@@ -32,7 +32,27 @@ import type {
   Verification,
 } from './types'
 
-export type ExportKind = 'xlsx' | 'report.pdf' | 'sia'
+export type ExportKind = 'lv-filled.pdf' | 'xlsx' | 'report.pdf' | 'sia'
+
+/** GET /export/lv-filled/summary: what the filled tender PDF contains. Page numbers are in the output file. */
+export interface FilledLvSummary {
+  offer: number
+  how: string
+  chosen: boolean
+  k: number
+  lv_sum: number
+  rounding: number
+  filled: number
+  open: number
+  open_by_marker: Record<string, number>
+  totals_filled: number
+  netto: number | null
+  cover_pages: number
+  page_count: number
+  filled_pages: number[]
+  front_pages: number[]
+  preview_pages: number[]
+}
 
 export interface Api {
   listTenders(): Promise<TenderSummary[]>
@@ -73,6 +93,10 @@ export interface Api {
   pageImageUrl(id: string, page: number, scale?: number): string | null
   /** Starts a file download for an export. */
   download(id: string, kind: ExportKind): Promise<void>
+  /** The filled tender PDF: counts and pages worth previewing (null in mock mode). */
+  getFilledLv(id: string): Promise<FilledLvSummary | null>
+  /** Image of one page of the filled tender PDF, or null when there is none (mock mode). */
+  filledLvPageUrl(id: string, page: number, scale?: number): string | null
 }
 
 export class ApiError extends Error {
@@ -317,6 +341,13 @@ export const realApi: Api = {
     a.click()
     a.remove()
   },
+  getFilledLv: (id) => req('GET', `/tenders/${id}/export/lv-filled/summary`),
+  filledLvPageUrl: (id, page, scale = 1.5) => `/api/tenders/${id}/export/lv-filled/pages/${page}.png?scale=${scale}`,
+}
+
+/** The filled tender PDF in the browser's own viewer (preview: not counted as exported). */
+export function filledLvPdfUrl(id: string, page?: number): string {
+  return `/api/tenders/${id}/export/lv-filled.pdf?inline=1${page ? `#page=${page}` : ''}`
 }
 
 // ---- mode switch -------------------------------------------------------------
@@ -379,6 +410,11 @@ export function getApiMode(): ApiMode {
 /** Synchronous page-image URL for render code: null until the mode is known or in mock mode. */
 export function pageImageUrl(id: string, page: number, scale = 2): string | null {
   return mode === 'real' ? realApi.pageImageUrl(id, page, scale) : null
+}
+
+/** Synchronous filled-tender page URL for render code: null until the mode is known or in mock mode. */
+export function filledLvPageUrl(id: string, page: number, scale = 1.5): string | null {
+  return mode === 'real' ? realApi.filledLvPageUrl(id, page, scale) : null
 }
 
 type AsyncKeys = { [K in keyof Api]: Api[K] extends (...a: never[]) => Promise<unknown> ? K : never }[keyof Api]

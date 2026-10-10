@@ -958,7 +958,9 @@ function exportFile(t: MockTender, kind: ExportKind) {
   const ps = LINES.map((l) => toPosition(t, l.lv))
   const tot = totalsOf(t)
   const slug = 'Oberglatt_BKP244'
-  if (kind === 'xlsx') {
+  if (kind === 'lv-filled.pdf') {
+    saveBlob(`${slug}_LV_filled_demo.txt`, 'The filled tender PDF is written by the backend from the original tender. Start the backend to get it.')
+  } else if (kind === 'xlsx') {
     const head = ['LV', 'Page', 'System', 'Description (tender)', 'Qty', 'Unit', 'Product', 'Unit price', 'Hours', 'Material', 'Labour', 'Direct', 'Status']
     const rows = ps.map((p) =>
       [p.lv_id, p.page, p.system, p.title_de, p.pricing?.quantity, p.unit, p.product?.product_id, p.pricing?.net_unit_cost, p.pricing?.hours, p.pricing?.material, p.pricing?.labour, p.pricing?.direct, p.status]
@@ -1426,4 +1428,8 @@ export const mockApi: Api = {
   async download(id, kind) {
     exportFile(tender(id), kind)
   },
+  async getFilledLv() {
+    return null
+  },
+  filledLvPageUrl: () => null,
 }

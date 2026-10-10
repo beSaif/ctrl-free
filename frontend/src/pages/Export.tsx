@@ -7,6 +7,7 @@ import { api, type ExportKind } from '../api/client'
 import { useInstructions, usePositions, usePricing, useSubmit, useTender } from '../api/hooks'
 import { Button, Loading, Td, Th } from '../components/ui'
 import { PageViewer } from '../components/PdfCrop'
+import { FilledLv } from './FilledLv'
 import { fmt0, fmtDateTime, fmtDaysLeft, fmtShare } from '../lib/format'
 import { C, isOpen, isPriceable, isSupplier, quotedPrice } from '../lib/lines'
 import { allProjectCosts, previewScenario } from '../lib/pricing'
@@ -179,6 +180,7 @@ export function Export() {
 
       <section aria-label={t('Files')} className="flex-[1_1_520px] min-w-0 p-6 flex flex-col gap-4">
         <h2 className="m-0 text-[20px] font-semibold">{t('Files')}</h2>
+        <FilledLv id={id} onDownload={() => download('lv-filled.pdf')} busy={dl === 'lv-filled.pdf'} />
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] border-collapse">
             <thead>
@@ -202,7 +204,7 @@ export function Export() {
                 </Td>
                 <Td>SEAP</Td>
                 <Td className="text-right">
-                  <Button variant="primary" size="sm" onClick={() => download('xlsx')} disabled={dl === 'xlsx'}>
+                  <Button size="sm" onClick={() => download('xlsx')} disabled={dl === 'xlsx'}>
                     {t('Download')}
                   </Button>
                 </Td>

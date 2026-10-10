@@ -2,6 +2,7 @@
 import { Fragment, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
+import { api } from '../api/client'
 import { useDeleteTender, useInstructions, usePositions, usePricing, useReference, useTender, useVerification } from '../api/hooks'
 import { Button, Dialog, IconCheck, LinkButton, Loading } from '../components/ui'
 import { cx } from '../lib/cx'
@@ -114,7 +115,14 @@ export function Overview() {
         <span className="text-muted">
           {tender.submission
             ? t('Submitted at CHF {p} on {d}.', { p: fmt0(tender.submission.offer_price), d: fmtDateTime(tender.submission.at) })
-            : t('Offer workbook, SIA interface file and pricing report. Open points above do not block the export.')}
+            : t('The filled tender: the original PDF with your prices written in. Also the offer workbook, SIA interface file and pricing report. Open points above do not block the export.')}{' '}
+          <button
+            type="button"
+            onClick={() => void api.download(id, 'lv-filled.pdf')}
+            className="border-0 bg-transparent p-0 text-accent underline underline-offset-2 hover:text-accent-hover"
+          >
+            {t('Download the filled tender (PDF)')}
+          </button>
         </span>
       ),
     },

@@ -1,4 +1,6 @@
 // German UI strings (Swiss spelling), keyed by the English text. Tender text stays as in the PDF.
+import { DE_FILLEDLV } from './i18n.de.filledlv'
+
 export const DE: Record<string, string> = {
   ' and ': ' und ',
   'match.Strong': 'Sicher',
@@ -765,4 +767,5 @@ export const DE: Record<string, string> = {
   '1 line priced with an assumption': '1 Position mit Annahme kalkuliert',
   '{n} lines priced with an assumption': '{n} Positionen mit Annahme kalkuliert',
   'check them before you submit': 'vor der Eingabe prüfen',
+  ...DE_FILLEDLV,
 }
