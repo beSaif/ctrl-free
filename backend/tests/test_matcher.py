@@ -131,7 +131,10 @@ def test_llm_pick_is_enum_constrained_and_batched(fake_llm, ex):
     assert sorted(seen) == sorted(gt)
     assert res["LV0001"]["method"] == "llm" and res["LV0001"]["label"] == "Strong" and res["LV0001"]["confidence"] == 0.92
     assert res["LV0005"]["label"] == "Close" and res["LV0005"]["assumptions"]
-    assert res["LV0021"]["product_id"] is None and res["LV0021"]["label"] == "None"
+    # the LLM says "none" on a Strong code match: the code match is kept, labelled Close, disagreement noted
+    assert res["LV0021"]["product_id"] == gt["LV0021"]["suggested_product_id"]
+    assert res["LV0021"]["label"] == "Close" and res["LV0021"]["method"] == "rules"
+    assert any("AI check found no fitting product" in a for a in res["LV0021"]["assumptions"])
     # second run is served from the cache, even offline
     config.LLM_OFFLINE = True
     try:
@@ -150,7 +153,8 @@ def test_llm_answer_outside_candidates_is_rejected(fake_llm, ex):
     fake_llm(FakeClient(handler))
     p = ps[0]
     r = matcher.pick(p, matcher.shortlist(p, None))
-    assert r["product_id"] is None and r["label"] == "None"
+    # a malformed answer is ignored: the rules pick stands unchanged
+    assert r["product_id"] == "P-AIR-001" and r["label"] == "Strong" and r["method"] == "rules"
 
 
 def test_llm_size_disagreement_caps_confidence(fake_llm, ex):
@@ -167,7 +171,15 @@ def test_llm_size_disagreement_caps_confidence(fake_llm, ex):
     cands = matcher.shortlist(p, None)
     assert any(c["product_id"] == "P-AIR-002" for c in cands)
     r = matcher.pick(p, cands)
-    assert r["product_id"] == "P-AIR-002" and r["confidence"] <= 0.5 and r["label"] == "Weak"
+    # the code match (P-AIR-001, Strong) is kept; the LLM's wrong-size pick only lowers it to Close
+    assert r["product_id"] == "P-AIR-001" and r["label"] == "Close" and r["method"] == "rules"
+    assert any("P-AIR-002" in a for a in r["assumptions"])
+    # with no code match to keep, the LLM's wrong-size pick is capped (never Strong)
+    llm_only = matcher.combine_picks({"product_id": None, "confidence": 0.0, "label": "None"},
+                                     matcher._llm_pick_batch([(p, matcher.normalize(p), cands)],
+                                                             {r["product_id"]: r for r in matcher.load_catalog()})[p["lv_id"]],
+                                     cands)
+    assert llm_only["product_id"] == "P-AIR-002" and llm_only["confidence"] <= 0.5 and llm_only["label"] == "Weak"
 
 
 def test_llm_normalize_fills_unknown_types(fake_llm):

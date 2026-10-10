@@ -855,19 +855,29 @@ def _llm_pick_batch(batch: list[tuple[dict, dict, list[dict]]], rows_by_id: dict
     res = llm.call_json(_PICK_SYSTEM, user, schema, name="pick_products", temperature=0)
     cached = llm.last_call_cached()
     out = {}
+    if not isinstance(res, dict):
+        raise llm.LLMError("pick_products: answer is not an object")
     for p, pa, cands in batch:
-        r = res.get(p["lv_id"]) or {}
+        r = res.get(p["lv_id"])
+        if not isinstance(r, dict):
+            continue  # no usable answer for this line: the rules pick stands
         pid = r.get("product_id")
         valid = {c["product_id"]: c for c in cands}
+        if pid != "none" and pid not in valid:
+            continue  # malformed answer (not one of the candidates): keep the rules pick for this line
         if pid not in valid:
             pid = None
         conf = CONF.get(r.get("confidence"), 0.45) if pid else 0.0
-        assumptions = [a for a in (r.get("assumptions") or []) if a and a.strip()]
-        reason = (r.get("reason") or "").strip()
+        raw_as = r.get("assumptions") if isinstance(r.get("assumptions"), list) else []
+        assumptions = [a for a in raw_as if isinstance(a, str) and a.strip()]
+        reason = r.get("reason").strip() if isinstance(r.get("reason"), str) else ""
         if pid:
             c = valid[pid]
             if c.get("_size") == -1:  # code disagrees on size: never Strong
                 conf = min(conf, 0.5)
+                assumptions.append(f"Code check: {c['why']}")
+            elif c.get("_type_ok") is False:  # code disagrees on the product type: never Strong
+                conf = min(conf, 0.55)
                 assumptions.append(f"Code check: {c['why']}")
             if assumptions:
                 conf = min(conf, 0.74)
@@ -899,10 +909,49 @@ def pick_many(positions: list[dict], candidates_by_lv: dict[str, list[dict]], ca
     batches = llm.chunks(todo, batch)
     results = llm.map_concurrent(lambda b: _llm_pick_batch(b, rows_by_id), batches, max_workers=8, progress=progress)
     for b, res in zip(batches, results):
-        if isinstance(res, Exception):
+        if isinstance(res, Exception) or not isinstance(res, dict):
             continue  # keep rules result for this batch
-        out.update(res)
+        for p, _pa, cands in b:
+            lv = p["lv_id"]
+            if lv in res:
+                out[lv] = combine_picks(out[lv], res[lv], cands)
     return out
+
+
+DISAGREE_CAP = 0.72  # a Strong code match the LLM disputes drops to Close (priced, flagged for a check)
+
+
+def combine_picks(rules: dict, llm_pick: dict, candidates: list[dict]) -> dict:
+    """Merge the rules pick and the LLM pick so the LLM can never make a line worse than rules-only.
+
+    - Both agree: the LLM's answer, with the higher of the two confidences (LLM assumptions still cap it).
+    - Rules have a Strong match and the LLM disagrees (another product or "none"): keep the rules
+      product, label it Close and record the disagreement as an assumption, so the estimator checks it.
+    - Rules have a product (not Strong) and the LLM says "none", or picks a product the code check
+      rejects (wrong size or type): keep the rules product, capped to Close, disagreement recorded.
+    - Otherwise (rules have no product, or both picks pass the code check) the LLM decides among
+      the candidates.
+    """
+    rp, lp = rules.get("product_id"), llm_pick.get("product_id")
+    if rp and lp == rp:
+        conf = max(float(rules.get("confidence") or 0), float(llm_pick.get("confidence") or 0))
+        if llm_pick.get("assumptions"):
+            conf = min(conf, 0.74)
+        return {**llm_pick, "confidence": round(conf, 2), "label": _label(conf, lp)}
+    if not rp:
+        return llm_pick
+    by_id = {c["product_id"]: c for c in candidates}
+    lc = by_id.get(lp) if lp else None
+    llm_fails_check = lc is None or lc.get("_size") == -1 or lc.get("_type_ok") is False
+    if rules.get("label") == "Strong" or llm_fails_check:
+        what = f"suggested {lp}" if lp else "found no fitting product"
+        why = (llm_pick.get("reason") or "").strip()
+        note = f"AI check {what}{f' ({why})' if why else ''}; kept the code match {rp}"
+        conf = min(float(rules.get("confidence") or 0), DISAGREE_CAP)
+        return {**rules, "confidence": round(conf, 2), "label": _label(conf, rp),
+                "assumptions": list(rules.get("assumptions") or []) + [note], "method": "rules",
+                "llm_disagreed": {"product_id": lp, "reason": why}}
+    return llm_pick
 
 
 def pick(position: dict, candidates: list[dict], catalog=None, use_llm: bool | None = None) -> dict:
@@ -939,6 +988,10 @@ def match_positions(positions: list[dict], catalog=None, progress: Callable[[int
         lv = p["lv_id"]
         pk = picks[lv]
         pid = pk.get("product_id")
+        if pid and attrs[lv].get("type_source") == "llm" and pk["confidence"] > 0.74:
+            # the code could not tell the product type; the LLM did. Never Strong: the estimator checks it
+            pk = {**pk, "confidence": 0.74, "label": _label(0.74, pid),
+                  "assumptions": list(pk.get("assumptions") or []) + [f"Product type read by AI: {attrs[lv]['type']}"]}
         out[lv] = {
             "product_id": pid,
             "install_code": rows_by_id[pid].get("install_code") if pid else None,
@@ -947,6 +1000,7 @@ def match_positions(positions: list[dict], catalog=None, progress: Callable[[int
             "reason": pk["reason"],
             "method": pk["method"],
             "assumptions": pk.get("assumptions", []),
+            **({"llm_disagreed": pk["llm_disagreed"]} if pk.get("llm_disagreed") else {}),
             "candidates": public_candidates(cands[lv]),
             "attributes": {k2: v for k2, v in attrs[lv].items() if k2 != "type_source"},
         }

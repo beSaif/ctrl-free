@@ -108,6 +108,8 @@ export function Pricing() {
     if (!Object.keys(body).length) return
     try {
       await put.mutateAsync(body)
+    } catch {
+      /* rejected: the controls fall back to the server's values */
     } finally {
       if (!Object.keys(pending.current).length) setDraft({})
     }
@@ -133,7 +135,10 @@ export function Pricing() {
   )
 
   const s = useMemo(() => (server ? merge(server.settings, draft) : null), [server, draft])
-  const tot = useMemo(() => (server && s ? localTotals(server, s) : null), [server, s])
+  // the local estimate only while a change is on its way; otherwise exactly the server's numbers,
+  // so this page shows the same offer price as the overview, the footer and the export
+  const hasDraft = Object.keys(draft).length > 0
+  const tot = useMemo(() => (server && s ? (hasDraft ? localTotals(server, s) : server.totals) : null), [server, s, hasDraft])
   const busy = put.isPending || Object.keys(draft).length > 0
 
   if (isLoading) return <Loading label={t('Loading')} />

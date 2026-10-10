@@ -1,6 +1,6 @@
 // N04b Line detail: PDF crop, tender rule, editable price with sentences, supplier quote,
 // Assist in place, Confirm (Enter) / Flag / Undo, Previous K / Next J through the queue.
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
 import { useInstructions, useMarkSent, usePatchPosition, usePosition, useTender, useVerification } from '../api/hooks'
@@ -17,7 +17,7 @@ import {
   C,
   factorLabel,
   hoursSentence,
-  isOpen,
+  canConfirm,
   isSupplier,
   labourSentence,
   lineStatus,
@@ -69,22 +69,35 @@ export function LineDetail() {
   }, [p])
 
   const doPatch = (body: PositionPatch) => patch.mutateAsync({ lv, body })
+  // fire-and-forget edits: a failed save is shown under the buttons (patch.error), not as an unhandled rejection
+  const safePatch = (body: PositionPatch) => doPatch(body).catch(() => undefined)
 
+  // one confirm at a time: a second Enter before the first save returns must not confirm twice or skip a line
+  const confirming = useRef(false)
   const confirm = async () => {
-    if (!p) return
-    const rest = queue.filter((x) => x.lv_id !== lv)
-    const review = filter === 'review' && inQueue >= 0
-    const nxt = review ? (queue[inQueue + 1] ?? rest[0] ?? null) : null
-    await doPatch({ confirm: true })
-    if (review) {
-      if (nxt) nav(`/t/${id}/lines/${nxt.lv_id}${qs}`)
-      else nav(`/t/${id}/lines${qs}`)
+    if (!p || confirming.current) return
+    confirming.current = true
+    try {
+      const rest = queue.filter((x) => x.lv_id !== lv)
+      const review = filter === 'review' && inQueue >= 0
+      const nxt = review ? (queue[inQueue + 1] ?? rest[0] ?? null) : null
+      await doPatch({ confirm: true })
+      if (review) {
+        if (nxt) nav(`/t/${id}/lines/${nxt.lv_id}${qs}`)
+        else nav(`/t/${id}/lines${qs}`)
+      }
+    } catch {
+      /* the error is shown under the buttons (patch.error) */
+    } finally {
+      confirming.current = false
     }
   }
 
   const onKey = (e: KeyboardEvent) => {
     if (ctx.barOpen || e.metaKey || e.ctrlKey || e.altKey || inEditable(e.target)) return
     if (document.querySelector('[role="dialog"]')) return
+    // the URL already moved on (J pressed, next line not rendered yet): this handler's prev/next are stale
+    if (!window.location.pathname.endsWith(`/lines/${lv}`)) return
     const tag = (e.target as HTMLElement | null)?.tagName
     if (e.key === 'j' || e.key === 'J') {
       e.preventDefault()
@@ -92,7 +105,7 @@ export function LineDetail() {
     } else if (e.key === 'k' || e.key === 'K') {
       e.preventDefault()
       goTo(prev)
-    } else if (e.key === 'Enter' && tag !== 'BUTTON' && tag !== 'A' && p && isOpen(p) && !patch.isPending) {
+    } else if (e.key === 'Enter' && !e.repeat && tag !== 'BUTTON' && tag !== 'A' && p && canConfirm(p) && !patch.isPending && !confirming.current) {
       e.preventDefault()
       void confirm()
     }
@@ -115,7 +128,7 @@ export function LineDetail() {
 
   const st = lineStatus(p, t)
   const sup = isSupplier(p)
-  const open = isOpen(p)
+  const open = canConfirm(p)
   const quoted = quotedPrice(p)
   const posLabel = inQueue < 0 ? t('Line') : filter === 'review' ? t('To review') : filter === 'priced' ? t('Priced') : t('Line')
   const sysName = p.system.replace(/^\d+(\.\d+)*\s+/, '')
@@ -188,7 +201,7 @@ export function LineDetail() {
             </div>
 
             <div className="flex-[1_1_440px] min-w-0 flex flex-col gap-6">
-              <PriceSection key={'price-' + lv} p={p} cat={cat} tenderId={id} onPatch={doPatch} busy={patch.isPending} filledByAssist={filledByAssist} />
+              <PriceSection key={'price-' + lv} p={p} cat={cat} tenderId={id} onPatch={safePatch} busy={patch.isPending} filledByAssist={filledByAssist} />
 
               {sup && (
                 <SupplierSection
@@ -213,13 +226,13 @@ export function LineDetail() {
                   </Button>
                 )}
                 {open && p.flagged && (
-                  <Button onClick={() => doPatch({ flag: false })} disabled={patch.isPending}>
+                  <Button onClick={() => safePatch({ flag: false })} disabled={patch.isPending}>
                     {t('Remove flag')}
                   </Button>
                 )}
                 {!open && !p.confirmed && !p.flagged && (
                   <>
-                    <Button onClick={() => doPatch({ flag: true })} disabled={patch.isPending}>
+                    <Button onClick={() => safePatch({ flag: true })} disabled={patch.isPending}>
                       {t('Flag for review')}
                     </Button>
                     <span className="text-[13px] text-muted">{t('Priced from the catalogue. Nothing to do unless something looks wrong.')}</span>
@@ -231,7 +244,7 @@ export function LineDetail() {
                       <span className="w-2 h-2 bg-ink" aria-hidden="true" />
                       {t('Confirmed by {who} · {when}', { who: t(p.confirmed.by === 'You' ? 'you' : p.confirmed.by), when: fmtShortDate(p.confirmed.at, lang) })}
                     </span>
-                    <Button onClick={() => doPatch({ unconfirm: true })} disabled={patch.isPending}>
+                    <Button onClick={() => safePatch({ unconfirm: true })} disabled={patch.isPending}>
                       {t('Undo')}
                     </Button>
                   </>

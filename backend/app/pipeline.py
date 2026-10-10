@@ -233,7 +233,25 @@ def _stage(timings: dict, name: str):
     return _T()
 
 
+def _rules_only(fn: Callable[[], Any], default: Any) -> Any:
+    """Second try of a stage without the LLM (after the LLM path raised); never raises."""
+    try:
+        return fn() or default
+    except Exception as e:  # noqa: BLE001
+        log.warning("rules-only fallback failed: %s", e)
+        return default
+
+
 def _run(tid: str, timings: dict) -> None:
+    llm = mod("llm")
+    if llm is None or not hasattr(llm, "time_budget"):
+        return _run_stages(tid, timings)
+    # bound the total time spent waiting on a live LLM; after the budget every stage runs on rules
+    with llm.time_budget():
+        return _run_stages(tid, timings)
+
+
+def _run_stages(tid: str, timings: dict) -> None:
     pdf = str(store.pdf_path(tid))
 
     # 1. parse ---------------------------------------------------------
@@ -281,7 +299,7 @@ def _run(tid: str, timings: dict) -> None:
             results["meta"] = (meta_mod.extract_meta(pages_text, pdf=pdf) or {}) if meta_mod else {}
         except Exception as e:
             _warn(tid, "meta", e)
-            results["meta"] = {}
+            results["meta"] = _rules_only(lambda: meta_mod.extract_meta(pages_text, pdf=pdf, use_llm=False), {})
         timings["meta"] = round(time.monotonic() - t0, 2)
 
     def _translate():
@@ -291,7 +309,7 @@ def _run(tid: str, timings: dict) -> None:
             results["translate"] = (tr.translate_titles(copy.deepcopy(positions)) or {}) if tr else {}
         except Exception as e:
             _warn(tid, "translate", e)
-            results["translate"] = {}
+            results["translate"] = _rules_only(lambda: tr.translate_titles(copy.deepcopy(positions), use_llm=False), {})
         timings["translate"] = round(time.monotonic() - t0, 2)
 
     side = [threading.Thread(target=f, name=f"{f.__name__}-{tid}", daemon=True) for f in (_meta, _translate)]
@@ -313,6 +331,8 @@ def _run(tid: str, timings: dict) -> None:
                                                   progress=_throttled(on_match)) or {}
             except Exception as e:
                 _warn(tid, "match", e)
+                matches = _rules_only(lambda: matcher.match_positions(copy.deepcopy(positions), list(catalog().values()),
+                                                                      use_llm=False), {})
         else:
             _warn(tid, "match", "Matcher not available: lines have no product yet")
     _set_progress(tid, stage="translating", message="Translating line titles")
@@ -355,6 +375,8 @@ def _run(tid: str, timings: dict) -> None:
                                                             pdf=pdf) or []
             except Exception as e:
                 _warn(tid, "instructions", e)
+                instructions = _rules_only(lambda: ins_mod.extract_instructions(
+                    pages_text, positions, list(catalog().values()), pdf=pdf, use_llm=False), [])
         for i, ins in enumerate(instructions, 1):
             ins.setdefault("id", f"i_{i:02d}")
             ins.setdefault("state", "open")

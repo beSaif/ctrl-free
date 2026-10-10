@@ -243,7 +243,10 @@ def price_position(position: dict, settings: dict, system_profile: str = "school
     lab = hours * rate
 
     unit = position.get("unit") or (product or {}).get("unit") or (rule or {}).get("unit")
-    material, labour, direct = round(mat, 2), round(lab, 2), round(mat + lab, 2)
+    # line total = the two shown (rounded) parts, so "material + labour = direct" adds up on screen,
+    # in the workbook (=ROUND(..)+ROUND(..)) and in the project totals (sum of rounded parts)
+    material, labour = round(mat, 2), round(lab, 2)
+    direct = round(material + labour, 2)
     factors = [{k: v for k, v in t.items() if k != "_mult"} for t in trail]
 
     # plain-word explain sentences

@@ -67,7 +67,8 @@ export function Lines() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement
-      if (e.metaKey || e.ctrlKey || e.altKey || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) return
+      if (e.metaKey || e.ctrlKey || e.altKey || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable) return
+      if (document.querySelector('[role="dialog"]')) return
       const vq = visibleQueue
       if (!vq.length) return
       const i = vq.findIndex((p) => p.lv_id === sel)
@@ -81,7 +82,7 @@ export function Lines() {
         const n = vq[Math.max(0, i - 1)]
         setSel(n.lv_id)
         rowRefs.current[n.lv_id]?.focus()
-      } else if (e.key === 'Enter' && sel && el.tagName !== 'A' && el.tagName !== 'BUTTON') {
+      } else if (e.key === 'Enter' && !e.repeat && sel && el.tagName !== 'A' && el.tagName !== 'BUTTON') {
         nav(`/t/${id}/lines/${sel}${linesQuery(filter, q)}`)
       }
     }

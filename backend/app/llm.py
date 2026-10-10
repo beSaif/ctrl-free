@@ -15,11 +15,13 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import random
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Callable, Iterable
+from contextlib import contextmanager
+from typing import Any, Callable, Iterable, Iterator
 
 from . import config
 
@@ -43,8 +45,15 @@ _api_mode: dict[str, str] = {}                 # model -> "responses" | "chat"
 _stats = {"calls": 0, "cache_hits": 0, "errors": 0, "input_tokens": 0, "output_tokens": 0, "seconds": 0.0}
 _local = threading.local()
 
-DEFAULT_TIMEOUT = 90.0
+DEFAULT_TIMEOUT = float(os.getenv("LLM_TIMEOUT", "45"))     # seconds per request
 MAX_RETRIES = 4
+PIPELINE_BUDGET = float(os.getenv("LLM_PIPELINE_BUDGET", "90"))  # total LLM seconds per tender run
+
+# Active time budgets (token -> monotonic deadline). While at least one budget is active, live calls
+# are allowed only until the latest deadline; after that every call raises LLMUnavailable at once
+# (cache hits still work), so the pipeline finishes on rules instead of waiting on a slow API.
+_budgets: dict[int, float] = {}
+_budget_seq = [0]
 
 
 # --------------------------------------------------------------------------- client
@@ -103,6 +112,29 @@ def reset(client=None) -> None:
         _disabled_reason = None
         _unsupported.clear()
         _api_mode.clear()
+
+
+@contextmanager
+def time_budget(seconds: float | None = None) -> Iterator[None]:
+    """Bound the total wall time of live LLM calls made inside the block (all threads)."""
+    seconds = PIPELINE_BUDGET if seconds is None else seconds
+    with _lock:
+        _budget_seq[0] += 1
+        token = _budget_seq[0]
+        _budgets[token] = time.monotonic() + seconds
+    try:
+        yield
+    finally:
+        with _lock:
+            _budgets.pop(token, None)
+
+
+def budget_left() -> float | None:
+    """Seconds left in the active time budget, None when no budget is active."""
+    with _lock:
+        if not _budgets:
+            return None
+        return max(_budgets.values()) - time.monotonic()
 
 
 def stats() -> dict:
@@ -228,12 +260,10 @@ def call_json(system: str, user: str, schema: dict, model: str | None = None, na
             _stats["cache_hits"] += 1
             _local.cached = True
             return hit
-    client = get_client()  # raises LLMUnavailable
-    if timeout is not None:
-        try:
-            client = client.with_options(timeout=timeout)
-        except Exception:
-            pass
+    left = budget_left()
+    if left is not None and left <= 0:
+        raise LLMUnavailable("LLM time budget used up: rules for the rest")
+    base_client = get_client()  # raises LLMUnavailable
 
     import openai
 
@@ -243,6 +273,17 @@ def call_json(system: str, user: str, schema: dict, model: str | None = None, na
     while attempt < MAX_RETRIES:
         attempt += 1
         mode = _api_mode.get(model, "responses")
+        # per-request timeout: the caller's (or the default), never beyond the time budget
+        req_timeout = timeout if timeout is not None else DEFAULT_TIMEOUT
+        left = budget_left()
+        if left is not None:
+            if left <= 0:
+                raise LLMUnavailable("LLM time budget used up: rules for the rest")
+            req_timeout = min(req_timeout, max(left, 1.0))
+        try:
+            client = base_client.with_options(timeout=req_timeout)
+        except Exception:
+            client = base_client
         try:
             fn = _responses_call if mode == "responses" else _chat_call
             text, tin, tout = fn(client, model, system, user, schema, name, temperature)
@@ -293,7 +334,20 @@ def call_json(system: str, user: str, schema: dict, model: str | None = None, na
             last = e
         except (json.JSONDecodeError, LLMError) as e:
             last = e
-        time.sleep(min(20.0, (2 ** attempt) * 0.5 + random.random()))
+        except openai.APIError as e:  # other HTTP statuses (502/503 ...): retry
+            last = e
+        except Exception as e:  # noqa: BLE001  anything else from the client: unusable answer, no retry
+            _stats["errors"] += 1
+            raise LLMError("unexpected LLM client error: %s" % str(e)[:200]) from e
+        if attempt >= MAX_RETRIES:
+            break
+        pause = min(20.0, (2 ** attempt) * 0.5 + random.random())
+        left = budget_left()
+        if left is not None:
+            if left <= pause:
+                _stats["errors"] += 1
+                raise LLMUnavailable("LLM time budget used up while retrying: %s" % str(last)[:200]) from last
+        time.sleep(pause)
     _stats["errors"] += 1
     if isinstance(last, (json.JSONDecodeError, LLMError)):
         raise LLMError(str(last)) from last

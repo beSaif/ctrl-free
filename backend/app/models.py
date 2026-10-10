@@ -20,7 +20,8 @@ Status = Literal[
 
 
 class PositionPatch(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    # NaN/Infinity would be stored and then break every JSON response for the tender
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     quantity: float | None = None
     product_id: str | None = None
@@ -50,7 +51,7 @@ class PricingUpdate(BaseModel):
     """Partial PricingSettings. Nested dicts are merged key by key. Unknown keys are kept
     (pricing.py may define more settings than listed here)."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="allow", allow_inf_nan=False)
 
     competition: float | None = None
     appetite: float | None = None
@@ -71,7 +72,7 @@ class PricingUpdate(BaseModel):
 
 
 class Outcome(BaseModel):
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="allow", allow_inf_nan=False)
 
     simap_no: str | None = None
     award_date: str | None = None
@@ -90,7 +91,7 @@ class AssistCommand(BaseModel):
 
 
 class QuoteProposal(BaseModel):
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="allow", allow_inf_nan=False)
 
     lv_id: str
     unit_price: float

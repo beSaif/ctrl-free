@@ -287,7 +287,10 @@ def extract_reply_pages(file, filename: str = "") -> list[tuple[int, str]]:
         if b[:5] == b"%PDF-":
             import pymupdf
 
-            doc = pymupdf.open(stream=b, filetype="pdf")
+            try:
+                doc = pymupdf.open(stream=b, filetype="pdf")
+            except Exception as e:  # damaged or not really a PDF: a clear 400, not a crash
+                raise ValueError(f"Could not read {filename or 'the PDF'}: the file is damaged or not a PDF") from e
             return [(i + 1, _pdf_rows_text(doc[i])) for i in range(doc.page_count)]
         if filename.lower().endswith(".eml") or b[:200].lower().find(b"subject:") >= 0:
             msg = email.message_from_bytes(b, policy=email.policy.default)

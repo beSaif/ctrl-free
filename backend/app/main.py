@@ -638,8 +638,9 @@ def position_detail(t: dict, lv_id: str) -> dict:
     out["log"] = [e for e in reversed(t.get("log") or []) if e.get("lv_id") == lv_id]
     sq = cur.get("supplier_quote")
     if sq and not sq.get("log_id"):  # the entry that set the quote, so the UI can offer Undo
+        # only an entry that actually set the quote (a later quantity edit must not be what "Undo" reverts)
         e = next((e for e in out["log"] if e.get("undoable", True) and not e.get("undone")
-                  and e.get("action") in ("fill_quote", "edit")), None)
+                  and e.get("action") in ("fill_quote", "edit") and "supplier_quote" in (e.get("after") or {})), None)
         if e:
             out["supplier_quote"] = {**sq, "log_id": e["id"]}
     out["assist"] = assist.line_proposals(t, lv_id)
@@ -956,6 +957,19 @@ def put_pricing(tid: str, body: PricingUpdate = Body(...)):
                     upd[f"{k}.{sk}"] = sv
             else:
                 upd[k] = val
+        # values the arithmetic cannot take (a 0 site efficiency divides by zero, a 100% margin too):
+        # rejected here, otherwise every screen of the tender would fail until pricing is reset
+        for k, val in upd.items():
+            if not isinstance(val, (int, float)) or isinstance(val, bool):
+                continue
+            if k.startswith("factors.") and val <= 0:
+                raise HTTPException(400, f"{k.split('.', 1)[1].replace('_', ' ').capitalize()} must be above 0")
+            if k.startswith("margins.") and not -100 < val < 100:
+                raise HTTPException(400, "A margin must be between -100% and 100%")
+            if k == "round_to" and val <= 0:
+                raise HTTPException(400, "Rounding must be above 0")
+            if k.endswith("_pct") and val < 0:
+                raise HTTPException(400, f"{k.replace('_', ' ')} cannot be negative")
         # compare against effective values, so re-sending a default is a no-op
         eff = _flatten(settings)
         upd = {k: val for k, val in upd.items() if eff.get(k) != val or k not in eff}
@@ -1018,7 +1032,9 @@ async def read_quote(tid: str, file: UploadFile | None = File(None), text: str |
     _tender(tid)
     if file is None and not text:
         raise HTTPException(400, "Send a file or text")
-    data: bytes | str = await file.read() if file is not None else text
+    # pasted text goes in as bytes: a str is also taken as a file path by the reader, which must never
+    # happen for text typed into the browser
+    data: bytes = await file.read() if file is not None else (text or "").encode("utf-8")
     filename = (file.filename if file is not None else None) or "Pasted text"
     return assist.read_supplier_reply(tid, data, filename)
 

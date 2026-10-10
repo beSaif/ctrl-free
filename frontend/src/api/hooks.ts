@@ -197,6 +197,7 @@ export function useImportReference() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ kind, file }: { kind: string; file: File }) => api.importReference(kind, file),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.reference }),
+    // new catalogue prices or install rules re-price every tender: refresh everything, not only this screen
+    onSuccess: () => qc.invalidateQueries(),
   })
 }

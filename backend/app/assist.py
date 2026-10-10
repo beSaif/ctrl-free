@@ -236,7 +236,12 @@ def read_supplier_reply(tid: str, data: bytes | str, filename: str) -> dict:
             raise HTTPException(503, "Reading supplier replies is not available (app/quotes.py missing)")
         open_lines = [p for p in v["positions"] if p["status"] == "supplier_quote_required"
                       and not (p.get("supplier_quote") or {}).get("unit_price")]
-        raw = quotes.read_supplier_reply(data, filename, open_lines or v["positions"]) or []
+        llm = mod("llm")
+        if llm is not None and hasattr(llm, "time_budget"):
+            with llm.time_budget(45):  # the user is waiting: bounded, then the rules reader alone
+                raw = quotes.read_supplier_reply(data, filename, open_lines or v["positions"]) or []
+        else:
+            raw = quotes.read_supplier_reply(data, filename, open_lines or v["positions"]) or []
         by_lv = {p["lv_id"]: p for p in t["positions"]}
         items = []
         for r in raw:
@@ -500,7 +505,8 @@ def _classify(t: dict, v: dict, text: str, scope: str, lv_id: str | None) -> tup
     if llm is not None:
         try:
             user = json.dumps({"request": text, "context": _context(t, v, scope, lv_id, text)}, ensure_ascii=False)
-            res = llm.call_json(_SYSTEM, user, _SCHEMA, name="assist_command", timeout=30)
+            with llm.time_budget(30):  # the user is waiting: bounded, then keyword rules
+                res = llm.call_json(_SYSTEM, user, _SCHEMA, name="assist_command", timeout=30)
             if res.get("intent") in INTENTS:
                 return res, ("cache" if llm.last_call_cached() else "llm")
         except Exception as e:  # LLMUnavailable / LLMError / network

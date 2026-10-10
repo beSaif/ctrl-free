@@ -46,10 +46,10 @@ function InstructionDetailView() {
 
   const onKey = (e: KeyboardEvent) => {
     const el = e.target as HTMLElement
-    if (e.metaKey || e.ctrlKey || e.altKey || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || document.querySelector('[role="dialog"]')) return
+    if (e.metaKey || e.ctrlKey || e.altKey || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable || document.querySelector('[role="dialog"]')) return
     if (e.key === 'j' || e.key === 'J') go(next)
     else if (e.key === 'k' || e.key === 'K') go(prev)
-    else if (e.key === 'Enter' && el.tagName !== 'BUTTON' && el.tagName !== 'A' && s?.state === 'open' && !patch.isPending) {
+    else if (e.key === 'Enter' && !e.repeat && el.tagName !== 'BUTTON' && el.tagName !== 'A' && s?.state === 'open' && !patch.isPending) {
       e.preventDefault()
       void close({ state: 'confirmed' })
     }

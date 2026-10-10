@@ -34,10 +34,18 @@ export function isPriceable(p: Position) {
   return p.status !== 'out_of_scope' && p.status !== 'non_priceable'
 }
 
-/** A line needs the estimator: needs_review (server rule) or flagged, and not confirmed. */
+/** A line needs the estimator: the server's needs_review, so the Lines tab, the overview, the tender
+ *  list and the export checklist all count the same lines (a supplier line leaves review once a quote is in). */
 export function isOpen(p: Position): boolean {
+  if (p.needs_review !== undefined && p.needs_review !== null) return !!p.needs_review
   if (p.confirmed) return false
-  return !!p.needs_review || !!p.flagged || (isSupplier(p) && isPriceable(p))
+  return !!p.flagged || (isSupplier(p) && isPriceable(p) && quotedPrice(p) === null)
+}
+
+/** The line can still be confirmed: open, or a supplier line whose quote was entered but not confirmed yet. */
+export function canConfirm(p: Position): boolean {
+  if (p.confirmed) return false
+  return isOpen(p) || (isSupplier(p) && isPriceable(p))
 }
 
 export function wasChanged(p: Position): boolean {
