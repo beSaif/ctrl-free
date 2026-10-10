@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { useT } from '../i18n'
 import { api, filledLvPageUrl, filledLvPdfUrl } from '../api/client'
 import { Button, Dialog, Spinner } from '../components/ui'
+import { Source } from '../components/Source'
 import { fmt0, fmt2 } from '../lib/format'
 
 export function FilledLv({ id, onDownload, busy }: { id: string; onDownload: () => void; busy: boolean }) {
@@ -25,15 +26,10 @@ export function FilledLv({ id, onDownload, busy }: { id: string; onDownload: () 
   return (
     <div className="flex flex-col gap-3 p-4 border border-ink">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-col gap-1 flex-[1_1_320px] min-w-0">
-          <span className="font-semibold">
-            {t('Filled tender (LV)')} <span className="font-mono font-normal text-muted">.pdf</span>
-            <span className="font-normal"> · {t('the original PDF with your prices')}</span>
-          </span>
-          <span className="text-muted text-[13.5px]">
-            {t('Unit price and amount on every priced line, the totals per section and system, and the summary pages, written into the tender like you fill it by hand. A cover page lists the offer price and what is still open.')}
-          </span>
-        </div>
+        <span className="flex-[1_1_320px] min-w-0 font-semibold">
+          {t('Filled tender (LV)')} <span className="font-mono font-normal text-muted">.pdf</span>
+          <span className="font-normal"> · {t('the original PDF with your prices')}</span>
+        </span>
         <Button variant="primary" size="sm" onClick={onDownload} disabled={busy}>
           {t('Download')}
         </Button>
@@ -59,17 +55,22 @@ export function FilledLv({ id, onDownload, busy }: { id: string; onDownload: () 
                 </>
               )}
               {' · '}
-              {t('{n} totals', { n: s.totals_filled })}
-            </span>
-            <span className="text-muted">
-              {t('Sum of the LV CHF {sum} · offer price CHF {offer}', { sum: fmt2(s.lv_sum), offer: fmt0(s.offer) })}
-              {Math.abs(s.rounding) >= 0.005 && ' ' + t('(CHF {r} from rounding unit prices to the cent)', { r: fmt2(s.rounding) })}
-              {s.netto != null && ' · ' + t('netto incl. MWST CHF {n}', { n: fmt2(s.netto) })}
+              {t('{n} totals', { n: s.totals_filled })}{' '}
+              <Source label={t('How it is filled')} title={t('Filled tender (LV)')} className="ml-1 text-[13px] text-muted">
+                <p className="m-0 leading-[1.55]">
+                  {t('Unit price and amount on every priced line, the totals per section and system, and the summary pages, written into the tender like you fill it by hand. A cover page lists the offer price and what is still open.')}
+                </p>
+                <p className="m-0 leading-[1.55]">
+                  {t('Unit prices are selling prices: direct cost × {k} (offer price ÷ direct cost), the same numbers as the SIA file.', { k: s.k.toFixed(4) })}
+                </p>
+                <p className="m-0 leading-[1.55] text-muted">
+                  {t('Sum of the LV CHF {sum} · offer price CHF {offer}', { sum: fmt2(s.lv_sum), offer: fmt0(s.offer) })}
+                  {Math.abs(s.rounding) >= 0.005 && ' ' + t('(CHF {r} from rounding unit prices to the cent)', { r: fmt2(s.rounding) })}
+                  {s.netto != null && ' · ' + t('netto incl. MWST CHF {n}', { n: fmt2(s.netto) })}
+                </p>
+              </Source>
             </span>
             {!s.chosen && <span className="text-attn">{t('No price chosen yet: the tender is filled at the standard price.')}</span>}
-            <span className="text-muted">
-              {t('Unit prices are selling prices: direct cost × {k} (offer price ÷ direct cost), the same numbers as the SIA file.', { k: s.k.toFixed(4) })}
-            </span>
           </div>
           {pages.length > 0 && img(pages[0], 0.4) && (
             <div className="flex gap-2 overflow-x-auto pb-1" role="list" aria-label={t('Preview')}>
@@ -94,9 +95,10 @@ export function FilledLv({ id, onDownload, busy }: { id: string; onDownload: () 
               ))}
             </div>
           )}
-          <span className="text-[13px] text-muted">
-            <Link to={`/t/${id}/pdf?mode=filled`}>{t('Check every page in the Tender PDF')}</Link>{' '}
-            {t('(the filled pages with each line clickable)')}
+          <span className="text-[13px]">
+            <Link to={`/t/${id}/pdf?mode=filled`} title={t('(the filled pages with each line clickable)')}>
+              {t('Check every page in the Tender PDF')}
+            </Link>
           </span>
         </>
       )}

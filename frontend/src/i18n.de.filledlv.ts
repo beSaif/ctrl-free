@@ -21,4 +21,5 @@ export const DE_FILLEDLV: Record<string, string> = {
   'The filled tender: the original PDF with your prices written in. Also the offer workbook, SIA interface file and pricing report. Open points above do not block the export.':
     'Das ausgefüllte LV: das Original-PDF mit Ihren eingetragenen Preisen. Dazu Offert-Arbeitsmappe, SIA-Schnittstelle und Kalkulationsbericht. Offene Punkte oben blockieren den Export nicht.',
   'Download the filled tender (PDF)': 'Ausgefülltes LV herunterladen (PDF)',
+  'How it is filled': 'So wird ausgefüllt',
 }

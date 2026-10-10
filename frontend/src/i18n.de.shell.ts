@@ -20,6 +20,8 @@ export const DE_SHELL: Record<string, string> = {
   'All checks': 'Alle Prüfpunkte',
   'Tender text': 'Text der Ausschreibung',
   'What it saves': 'Was gespeichert wird',
+  'One row per line, with formulas': 'Eine Zeile pro Position, mit Formeln',
+  'Every value with its source, your notes and open points': 'Jeder Wert mit Quelle, Ihre Notizen und offene Punkte',
   // Outcome
   'From the award notice on simap (Zuschlag).': 'Aus der Zuschlagsverfügung auf simap.',
 }

@@ -238,8 +238,8 @@ export function Export() {
                   <div className="font-semibold">
                     {t('Offer workbook')} <span className="font-mono font-normal text-muted">.xlsx</span>
                   </div>
-                  <div className="text-muted">
-                    {t('One row per line with page, quantity, product, hours, material and labour. Formulas point at catalogue, install-rule and pricing sheets.')}
+                  <div className="text-muted text-[13px]" title={t('One row per line with page, quantity, product, hours, material and labour. Formulas point at catalogue, install-rule and pricing sheets.')}>
+                    {t('One row per line, with formulas')}
                   </div>
                 </Td>
                 <Td>SEAP</Td>
@@ -252,8 +252,8 @@ export function Export() {
               <tr>
                 <Td>
                   <div className="font-semibold">{t('SIA interface file')}</div>
-                  <div className="text-muted">
-                    {t('The bill of quantities with unit prices, as the client asks.')} {t('Simplified, planned format.')}
+                  <div className="text-muted text-[13px]" title={t('Simplified, planned format.')}>
+                    {t('The bill of quantities with unit prices, as the client asks.')}
                   </div>
                 </Td>
                 <Td>{t('Client, on USB')}</Td>
@@ -268,8 +268,8 @@ export function Export() {
                   <div className="font-semibold">
                     {t('Pricing report')} <span className="font-mono font-normal text-muted">.pdf</span>
                   </div>
-                  <div className="text-muted">
-                    {t('Every value used, its source (project parameters or your judgment), your notes, and the open points on the left.')}
+                  <div className="text-muted text-[13px]" title={t('Every value used, its source (project parameters or your judgment), your notes, and the open points on the left.')}>
+                    {t('Every value with its source, your notes and open points')}
                   </div>
                 </Td>
                 <Td>{t('Bid lead')}</Td>
