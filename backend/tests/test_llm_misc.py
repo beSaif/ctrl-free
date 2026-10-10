@@ -309,8 +309,8 @@ def test_quote_groups_and_email(offline, examples):
 
 
 @pytest.fixture(scope="module")
-def demo_replies():
-    return quotes.make_demo_replies()
+def demo_replies(tmp_path_factory):
+    return quotes.make_demo_replies(tmp_path_factory.mktemp("demo"))
 
 
 def test_read_demo_replies(offline, examples, demo_replies):
