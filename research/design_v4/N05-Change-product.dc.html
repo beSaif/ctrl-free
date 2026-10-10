@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Change product</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1F4FD8}a:hover{color:#163A9E}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #FFFFFF; color: #121212; font-family: 'Work Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.45; display: flex; flex-direction: column">
+
+<header style="border-bottom: 1px solid #DEDEDB">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 12px 24px 0">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; flex: 1 1 520px; min-width: 0">
+<a href="N01-Tenders.dc.html" style="font-weight: 600; font-size: 15px; color: #121212; text-decoration: none">ctrl-free</a>
+<nav aria-label="Breadcrumb" style="font-size: 14px; color: #5A5A57"><a href="N01-Tenders.dc.html" style="color: #5A5A57">Tenders</a> / <span style="color: #121212; font-weight: 500">Neubau Primarschule Erlenstrasse, Oberglatt · BKP 244 Lüftung</span></nav>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px">
+<span style="font-size: 13px; color: #5A5A57">Due <span style="font-family: 'JetBrains Mono', monospace">22.09.2026 10:00</span> · <span style="color: #121212; font-weight: 600">12 days left</span></span>
+<div role="group" aria-label="Language" style="display: inline-flex; font-size: 13px; color: #5A5A57; gap: 2px"><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #121212; font-weight: 600">EN</button><span aria-hidden="true" style="align-self: center">|</span><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #5A5A57">DE</button></div>
+</div>
+</div>
+<nav aria-label="Tender" style="display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 12px 0">
+<a href="N03-Overview.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Overview</a>
+<a href="N04-Lines.dc.html" aria-current="page" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid #1F4FD8; color: #121212; font-weight: 600; text-decoration: none">Lines <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: #C2410C">6 to review</span></a>
+<a href="N06-Instructions.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Instructions &amp; norms <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: #C2410C">10 to confirm</span></a>
+<a href="N07-Pricing.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Pricing <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: #C2410C">price not chosen</span></a>
+<a href="N08-Export.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Export</a>
+<a href="N09-Outcome.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Outcome</a>
+</nav>
+</header>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 24px; border-bottom: 1px solid #DEDEDB">
+<a href="N04-Lines.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font: inherit; cursor: pointer; padding: 0 14px 0 10px; color: #121212; text-decoration: none"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#121212" stroke-width="1.6" aria-hidden="true"><path d="M7.5 2.5L4 6l3.5 3.5"></path></svg>Back to the line</a>
+<span style="flex: 1 1 auto"></span>
+<span style="font-size: 13px; color: #5A5A57">Change product for one line</span>
+</div>
+
+<main style="flex: 1 1 auto; display: flex; justify-content: center; padding: 28px 24px 48px">
+<div style="width: 100%; max-width: 1240px; display: flex; flex-direction: column; gap: 24px">
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #5A5A57">LV0001 · p. 78 · LA01 Nebenräume UG</span>
+<h1 style="margin: 0; font-size: 26px; line-height: 1.25; font-weight: 600">Change product</h1>
+<span style="color: #5A5A57">Zuluft-Tellerventil aus Kunststoff, Ø 10 cm · 5 pc</span>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px 40px">
+
+<section style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Tender PDF · p. 78</h2>
+<a href="#page" style="font-size: 13px">Open full page</a>
+</div>
+<div style="border: 1px solid #B5B5B0; background: #F6F6F4; padding: 16px">
+<div style="background: #FFFFFF; border: 1px solid #DEDEDB; padding: 16px 18px; display: flex; flex-direction: column; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.7">
+<div style="padding: 0 4px; background: #F6F6F4">Zuluft - Tellerventil</div>
+<div style="padding: 0 4px; background: #F6F6F4">aus Kunststoff, mit Luftmengeneinstellung</div>
+<div style="padding: 0 4px; background: #F6F6F4">Fabrikat   z.B Trox Hesco · Typ z.B Z-LVS</div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 0 4px; background: #FCE9DC"><span style="white-space: pre-wrap">Grösse     Ø 10 cm</span><span style="font-weight: 600">Stk 5</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 0 4px"><span style="white-space: pre-wrap">           Ø 12.5 cm</span><span>Stk 6</span></div>
+</div>
+</div>
+<span style="font-size: 13px; color: #5A5A57">The tender names a make as an example ("z.B"). Another make is allowed as a variant with a reason.</span>
+</section>
+
+<section style="flex: 1 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<fieldset style="margin: 0; padding: 0; border: 0">
+<legend style="padding: 0 0 8px; font-weight: 600; font-size: 15px">The 5 closest products in the catalogue</legend>
+<div style="overflow-x: auto">
+<div style="min-width: 640px">
+<div style="display: grid; grid-template-columns: 28px minmax(0, 1.3fr) 88px minmax(0, 1.4fr) 96px 92px; gap: 0 12px; padding: 6px 0; border-bottom: 1px solid #121212; font-size: 13px; color: #5A5A57; font-weight: 500">
+<span></span><span>Product</span><span style="text-align: right">Unit price</span><span>Why it is listed</span><span style="text-align: right">Line total</span><span style="text-align: right">Change</span>
+</div>
+<sc-for list="{{ cands }}" as="c" hint-placeholder-count="5">
+<button role="radio" aria-checked="{{ c.on }}" onClick="{{ c.pick }}" style="display: grid; grid-template-columns: 28px minmax(0, 1.3fr) 88px minmax(0, 1.4fr) 96px 92px; gap: 0 12px; align-items: center; width: 100%; min-height: 52px; padding: 6px 0; border: 0; border-bottom: 1px solid #EDEDEA; background: {{ c.bg }}; font: inherit; color: #121212; text-align: left; cursor: pointer">
+<span style="display: inline-flex; width: 16px; height: 16px; margin-left: 6px; border: 1.5px solid #121212; border-radius: 50%; align-items: center; justify-content: center"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{ c.dot }}"></span></span>
+<span style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 500">{{ c.name }}<span style="color: #1F4FD8; font-size: 12.5px">{{ c.tag }}</span></span><span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #5A5A57">{{ c.id }} · {{ c.model }}</span></span>
+<span style="font-family: 'JetBrains Mono', monospace; text-align: right">{{ c.unit }}</span>
+<span style="color: {{ c.whyFg }}">{{ c.why }}</span>
+<span style="font-family: 'JetBrains Mono', monospace; text-align: right">{{ c.total }}</span>
+<span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: #5A5A57">{{ c.diff }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+</fieldset>
+
+<div style="display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px">
+<a href="N11-Reference-data.dc.html">Search all 56 products</a>
+<a href="N04-Lines.dc.html">None fits: ask a supplier from the line</a>
+</div>
+
+<sc-if value="{{ isVariant }}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid #C2410C">
+<span style="font-weight: 600; color: #C2410C">This differs from what the tender specifies</span>
+<span style="font-size: 13px; color: #5A5A57">Varianten · p. 36 · 3.3.4 Technische Vorschriften Lüftung / Klima</span>
+<blockquote style="margin: 0; font-size: 13.5px; line-height: 1.55">«Sofern mit der Submission andere als vorgeschriebene Materialien offeriert werden, hat dies als Variante mit einer entsprechenden Begründung - z.B. technisch besser oder gleichwertig, preisgünstiger oder ähnliches - zu geschehen.»</blockquote>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5A5A57">Reason for the variant (goes into the offer)
+<input type="text" placeholder="e.g. technically equivalent, cheaper" style="min-height: 36px; padding: 0 10px; border: 1px solid #DEDEDB; border-radius: 2px; font: inherit; font-size: 14px; color: #121212; background: #FFFFFF">
+</label>
+</section>
+</sc-if>
+
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid #DEDEDB">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span>Line total <span style="font-family: 'JetBrains Mono', monospace; font-weight: 500">CHF {{ lineTotal }}</span> <span style="color: #5A5A57">{{ lineNote }}</span></span>
+<span style="font-size: 13px; color: #5A5A57">Price at standard margin CHF {{ price }} · {{ priceNote }}</span>
+</div>
+<div style="display: flex; gap: 8px">
+<a href="N04-Lines.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">Cancel</a>
+<a href="N04-Lines.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer">Use this product</a>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sel: 0 };
+  }
+  renderVals() {
+    const fmt = (n, d) => {
+      const parts = Number(Math.abs(n)).toFixed(d).split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+      return parts.join('.');
+    };
+    const C = [
+      ['P-AIR-001', 'Supply air valve DN100', 'DemoVent DV-Z-100', 74.8, 'Type and size match (Ø 10 cm = DN100)', 806.26],
+      ['P-AIR-002', 'Supply air valve DN125', 'DemoVent DV-Z-125', 86.24, 'Right type, wrong size: tender says Ø 10 cm', 865.75],
+      ['P-AIR-003', 'Exhaust air valve DN100', 'DemoVent DV-A-100', 72.16, 'Right size, but exhaust, not supply', 792.53],
+      ['P-DAM-001', 'Manual balancing damper DN125', 'DemoDuct MD-125', 130.5, 'Different product type', 1577.4],
+      ['P-FIR-001', 'Fire damper EI90-S DN100', 'DemoFire FD-EI90-100', 1487.5, 'Same size, different product type', 10462.22]
+    ];
+    const base = 806.26;
+    const priceFor = (total) => {
+      const direct = 372700.12 + (total - base);
+      const cost = direct * 1.025 * 1.085;
+      return Math.ceil(cost / 0.945 / 1000) * 1000;
+    };
+    const cands = C.map((c, i) => {
+      const on = i === this.state.sel;
+      const d = c[5] - base;
+      return {
+        id: c[0], name: c[1], model: c[2], unit: fmt(c[3], 2), why: c[4], total: fmt(c[5], 2),
+        diff: i === 0 ? 'current' : (d >= 0 ? '+' : '−') + fmt(d, 2),
+        tag: i === 0 ? '  · suggested match' : '', whyFg: i === 0 ? '#121212' : '#5A5A57',
+        on: on, bg: on ? '#EEF2FD' : '#FFFFFF', dot: on ? '#121212' : 'transparent',
+        pick: () => this.setState({ sel: i })
+      };
+    });
+    const cur = C[this.state.sel];
+    const p0 = priceFor(base), p = priceFor(cur[5]);
+    const d = cur[5] - base;
+    return {
+      cands: cands, isVariant: this.state.sel !== 0,
+      lineTotal: fmt(cur[5], 2),
+      lineNote: this.state.sel === 0 ? 'unchanged' : (d >= 0 ? '+' : '−') + fmt(d, 2) + ' vs. now',
+      price: fmt(p, 0),
+      priceNote: p === p0 ? 'unchanged after rounding to 1’000' : (p > p0 ? '+' : '−') + fmt(p - p0, 0) + ' vs. now'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>New tender</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1F4FD8}a:hover{color:#163A9E}
+</style>
+</helmet>
+<div style="position: relative; min-height: 100vh; background: #FFFFFF; color: #121212; font-family: 'Work Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.45">
+
+<div aria-hidden="true">
+<div style="display: flex; align-items: center; gap: 28px; padding: 0 24px; min-height: 49px; border-bottom: 1px solid #DEDEDB"><span style="font-weight: 600; font-size: 15px">ctrl-free</span><span>Tenders</span><span style="color: #5A5A57">Results history</span><span style="color: #5A5A57">Reference data</span></div>
+<div style="padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="font-size: 20px; font-weight: 600">Tenders</div>
+<div style="height: 1px; background: #121212"></div>
+<div style="display: flex; gap: 24px; padding: 4px 0 12px; border-bottom: 1px solid #EDEDEA"><span style="font-weight: 600">Neubau Primarschule Erlenstrasse, Oberglatt</span><span>Gemeinde Oberglatt</span><span>BKP 244 Lüftung</span></div>
+</div>
+</div>
+
+<div style="position: absolute; inset: 0; background: rgba(18,18,18,0.45); display: flex; justify-content: center; align-items: flex-start; padding: 64px 16px">
+<section role="dialog" aria-modal="true" aria-labelledby="nt-title" style="width: 100%; max-width: 680px; background: #FFFFFF; border: 1px solid #121212; display: flex; flex-direction: column">
+
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 24px; border-bottom: 1px solid #DEDEDB">
+<h1 id="nt-title" style="margin: 0; font-size: 18px; font-weight: 600">New tender</h1>
+<a href="N01-Tenders.dc.html" aria-label="Close" style="display: inline-flex; width: 36px; height: 36px; border: 1px solid #DEDEDB; border-radius: 2px; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#121212" stroke-width="1.6" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"></path></svg></a>
+</div>
+
+<form style="padding: 20px 24px; display: flex; flex-direction: column; gap: 18px">
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-weight: 600">Tender documents</span>
+<div style="display: grid; grid-template-columns: 20px minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid #DEDEDB">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5A5A57" stroke-width="1.4" aria-hidden="true"><path d="M4 1.5h5l3 3v10H4z"></path><path d="M9 1.5v3h3"></path></svg>
+<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">BKP_244_LV_Lueftung_260804.pdf</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #5A5A57">202 pages · 2.9 MB</span>
+<button type="button" style="min-height: 32px; padding: 0 10px; border: 0; background: transparent; font: inherit; color: #5A5A57">Remove</button>
+</div>
+<label style="align-self: flex-start; display: inline-flex; align-items: center; min-height: 34px; padding: 0 12px; border: 1px solid #DEDEDB; border-radius: 2px; cursor: pointer">Add files<input type="file" multiple style="position: absolute; width: 1px; height: 1px; opacity: 0"></label>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px">
+<label style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5A5A57">Name
+<input type="text" value="Neubau Primarschule Erlenstrasse, Oberglatt" style="min-height: 36px; padding: 0 10px; border: 1px solid #DEDEDB; border-radius: 2px; font: inherit; font-size: 14px; color: #121212">
+<span>Read from the tender, p. 9</span>
+</label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5A5A57">Client
+<input type="text" value="Gemeinde Oberglatt" style="min-height: 36px; padding: 0 10px; border: 1px solid #DEDEDB; border-radius: 2px; font: inherit; font-size: 14px; color: #121212">
+</label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5A5A57">Trade
+<input type="text" value="BKP 244 Lüftungsanlagen" style="min-height: 36px; padding: 0 10px; border: 1px solid #DEDEDB; border-radius: 2px; font: inherit; font-size: 14px; color: #121212">
+</label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5A5A57">Submission due
+<input type="text" value="22.09.2026 10:00" style="min-height: 36px; padding: 0 10px; border: 1px solid #DEDEDB; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #121212">
+<span>Read from the tender, p. 9</span>
+</label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5A5A57">Starting values
+<select style="min-height: 36px; padding: 0 8px; border: 1px solid #DEDEDB; border-radius: 2px; font: inherit; font-size: 14px; color: #121212; background: #FFFFFF">
+<option>School building (default parameters)</option>
+<option>Sports hall</option>
+<option>Copy from another tender</option>
+</select>
+<span>You can change every value later in Pricing</span>
+</label>
+</div>
+
+<div style="padding: 12px 14px; background: #F6F6F4; font-size: 13px; color: #3A3A38; display: flex; flex-direction: column; gap: 4px">
+<span>Priced with the product catalogue (56 products) and install rules (22) from <a href="N11-Reference-data.dc.html">Reference data</a>.</span>
+<span>The PDF is read in the background. The tender shows in the list right away and opens as soon as the first section is priced.</span>
+</div>
+</form>
+
+<div style="display: flex; justify-content: flex-end; gap: 8px; padding: 14px 24px; border-top: 1px solid #DEDEDB">
+<a href="N01-Tenders.dc.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; color: #121212; text-decoration: none">Cancel</a>
+<a href="N03-Overview.dc.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font-weight: 500; text-decoration: none">Create tender</a>
+</div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

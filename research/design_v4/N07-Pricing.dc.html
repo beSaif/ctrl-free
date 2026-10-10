@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pricing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1F4FD8}a:hover{color:#163A9E}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #FFFFFF; color: #121212; font-family: 'Work Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.45; display: flex; flex-direction: column">
+
+<header style="border-bottom: 1px solid #DEDEDB">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 12px 24px 0">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; flex: 1 1 520px; min-width: 0">
+<a href="N01-Tenders.dc.html" style="font-weight: 600; font-size: 15px; color: #121212; text-decoration: none">ctrl-free</a>
+<nav aria-label="Breadcrumb" style="font-size: 14px; color: #5A5A57"><a href="N01-Tenders.dc.html" style="color: #5A5A57">Tenders</a> / <span style="color: #121212; font-weight: 500">Neubau Primarschule Erlenstrasse, Oberglatt · BKP 244 Lüftung</span></nav>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px">
+<span style="font-size: 13px; color: #5A5A57">Due <span style="font-family: 'JetBrains Mono', monospace">22.09.2026 10:00</span> · <span style="color: #121212; font-weight: 600">12 days left</span></span>
+<div role="group" aria-label="Language" style="display: inline-flex; font-size: 13px; color: #5A5A57; gap: 2px"><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #121212; font-weight: 600">EN</button><span aria-hidden="true" style="align-self: center">|</span><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #5A5A57">DE</button></div>
+</div>
+</div>
+<nav aria-label="Tender" style="display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 12px 0">
+<a href="N03-Overview.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Overview</a>
+<a href="N04-Lines.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Lines <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: #C2410C">6 to review</span></a>
+<a href="N06-Instructions.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Instructions &amp; norms <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: #C2410C">10 to confirm</span></a>
+<a href="N07-Pricing.dc.html" aria-current="page" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid #1F4FD8; color: #121212; font-weight: 600; text-decoration: none">Pricing</a>
+<a href="N08-Export.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Export</a>
+<a href="N09-Outcome.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Outcome</a>
+</nav>
+</header>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 24px; border-bottom: 1px solid #DEDEDB">
+<span style="color: #5A5A57">Your choices here apply to this tender only.</span>
+<span style="flex: 1 1 auto"></span>
+<span style="font-size: 13px; color: #5A5A57">{{ changedCount }}</span>
+<button onClick="{{ reset }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font: inherit; cursor: pointer; min-height: 34px; color: #121212">Reset to defaults</button>
+</div>
+
+<main style="flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: flex-start">
+
+<section aria-label="Your read on this tender" style="flex: 1 1 520px; max-width: 680px; min-width: 0; padding: 24px; display: flex; flex-direction: column; gap: 24px; border-right: 1px solid #DEDEDB">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 20px; font-weight: 600">Your read on this tender</h1>
+<p style="margin: 0; color: #5A5A57">Nobody knows the competitors before the award, so these three answers are your call. Each one moves the win chance on the right.</p>
+</div>
+
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+<fieldset style="margin: 0; padding: 0 0 20px; border: 0; border-bottom: 1px solid #EDEDEA; display: flex; flex-direction: column; gap: 10px">
+<legend style="padding: 0; margin-bottom: 4px; font-weight: 600; font-size: 15px">{{ g.title }}</legend>
+<div role="radiogroup" aria-label="{{ g.title }}" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{ g.opts }}" as="o" hint-placeholder-count="4">
+<button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="min-height: 52px; padding: 6px 14px; border: 1px solid {{ o.border }}; border-radius: 2px; background: {{ o.bg }}; color: {{ o.fg }}; font: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px"><span style="font-weight: 500">{{ o.label }}</span><span style="font-size: 12.5px">{{ o.effect }}</span></button>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 13px">
+<span style="display: flex; align-items: center; gap: 6px; color: {{ g.srcFg }}"><span style="width: 8px; height: 8px; background: {{ g.srcFg }}"></span>{{ g.source }}</span>
+<sc-if value="{{ g.changed }}" hint-placeholder-val="{{ false }}">
+<label style="flex: 1 1 260px; display: flex; align-items: center; gap: 8px"><span style="color: #5A5A57">Why</span><input type="text" placeholder="{{ g.notePh }}" style="flex: 1 1 auto; min-width: 0; min-height: 32px; padding: 0 10px; border: 1px solid #DEDEDB; border-radius: 2px; font: inherit; color: #121212"></label>
+</sc-if>
+</div>
+</fieldset>
+</sc-for>
+
+<section style="display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid {{ pcBorder }}">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Project costs</h2>
+<span style="font-size: 13px; font-weight: 500; color: {{ pcFg }}">{{ pcState }}</span>
+</div>
+<span style="font-size: 13px; color: #5A5A57">These are not in the 22 lines. Switch on what this offer has to carry.</span>
+<sc-for list="{{ projCosts }}" as="c" hint-placeholder-count="4">
+<label style="display: grid; grid-template-columns: 20px minmax(0, 1fr) 120px; gap: 12px; align-items: center; min-height: 40px; border-bottom: 1px solid #EDEDEA; cursor: pointer">
+<input type="checkbox" checked="{{ c.on }}" onChange="{{ c.toggle }}" style="width: 16px; height: 16px; margin: 0; accent-color: #1F4FD8">
+<span>{{ c.label }}</span>
+<span style="font-family: 'JetBrains Mono', monospace; text-align: right">{{ c.amount }}</span>
+</label>
+</sc-for>
+</section>
+
+<div style="display: flex; flex-direction: column; gap: 14px">
+<button onClick="{{ toggleMore }}" aria-expanded="{{ more }}" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0; border: 0; background: transparent; font: inherit; font-weight: 600; font-size: 15px; color: #121212; cursor: pointer; text-align: left">
+<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#121212" stroke-width="1.6" style="transform: {{ moreRot }}" aria-hidden="true"><path d="M4 2.5l3.5 3.5L4 9.5"></path></svg>
+More settings <span style="font-weight: 400; color: #5A5A57; font-size: 13px">margins, overhead, allowances, site factors</span>
+</button>
+<sc-if value="{{ more }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 24px; padding-left: 22px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600">Margins and overhead</h2>
+<sc-for list="{{ steppers }}" as="s" hint-placeholder-count="7">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) auto 180px; gap: 12px; align-items: center; padding: 6px 0; border-bottom: 1px solid #EDEDEA">
+<span>{{ s.label }}</span>
+<span style="display: inline-flex; align-items: center; border: 1px solid #DEDEDB; border-radius: 2px">
+<button onClick="{{ s.dec }}" aria-label="Decrease {{ s.label }}" style="width: 32px; height: 32px; border: 0; border-right: 1px solid #DEDEDB; background: #FFFFFF; font: inherit; cursor: pointer">−</button>
+<span style="min-width: 72px; text-align: center; font-family: 'JetBrains Mono', monospace">{{ s.val }}</span>
+<button onClick="{{ s.inc }}" aria-label="Increase {{ s.label }}" style="width: 32px; height: 32px; border: 0; border-left: 1px solid #DEDEDB; background: #FFFFFF; font: inherit; cursor: pointer">+</button>
+</span>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: {{ s.srcFg }}"><span style="width: 8px; height: 8px; background: {{ s.srcFg }}"></span>{{ s.source }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600">Allowances and site factors <span style="font-weight: 400; color: #5A5A57">· change one and all 22 lines recalculate</span></h2>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 100px; gap: 0 12px">
+<span style="padding: 6px 0; border-bottom: 1px solid #EDEDEA">Material waste</span><span style="padding: 6px 0; border-bottom: 1px solid #EDEDEA; font-family: 'JetBrains Mono', monospace; text-align: right">4.0%</span>
+<span style="padding: 6px 0; border-bottom: 1px solid #EDEDEA">Small material</span><span style="padding: 6px 0; border-bottom: 1px solid #EDEDEA; font-family: 'JetBrains Mono', monospace; text-align: right">3.5%</span>
+<span style="padding: 6px 0; border-bottom: 1px solid #EDEDEA">Supplier package contingency</span><span style="padding: 6px 0; border-bottom: 1px solid #EDEDEA; font-family: 'JetBrains Mono', monospace; text-align: right">3.0%</span>
+<span style="padding: 6px 0; border-bottom: 1px solid #EDEDEA">Site efficiency (hours ÷)</span><span style="padding: 6px 0; border-bottom: 1px solid #EDEDEA; font-family: 'JetBrains Mono', monospace; text-align: right">0.88</span>
+<span style="padding: 6px 0; border-bottom: 1px solid #EDEDEA">School logistics</span><span style="padding: 6px 0; border-bottom: 1px solid #EDEDEA; font-family: 'JetBrains Mono', monospace; text-align: right">× 1.07</span>
+<span style="padding: 6px 0; border-bottom: 1px solid #EDEDEA">Mounting height, school</span><span style="padding: 6px 0; border-bottom: 1px solid #EDEDEA; font-family: 'JetBrains Mono', monospace; text-align: right">× 1.10</span>
+<span style="padding: 6px 0">Timber interface</span><span style="padding: 6px 0; font-family: 'JetBrains Mono', monospace; text-align: right">× 1.08</span>
+</div>
+<span style="font-size: 13px; color: #5A5A57">All from the default parameters in <a href="N11-Reference-data.dc.html">Reference data</a>.</span>
+</div>
+</div>
+</sc-if>
+</div>
+</section>
+
+<section aria-label="Offer price" style="flex: 1 1 520px; min-width: 0; padding: 24px; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 16px 18px; border: 1px solid #121212">
+<span style="font-size: 13px; color: #5A5A57">Offer price</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 32px; line-height: 1.15; font-weight: 500">CHF {{ chosenBid }}</span>
+<span>{{ chosenName }} · {{ chosenMargin }} margin · <span style="font-weight: 600">{{ chosenWin }} win chance</span> · CHF {{ chosenProfit }} profit if won</span>
+<span style="font-size: 13px; color: #5A5A57">{{ winWords }}</span>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Pick a price</h2>
+<div style="overflow-x: auto">
+<div style="min-width: 620px">
+<div style="display: grid; grid-template-columns: minmax(0, 1.3fr) 64px 96px 124px 96px 104px; gap: 0 10px; padding: 8px 0; border-bottom: 1px solid #121212; font-size: 13px; color: #5A5A57; font-weight: 500">
+<span>Option</span><span style="text-align: right">Margin</span><span style="text-align: right">Offer price</span><span style="text-align: right">Win chance</span><span style="text-align: right">Profit if won</span><span style="text-align: right">Expected profit</span>
+</div>
+<sc-for list="{{ options }}" as="o" hint-placeholder-count="4">
+<button role="radio" aria-checked="{{ o.chosen }}" onClick="{{ o.pick }}" style="display: grid; grid-template-columns: minmax(0, 1.3fr) 64px 96px 124px 96px 104px; gap: 0 10px; align-items: center; width: 100%; min-height: 48px; padding: 0; border: 0; border-bottom: 1px solid #EDEDEA; background: {{ o.bg }}; box-shadow: {{ o.mark }}; font: inherit; color: #121212; text-align: left; cursor: pointer">
+<span style="padding-left: 10px; font-weight: {{ o.w }}">{{ o.name }}<span style="color: #5A5A57; font-size: 12.5px; font-weight: 400">{{ o.tag }}</span></span>
+<span style="text-align: right; font-family: 'JetBrains Mono', monospace">{{ o.margin }}</span>
+<span style="text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 500">{{ o.bid }}</span>
+<span style="display: flex; align-items: center; justify-content: flex-end; gap: 8px"><span aria-hidden="true" style="width: 56px; height: 6px; background: #EDEDEA"><span style="display: block; width: {{ o.winW }}; height: 6px; background: #121212"></span></span><span style="font-family: 'JetBrains Mono', monospace; min-width: 34px; text-align: right">{{ o.win }}</span></span>
+<span style="text-align: right; font-family: 'JetBrains Mono', monospace">{{ o.profit }}</span>
+<span style="text-align: right; font-family: 'JetBrains Mono', monospace">{{ o.ec }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+<span style="font-size: 13px; color: #5A5A57">Expected profit = win chance × profit if won. Price is worth 60 of 100 award points. An offer 50% above the lowest gets 0. Prices are fixed until completion (p. 9).</span>
+</div>
+
+<div style="display: flex; flex-direction: column; max-width: 520px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600; margin-bottom: 8px">How the cost adds up</h2>
+<sc-for list="{{ buildup }}" as="b" hint-placeholder-count="6">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: {{ b.rule }}; font-weight: {{ b.w }}"><span>{{ b.label }}</span><span style="font-family: 'JetBrains Mono', monospace">{{ b.val }}</span></div>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid #DEDEDB">
+<span style="color: #5A5A57">{{ pcHint }}</span>
+<span style="flex: 1 1 auto"></span>
+<a href="N08-Export.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer">Use CHF {{ chosenBid }} and continue to export</a>
+</div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = Object.assign(this.defaults(), { more: false, chosen: 'Target' });
+  }
+  defaults() {
+    return { comp: -0.05, app: 0.05, sens: 0.05, refWin: 0.55, mA: 2.5, mT: 4.0, mC: 6.5, overhead: 8.5, target: 5.5, transport: 2.5, eng: false, com: false, hyg: false, doc: false };
+  }
+  renderVals() {
+    const st = this.state, D = this.defaults();
+    const fmt = (n, d) => {
+      const parts = Number(n).toFixed(d || 0).split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+      return parts.join('.');
+    };
+    const pts = (v) => Math.round(Math.abs(v) * 100);
+    const effect = (v) => (v > 0 ? '+' + pts(v) + ' points win chance' : (v < 0 ? '−' + pts(v) + ' points win chance' : 'no change'));
+    const SRC_DEF = 'Default', SRC_YOU = 'Your call · You · 10 Sep';
+    const src = (k) => (st[k] === D[k] ? { source: SRC_DEF, srcFg: '#8A8A86', changed: false } : { source: SRC_YOU, srcFg: '#1F4FD8', changed: true });
+    const seg = (k, list) => list.map(([label, v]) => {
+      const on = Math.abs(st[k] - v) < 1e-9;
+      return { label: label, effect: k === 'sens' ? '−' + pts(v) + ' points per 1% above standard' : effect(v), on: on, border: on ? '#121212' : '#DEDEDB', bg: on ? '#121212' : '#FFFFFF', fg: on ? '#FFFFFF' : '#121212', pick: () => this.setState({ [k]: v }) };
+    });
+    const groups = [
+      Object.assign({ title: 'How strong is the competition?', notePh: 'e.g. heard 4 firms took the documents',
+        opts: seg('comp', [['Light', 0.05], ['Normal', 0], ['Strong', -0.05], ['Very strong', -0.10]]) }, src('comp')),
+      Object.assign({ title: 'How much do we want this job?', notePh: 'e.g. school references matter for next year',
+        opts: seg('app', [['Not a priority', -0.05], ['Neutral', 0], ['We want it', 0.05], ['Must win', 0.10]]) }, src('app')),
+      Object.assign({ title: 'How price sensitive is this client?', notePh: 'e.g. this client awards mostly on price',
+        opts: seg('sens', [['Low', 0.03], ['Normal', 0.05], ['High', 0.08]]) }, src('sens'))
+    ];
+    const step = (k, label, d, unit, lo, hi) => Object.assign({
+      label: label, val: (k === 'refWin' ? Math.round(st[k] * 100) + '%' : st[k].toFixed(1) + unit),
+      dec: () => this.setState({ [k]: Math.max(lo, Math.round((st[k] - d) * 100) / 100) }),
+      inc: () => this.setState({ [k]: Math.min(hi, Math.round((st[k] + d) * 100) / 100) })
+    }, src(k));
+    const steppers = [
+      step('mA', 'Aggressive margin', 0.5, '%', 0, 15),
+      step('mT', 'Target margin', 0.5, '%', 0, 15),
+      step('target', 'Standard margin', 0.5, '%', 0, 15),
+      step('mC', 'Conservative margin', 0.5, '%', 0, 15),
+      step('overhead', 'Overhead', 0.5, '%', 0, 20),
+      step('transport', 'Transport and equipment', 0.5, '%', 0, 10),
+      step('refWin', 'Win chance at the standard price', 0.05, '', 0.05, 0.95)
+    ];
+    const PC = [['eng', 'Engineering 420 h × CHF 145', 60900], ['com', 'Commissioning 160 h × CHF 155', 24800], ['hyg', 'Hygiene inspection', 18000], ['doc', 'Documentation', 12000]];
+    const projCosts = PC.map(([k, label, amt]) => ({ label: label, amount: fmt(amt, 0), on: st[k], toggle: () => this.setState({ [k]: !st[k] }) }));
+    const direct = 372700.12;
+    const extra = PC.reduce((t, [k, , amt]) => t + (st[k] ? amt : 0), 0);
+    const base = direct + extra;
+    const transportAmt = base * st.transport / 100;
+    const overheadAmt = (base + transportAmt) * st.overhead / 100;
+    const cost = base + transportAmt + overheadAmt;
+    const ref = cost / (1 - st.target / 100);
+    const calc = (m) => {
+      const bid = Math.ceil(cost / (1 - m / 100) / 1000) * 1000;
+      const rel = (bid / ref - 1) * 100;
+      const p = Math.min(0.95, Math.max(0.05, st.refWin + st.app + st.comp - st.sens * rel));
+      return { bid: bid, p: p, profit: bid - cost, ec: p * (bid - cost) };
+    };
+    const defs = [['Aggressive', st.mA], ['Target', st.mT], ['Standard', st.target], ['Conservative', st.mC]];
+    const rows = defs.map(([n, m]) => Object.assign({ name: n, m: m }, calc(m)));
+    const best = rows.reduce((x, y) => (y.ec > x.ec ? y : x)).name;
+    const options = rows.map((r) => {
+      const chosen = r.name === st.chosen;
+      const tags = [];
+      if (r.name === best) tags.push('best expected profit');
+      if (chosen) tags.push('your offer');
+      return {
+        name: r.name, tag: tags.length ? '  · ' + tags.join(' · ') : '', chosen: chosen,
+        margin: r.m.toFixed(1) + '%', bid: fmt(r.bid, 0), win: Math.round(r.p * 100) + '%', winW: Math.round(r.p * 100) + '%', profit: fmt(r.profit, 0), ec: fmt(r.ec, 0),
+        bg: chosen ? '#EEF2FD' : '#FFFFFF', mark: chosen ? 'inset 3px 0 0 #1F4FD8' : 'none', w: chosen ? '600' : '400',
+        pick: () => this.setState({ chosen: r.name })
+      };
+    });
+    const ch = rows.find((r) => r.name === st.chosen) || rows[1];
+    const stdPrice = Math.ceil(ref / 1000) * 1000;
+    const relCh = (ch.bid / ref - 1) * 100;
+    const word = (v, plus, minus) => (v > 0 ? ', plus ' + pts(v) + ' ' + plus : (v < 0 ? ', minus ' + pts(v) + ' ' + minus : ''));
+    const priceWords = Math.abs(relCh) < 0.05 ? '' : (relCh < 0
+      ? ', plus ' + (st.sens * -relCh * 100).toFixed(0) + ' because this price is ' + (-relCh).toFixed(1) + '% below the standard price'
+      : ', minus ' + (st.sens * relCh * 100).toFixed(0) + ' because this price is ' + relCh.toFixed(1) + '% above the standard price');
+    const winWords = 'Why ' + Math.round(ch.p * 100) + '%: it starts at ' + Math.round(st.refWin * 100) + '%'
+      + word(st.app, 'because we want the job', 'because the job is not a priority')
+      + word(st.comp, 'for light competition', 'for strong competition')
+      + priceWords + ' (CHF ' + fmt(stdPrice, 0) + ' at ' + st.target.toFixed(1) + '%).';
+    const buildup = [{ label: 'Direct cost, 22 lines', val: fmt(direct, 2), rule: '1px solid #EDEDEA', w: '400' }];
+    if (extra) buildup.push({ label: '+ Project costs switched on', val: fmt(extra, 2), rule: '1px solid #EDEDEA', w: '400' });
+    buildup.push({ label: '+ Transport and equipment ' + st.transport.toFixed(1) + '%', val: fmt(transportAmt, 2), rule: '1px solid #EDEDEA', w: '400' });
+    buildup.push({ label: '+ Overhead ' + st.overhead.toFixed(1) + '%', val: fmt(overheadAmt, 2), rule: '1px solid #121212', w: '400' });
+    buildup.push({ label: 'Cost', val: fmt(cost, 2), rule: '1px solid #EDEDEA', w: '600' });
+    buildup.push({ label: '+ ' + ch.name + ' margin ' + ch.m.toFixed(1) + '%, rounded up to 1’000', val: fmt(ch.bid - cost, 2), rule: '1px solid #121212', w: '400' });
+    buildup.push({ label: 'Offer price', val: fmt(ch.bid, 0), rule: '0', w: '600' });
+    const keys = Object.keys(D);
+    const n = keys.filter((k) => st[k] !== D[k]).length;
+    const pcOn = PC.filter(([k]) => st[k]).length;
+    return {
+      groups: groups, steppers: steppers, projCosts: projCosts, options: options, buildup: buildup,
+      chosenName: ch.name, chosenBid: fmt(ch.bid, 0), chosenWin: Math.round(ch.p * 100) + '%', chosenMargin: ch.m.toFixed(1) + '%', chosenProfit: fmt(ch.profit, 0),
+      winWords: winWords,
+      pcState: pcOn ? 'CHF ' + fmt(extra, 0) + ' in the price' : 'Not in the price yet · CHF 115’700 if all on',
+      pcFg: pcOn ? '#121212' : '#C2410C', pcBorder: pcOn ? '#DEDEDB' : '#C2410C',
+      pcHint: pcOn ? '' : 'Project costs are still off.',
+      more: st.more, moreRot: st.more ? 'rotate(90deg)' : 'none', toggleMore: () => this.setState({ more: !st.more }),
+      changedCount: n ? n + ' changed from defaults' : 'All values are defaults',
+      reset: () => this.setState(this.defaults())
+    };
+  }
+}
+</script>
+</body>
+</html>

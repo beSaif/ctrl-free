@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Assist</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1F4FD8}a:hover{color:#163A9E}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #FFFFFF; color: #121212; font-family: 'Work Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.45; display: flex; flex-direction: column">
+
+<header style="border-bottom: 1px solid #DEDEDB">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 12px 24px 0">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; flex: 1 1 520px; min-width: 0">
+<a href="N01-Tenders.dc.html" style="font-weight: 600; font-size: 15px; color: #121212; text-decoration: none">ctrl-free</a>
+<nav aria-label="Breadcrumb" style="font-size: 14px; color: #5A5A57"><a href="N01-Tenders.dc.html" style="color: #5A5A57">Tenders</a> / <span style="color: #121212; font-weight: 500">Neubau Primarschule Erlenstrasse, Oberglatt · BKP 244 Lüftung</span></nav>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px">
+<button onClick="{{ toggleTray }}" aria-expanded="{{ tray }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 10px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font: inherit; font-size: 13px; color: {{ pillFg }}; cursor: pointer"><span aria-hidden="true" style="flex: none; width: 7px; height: 7px; border: 1.5px solid #121212; transform: rotate(45deg)"></span>{{ pill }}</button>
+<span style="font-size: 13px; color: #5A5A57">Due <span style="font-family: 'JetBrains Mono', monospace">22.09.2026 10:00</span> · <span style="color: #121212; font-weight: 600">12 days left</span></span>
+<div role="group" aria-label="Language" style="display: inline-flex; font-size: 13px; color: #5A5A57; gap: 2px"><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #121212; font-weight: 600">EN</button><span aria-hidden="true" style="align-self: center">|</span><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #5A5A57">DE</button></div>
+</div>
+</div>
+<nav aria-label="Tender" style="display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 12px 0">
+<a href="N03-Overview.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Overview</a>
+<a href="N04-Lines.dc.html" aria-current="page" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid #1F4FD8; color: #121212; font-weight: 600; text-decoration: none">Lines <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: #C2410C">6 to review</span></a>
+<a href="N06-Instructions.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Instructions &amp; norms <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: #C2410C">10 to confirm</span></a>
+<a href="N07-Pricing.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Pricing <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: #C2410C">price not chosen</span></a>
+<a href="N08-Export.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Export</a>
+<a href="N09-Outcome.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Outcome</a>
+</nav>
+</header>
+
+<div style="position: relative">
+<sc-if value="{{ tray }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Assist" style="position: absolute; z-index: 5; top: 8px; right: 24px; width: 440px; max-width: calc(100% - 32px); background: #FFFFFF; border: 1px solid #121212; box-shadow: 0 8px 24px rgba(18,18,18,0.12); display: flex; flex-direction: column">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #DEDEDB">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Assist on this tender</h2>
+<button onClick="{{ toggleTray }}" aria-label="Close" style="width: 32px; height: 32px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; cursor: pointer"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#121212" stroke-width="1.6" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"></path></svg></button>
+</div>
+
+<div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; border-bottom: 1px solid #DEDEDB">
+<span style="font-size: 13px; font-weight: 600; color: {{ okFg }}">{{ okTitle }}</span>
+<sc-if value="{{ quotesOpen }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid #DEDEDB">
+<span style="font-weight: 600">Fill 3 silencer quotes</span>
+<span style="font-size: 13px; color: #5A5A57">Read from [Supplier reply.pdf], received 10 Sep</span>
+<div style="display: flex; flex-direction: column">
+<sc-for list="{{ lines }}" as="l" hint-placeholder-count="3">
+<div style="display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 10px; padding: 5px 0; border-bottom: 1px solid #EDEDEA; font-size: 13px"><span style="font-family: 'JetBrains Mono', monospace">{{ l.id }}</span><span style="font-family: 'JetBrains Mono', monospace">{{ l.budget }} → {{ l.reply }}</span><span style="color: {{ l.stateFg }}">{{ l.state }}</span></div>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button onClick="{{ fillAll }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer; min-height: 36px">Fill all 3</button>
+<button onClick="{{ toggleTray }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer; min-height: 36px">Check on the line</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ instrOpen }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid #DEDEDB">
+<span style="font-weight: 600">Confirm 6 instructions that do not change the price</span>
+<span style="font-size: 13px; color: #5A5A57">All 6 are Scope or Covered and their lines already match. The 2 that add cost and the 2 risks stay with you.</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button onClick="{{ okInstr }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer; min-height: 36px">Confirm 6</button>
+<a href="N06-Instructions.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer; min-height: 36px">Review each</a>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ noneOpen }}" hint-placeholder-val="{{ false }}">
+<span style="color: #5A5A57">Nothing is waiting for you.</span>
+</sc-if>
+</div>
+
+<div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #DEDEDB">
+<span style="font-size: 13px; font-weight: 600">Working on</span>
+<span>Reading [Supplier reply 2.pdf] for the air volume controllers</span>
+<div role="img" aria-label="Page 2 of 4" style="height: 4px; background: #EDEDEA"><div style="width: 50%; height: 4px; background: #121212"></div></div>
+<span style="font-size: 13px; color: #5A5A57">p. 2 of 4 · you can keep working</span>
+</div>
+
+<div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; border-bottom: 1px solid #DEDEDB">
+<span style="font-size: 13px; font-weight: 600">Done</span>
+<sc-for list="{{ doneLog }}" as="d" hint-placeholder-count="3">
+<div style="display: flex; justify-content: space-between; gap: 12px"><span>{{ d.t }}</span><span style="flex: none; font-size: 13px; color: #5A5A57">{{ d.when }}</span></div>
+</sc-for>
+</div>
+
+<div style="padding: 12px 16px; font-size: 13px; color: #5A5A57">Assist never changes a price or confirms anything without your OK. Every value it fills is marked and can be undone.</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ barOpen }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Tell Assist what to do" style="position: absolute; z-index: 6; top: 64px; left: 50%; transform: translateX(-50%); width: 680px; max-width: calc(100% - 32px); background: #FFFFFF; border: 1px solid #121212; box-shadow: 0 12px 32px rgba(18,18,18,0.16); display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px 10px 16px; border-bottom: 1px solid #DEDEDB">
+<span aria-hidden="true" style="flex: none; width: 7px; height: 7px; border: 1.5px solid #121212; transform: rotate(45deg)"></span>
+<label style="flex: 1 1 auto; display: flex"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Tell Assist what to do</span><input type="text" value="{{ barText }}" onChange="{{ noop }}" placeholder="Tell Assist what to do, or ask about this line" style="flex: 1 1 auto; min-width: 0; min-height: 36px; border: 0; font: inherit; font-size: 16px; color: #121212; outline: none"></label>
+<button onClick="{{ closeBar }}" style="min-height: 32px; padding: 0 8px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #5A5A57; cursor: pointer">Esc</button>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 16px; border-bottom: 1px solid #EDEDEA; font-size: 13px">
+<span style="color: #5A5A57">About</span>
+<span style="padding: 2px 8px; border: 1px solid #121212; border-radius: 2px">This line · LV0010</span>
+<span style="padding: 2px 8px; border: 1px solid #DEDEDB; border-radius: 2px; color: #5A5A57">Whole tender</span>
+</div>
+
+<sc-if value="{{ barHome }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; padding: 6px 0">
+<sc-for list="{{ suggestions }}" as="s" hint-placeholder-count="5">
+<button onClick="{{ s.run }}" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 0 16px; border: 0; background: #FFFFFF; font: inherit; color: #121212; text-align: left; cursor: pointer"><span>{{ s.t }}</span><span style="flex: none; font-size: 13px; color: #5A5A57">{{ s.kind }}</span></button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ barPlan }}" hint-placeholder-val="{{ false }}">
+<div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-weight: 600">This is what I would do</span>
+<div style="display: flex; flex-direction: column">
+<sc-for list="{{ plan }}" as="p" hint-placeholder-count="3">
+<div style="display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 10px; padding: 7px 0; border-bottom: 1px solid #EDEDEA"><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">{{ p.id }}</span><span>{{ p.t }}</span><span style="font-weight: 500; color: {{ p.fg }}">{{ p.act }}</span></div>
+</sc-for>
+</div>
+<span style="font-size: 13px; color: #5A5A57">Direct cost goes from 372'700.12 to {{ planDirect }}. Nothing has changed yet.</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button onClick="{{ runPlan }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer">Do it <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 1px 5px; border: 1px solid currentColor; border-radius: 2px; opacity: 0.75">Enter</span></button>
+<button onClick="{{ barBack }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">Change the request</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ barDone }}" hint-placeholder-val="{{ false }}">
+<div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="display: flex; align-items: center; gap: 8px; font-weight: 600"><span style="width: 8px; height: 8px; background: #121212"></span>Done: 2 quotes filled and confirmed</span>
+<span style="color: #5A5A57">LV0006 and LV0010 now use the supplier's prices. LV0011 is still in review because its quote is above budget.</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button onClick="{{ undoAll }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">Undo</button>
+<button onClick="{{ closeBar }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">Close</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ barWhy }}" hint-placeholder-val="{{ false }}">
+<div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-weight: 600">Why the labour on this line is CHF 1'078.56</span>
+<div style="display: flex; flex-direction: column">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid #EDEDEA"><span>4 pc × 2.10 h per silencer (install rule SILENCER)</span><span style="flex: none; font-family: 'JetBrains Mono', monospace">8.40 h</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid #EDEDEA"><span>÷ 0.88 site efficiency, × 1.10 ceiling height, × 1.07 school logistics</span><span style="flex: none; font-family: 'JetBrains Mono', monospace">11.24 h</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-weight: 600"><span>× CHF 96 per hour (installer)</span><span style="flex: none; font-family: 'JetBrains Mono', monospace">1'078.56</span></div>
+</div>
+<span style="font-size: 13px; color: #5A5A57">Sources: <a href="N11-Reference-data.dc.html">install rules</a> and the site factors in <a href="N07-Pricing.dc.html">Pricing</a>.</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button onClick="{{ barBack }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">Ask something else</button>
+<button onClick="{{ closeBar }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">Close</button>
+</div>
+</div>
+</sc-if>
+</section>
+</sc-if>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 24px; border-bottom: 1px solid #DEDEDB">
+<a href="N04-Lines.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font: inherit; cursor: pointer; padding: 0 14px 0 10px; color: #121212; text-decoration: none"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#121212" stroke-width="1.6" aria-hidden="true"><path d="M7.5 2.5L4 6l3.5 3.5"></path></svg>All lines</a>
+<span style="flex: 1 1 auto"></span>
+<span style="font-size: 13px; color: #5A5A57">To review 3 of 6</span>
+<button style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font: inherit; cursor: pointer; color: #121212">Previous <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 1px 5px; border: 1px solid currentColor; border-radius: 2px; opacity: 0.75">K</span></button>
+<button style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font: inherit; cursor: pointer; color: #121212">Next <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 1px 5px; border: 1px solid currentColor; border-radius: 2px; opacity: 0.75">J</span></button>
+</div>
+
+<main style="flex: 1 1 auto; display: flex; justify-content: center; padding: 28px 24px 96px">
+<div style="width: 100%; max-width: 1240px; display: flex; flex-direction: column; gap: 24px">
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #5A5A57">LV0010 · p. 107 · LA02 Essenräume EG</span>
+<h1 style="margin: 0; font-size: 26px; line-height: 1.25; font-weight: 600">Schalldämpfer 600 x 600 x 1750 mm</h1>
+<span style="color: #5A5A57">Rectangular duct silencer 600×600×1750 mm</span>
+<span style="display: flex; align-items: center; gap: 8px; color: {{ statusFg }}"><span style="width: 8px; height: 8px; background: {{ statusFg }}"></span>{{ status }}</span>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px 40px">
+
+<div style="flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+<section style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px"><h2 style="margin: 0; font-size: 15px; font-weight: 600">Tender PDF · p. 107</h2><a href="#page" style="font-size: 13px">Open full page</a></div>
+<div style="border: 1px solid #B5B5B0; background: #F6F6F4; padding: 16px"><div style="background: #FFFFFF; border: 1px solid #DEDEDB; padding: 16px 18px; display: flex; flex-direction: column"><div style="min-height: 96px; display: flex; align-items: center; justify-content: center; border: 1px dashed #B5B5B0; padding: 16px; color: #5A5A57; text-align: center">[Crop of PDF page 107 with the position highlighted]</div></div></div>
+<span style="font-size: 13px; color: #5A5A57">The marked row is where the quantity 4 pc was read.</span>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px"><h2 style="margin: 0; font-size: 15px; font-weight: 600">Supplier's reply · [Supplier reply.pdf] · p. 1</h2><a href="#reply" style="font-size: 13px">Open the PDF</a></div>
+<div style="border: 1px solid #B5B5B0; background: #F6F6F4; padding: 16px">
+<div style="background: #FFFFFF; border: 1px solid #DEDEDB; padding: 16px 18px; display: flex; flex-direction: column; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.8">
+<div style="display: grid; grid-template-columns: 52px minmax(0, 1fr) 56px 96px; gap: 10px; padding: 0 4px; color: #5A5A57"><span>Pos.</span><span>Bezeichnung</span><span>Menge</span><span style="text-align: right">Netto / Stk</span></div>
+<sc-for list="{{ lines }}" as="l" hint-placeholder-count="3">
+<div style="display: grid; grid-template-columns: 52px minmax(0, 1fr) 56px 96px; gap: 10px; padding: 0 4px; background: {{ l.cropBg }}"><span>{{ l.posNo }}</span><span>{{ l.de }}</span><span>{{ l.qty }} Stk</span><span style="text-align: right; font-weight: {{ l.cropW }}">{{ l.reply }}</span></div>
+</sc-for>
+</div>
+</div>
+<span style="font-size: 13px; color: #5A5A57">This is the row Assist read the price from. Demo figures.</span>
+</section>
+</div>
+
+<div style="flex: 1 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Price for this line</h2>
+<div style="display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 10px 14px; align-items: center">
+<span style="color: #5A5A57">Quantity</span><span><span style="font-family: 'JetBrains Mono', monospace">4</span> pc <span style="font-size: 13px; color: #5A5A57">· read from p. 107</span></span>
+<span style="color: #5A5A57">Product</span><span>Rect. silencer 600×600×1750</span>
+<label for="a-unit" style="color: #5A5A57">Quoted unit price</label>
+<span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px"><span style="color: #5A5A57">CHF</span><input id="a-unit" type="number" value="{{ unitIn }}" placeholder="5'400.00" onChange="{{ setUnit }}" style="min-height: 36px; padding: 0 10px; border: 1px solid #121212; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #121212; background: #FFFFFF; width: 130px; border-style: {{ unitBorder }}"><span style="font-size: 13px; color: {{ unitFg }}">{{ unitNote }}</span></span>
+<span style="color: #5A5A57">Hours</span><span><span style="font-family: 'JetBrains Mono', monospace">11.24</span> h × CHF 96 (installer)</span>
+</div>
+<div style="display: flex; flex-direction: column">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid #121212; border-bottom: 1px solid #EDEDEA"><span>Material, incl. 4% waste</span><span style="flex: none; font-family: 'JetBrains Mono', monospace">{{ material }}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid #EDEDEA"><span>Labour</span><span style="flex: none; font-family: 'JetBrains Mono', monospace">1'078.56</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; font-weight: 600; font-size: 16px"><span>Line total</span><span style="flex: none; font-family: 'JetBrains Mono', monospace">CHF {{ total }}</span></div>
+<span style="font-size: 13px; color: #5A5A57">{{ totalNote }}</span>
+</div>
+</section>
+
+<sc-if value="{{ showProposal }}" hint-placeholder-val="{{ true }}">
+<section style="display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border: 1px dashed #121212">
+<div style="display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="flex: none; width: 7px; height: 7px; border: 1.5px solid #121212; transform: rotate(45deg)"></span><h2 style="margin: 0; font-size: 15px; font-weight: 600">Assist found a quote for this line</h2></div>
+<span>The supplier answered. The reply quotes <span style="font-family: 'JetBrains Mono', monospace; font-weight: 500">CHF 5'150.00</span> per piece, budget was <span style="font-family: 'JetBrains Mono', monospace">5'400.00</span>. The line total would drop by <span style="font-family: 'JetBrains Mono', monospace">1'040.00</span>.</span>
+<span style="font-size: 13px; color: #5A5A57">Read from [Supplier reply.pdf], p. 1, Pos. 2. The same reply covers LV0006 and LV0011.</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button onClick="{{ fillOne }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer; min-height: 36px">Fill this line</button>
+<button onClick="{{ fillAll }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer; min-height: 36px">Fill all 3 silencer lines</button>
+<button onClick="{{ dismiss }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer; min-height: 36px">Not this</button>
+</div>
+</section>
+</sc-if>
+<sc-if value="{{ showFilled }}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 16px; border: 1px solid #DEDEDB">
+<span aria-hidden="true" style="flex: none; width: 7px; height: 7px; border: 1.5px solid #121212; transform: rotate(45deg)"></span>
+<span style="flex: 1 1 240px">{{ filledText }}</span>
+<button onClick="{{ undoAll }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer; min-height: 36px">Undo</button>
+</section>
+</sc-if>
+<sc-if value="{{ showDrop }}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border: 1px dashed #B5B5B0">
+<span style="font-weight: 500">Got the supplier's answer?</span>
+<span style="font-size: 13px; color: #5A5A57">Drop the PDF or the email here. Assist reads the prices and asks before filling them in.</span>
+</section>
+</sc-if>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px">
+<button style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer">{{ confirmLabel }} <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 1px 5px; border: 1px solid currentColor; border-radius: 2px; opacity: 0.75">Enter</span></button>
+</div>
+</div>
+
+</div>
+</div>
+</main>
+
+<sc-if value="{{ barClosed }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ openBar }}" style="position: sticky; bottom: 62px; align-self: center; z-index: 4; display: inline-flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 14px 0 16px; border: 1px solid #121212; border-radius: 2px; background: #FFFFFF; box-shadow: 0 4px 16px rgba(18,18,18,0.10); font: inherit; color: #5A5A57; cursor: pointer">
+<span aria-hidden="true" style="flex: none; width: 7px; height: 7px; border: 1.5px solid #121212; transform: rotate(45deg)"></span>
+<span>Tell Assist what to do</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 1px 5px; border: 1px solid currentColor; border-radius: 2px; opacity: 0.75">Ctrl K</span>
+</button>
+</sc-if>
+
+<footer style="position: sticky; bottom: 0; display: flex; flex-wrap: wrap; gap: 8px 28px; padding: 12px 24px; border-top: 1px solid #121212; background: #FFFFFF; font-size: 14px">
+<span>Direct <span style="font-family: 'JetBrains Mono', monospace">{{ fDirect }}</span></span>
+<span>Cost incl. transport and overhead <span style="font-family: 'JetBrains Mono', monospace">{{ fCost }}</span></span>
+<span style="flex: 1 1 auto"></span>
+<span style="color: #5A5A57">{{ fNote }}</span>
+<span style="font-weight: 600">Price at standard margin <span style="font-family: 'JetBrains Mono', monospace">CHF {{ fPrice }}</span></span>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"start":{"editor":"enum","options":["inline","bar","tray"],"default":"inline"},"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { q: {}, by: {}, dismissed: false, instr: false, ran: false };
+  }
+  renderVals() {
+    const fmt = (n, d) => {
+      const parts = Number(Math.abs(n)).toFixed(d).split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+      return parts.join('.');
+    };
+    const st = this.state, start = this.props.start;
+    const tray = st.tray === undefined ? start === 'tray' : st.tray;
+    const bar = st.bar === undefined ? (start === 'bar' ? 'home' : null) : st.bar;
+    const G = [
+      ['LV0006', 80, 'Schalldämpfer 400 x 300 x 1250 mm', 4, 2600, 1078.56, 2480],
+      ['LV0010', 107, 'Schalldämpfer 600 x 600 x 1750 mm', 4, 5400, 1078.56, 5150],
+      ['LV0011', 163, 'Schalldämpfer 540 x 400 x 1250 mm', 6, 3600, 1617.84, 3720]
+    ];
+    const ME = 'LV0010';
+    const val = (id) => { const v = parseFloat(st.q[id]); return isFinite(v) && v > 0 ? v : null; };
+    const tot = (g, unit) => g[3] * unit * 1.04 + g[5];
+    let dDirect = 0;
+    const lines = G.map((g, i) => {
+      const v = val(g[0]);
+      if (v !== null) dDirect += tot(g, v) - tot(g, g[4]);
+      const filled = v !== null && !!st.by[g[0]];
+      return {
+        id: g[0], posNo: String(i + 1), de: g[2], qty: String(g[3]), budget: fmt(g[4], 2), reply: fmt(g[6], 2),
+        state: filled ? 'filled' : (g[6] > g[4] ? 'above budget' : 'below budget'), stateFg: filled ? '#121212' : (g[6] > g[4] ? '#C2410C' : '#5A5A57'),
+        cropBg: g[0] === ME ? '#FCE9DC' : 'transparent', cropW: g[0] === ME ? '600' : '400', filled: filled
+      };
+    });
+    const me = G[1], mine = val(ME), byAssist = mine !== null && !!st.by[ME];
+    const unit = mine === null ? me[4] : mine;
+    const allFilled = lines.every((l) => l.filled);
+    const quotesOpen = !allFilled && !st.dismissed;
+    const instrOpen = !st.instr;
+    const nOpen = (quotesOpen ? 1 : 0) + (instrOpen ? 1 : 0);
+    const fill = (ids) => {
+      const q = Object.assign({}, st.q), by = Object.assign({}, st.by);
+      G.forEach((g) => { if (ids.indexOf(g[0]) >= 0) { q[g[0]] = g[6].toFixed(2); by[g[0]] = true; } });
+      return { q: q, by: by };
+    };
+    const direct = 372700.12 + dDirect;
+    const cost = direct * 1.025 * 1.085;
+    const planIds = G.filter((g) => g[6] <= g[4]).map((g) => g[0]);
+    const planDelta = G.filter((g) => g[6] <= g[4]).reduce((t, g) => t + tot(g, g[6]) - tot(g, g[4]), 0);
+    const doneLog = [];
+    if (st.instr) doneLog.push({ t: 'Confirmed 6 instructions for you', when: 'now' });
+    if (allFilled) doneLog.push({ t: 'Filled 3 silencer quotes', when: 'now' });
+    doneLog.push({ t: 'Drafted 3 supplier requests', when: '9 Sep' });
+    doneLog.push({ t: 'Read the tender: 22 lines priced, 12 instructions found', when: '9 Sep' });
+    return {
+      tray: tray, toggleTray: () => this.setState({ tray: !tray, bar: null }),
+      pill: nOpen ? 'Assist · ' + nOpen + ' to approve' : 'Assist', pillFg: nOpen ? '#121212' : '#5A5A57',
+      okTitle: nOpen ? 'Needs your OK · ' + nOpen : 'Needs your OK', okFg: nOpen ? '#C2410C' : '#5A5A57',
+      quotesOpen: quotesOpen, instrOpen: instrOpen, noneOpen: nOpen === 0,
+      okInstr: () => this.setState({ instr: true }),
+      lines: lines, doneLog: doneLog,
+      barOpen: bar !== null, barClosed: bar === null, barHome: bar === 'home', barPlan: bar === 'plan', barDone: bar === 'done', barWhy: bar === 'why',
+      barText: bar === 'plan' || bar === 'done' ? 'Confirm every line where the quote is at or below budget' : (bar === 'why' ? 'Why is the labour on this line 1’078.56?' : ''),
+      noop: () => {},
+      openBar: () => this.setState({ bar: 'home', tray: false }),
+      closeBar: () => this.setState({ bar: null }),
+      barBack: () => this.setState({ bar: 'home' }),
+      suggestions: [
+        { t: 'Fill the quote from the supplier’s reply', kind: 'fills data', run: () => this.setState(Object.assign(fill([ME]), { bar: null })) },
+        { t: 'Confirm every line where the quote is at or below budget', kind: 'shows a plan first', run: () => this.setState({ bar: 'plan' }) },
+        { t: 'Why is the labour on this line 1’078.56?', kind: 'explains', run: () => this.setState({ bar: 'why' }) },
+        { t: 'Draft a reminder to the supplier for the open lines', kind: 'drafts an email', run: () => this.setState({ bar: null }) },
+        { t: 'Show the same product in other areas', kind: 'finds', run: () => this.setState({ bar: null }) }
+      ],
+      plan: G.map((g) => ({
+        id: g[0], t: 'Quote ' + fmt(g[6], 2) + ', budget ' + fmt(g[4], 2),
+        act: g[6] <= g[4] ? 'fill and confirm' : 'leave in review', fg: g[6] <= g[4] ? '#121212' : '#C2410C'
+      })),
+      planDirect: fmt(372700.12 + planDelta, 2),
+      runPlan: () => this.setState(Object.assign(fill(planIds), { bar: 'done', ran: true })),
+      undoAll: () => this.setState({ q: {}, by: {}, ran: false, bar: bar === 'done' ? 'home' : bar }),
+      fillOne: () => this.setState(fill([ME])),
+      fillAll: () => this.setState(fill(G.map((g) => g[0]))),
+      dismiss: () => this.setState({ dismissed: true }),
+      setUnit: (e) => { const q = Object.assign({}, st.q), by = Object.assign({}, st.by); q[ME] = e.target.value; by[ME] = false; this.setState({ q: q, by: by }); },
+      unitIn: st.q[ME] !== undefined ? st.q[ME] : '',
+      unitNote: mine === null ? 'Empty: budget price 5’400.00 is used' : (byAssist ? 'Filled by Assist from the reply' : 'Supplier quote, typed by you'),
+      unitFg: mine === null ? '#C2410C' : (byAssist ? '#121212' : '#1F4FD8'),
+      unitBorder: byAssist ? 'dashed' : 'solid',
+      material: fmt(me[3] * unit * 1.04, 2), total: fmt(tot(me, unit), 2),
+      totalNote: mine === null ? '' : 'Calculated total on budget price was 23’542.56 (' + (tot(me, unit) - tot(me, me[4]) >= 0 ? '+' : '−') + fmt(tot(me, unit) - tot(me, me[4]), 2) + ').',
+      status: st.ran && byAssist ? 'Confirmed' : (mine === null ? 'Needs supplier quote' : 'Quote entered, confirm'),
+      statusFg: st.ran && byAssist ? '#121212' : (mine === null ? '#C2410C' : '#1F4FD8'),
+      showProposal: mine === null && !st.dismissed, showFilled: byAssist, showDrop: mine === null && st.dismissed,
+      filledText: allFilled ? 'Assist filled all 3 silencer lines from [Supplier reply.pdf]. You can still change each value.' : 'Assist filled this price from [Supplier reply.pdf], p. 1. You can still change it.',
+      confirmLabel: mine === null ? 'Confirm with budget price' : 'Confirm quote',
+      fDirect: fmt(direct, 2), fCost: fmt(cost, 2), fPrice: fmt(Math.ceil(cost / 0.945 / 1000) * 1000, 0),
+      fNote: Math.abs(dDirect) < 0.005 ? '' : (dDirect > 0 ? '+' : '−') + fmt(dDirect, 2) + ' direct from quotes'
+    };
+  }
+}
+</script>
+</body>
+</html>

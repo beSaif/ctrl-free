@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Research and design principles</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F3F4F1}
+a{color:#1F45C4}a:hover{color:#15318F}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F3F4F1; color: #15181C; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 16px; line-height: 1.5">
+<div style="max-width: 1280px; margin: 0 auto; padding: 64px 32px 96px; display: flex; flex-direction: column; gap: 72px">
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+<span style="position: relative; display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 34px; border: 1.5px solid #15181C; border-radius: 8px; box-shadow: 0 3px 0 #15181C; font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: #FFFFFF">ctrl<span style="position: absolute; left: 5px; right: 5px; top: 16px; height: 2px; background: #1F45C4; transform: rotate(-18deg)"></span></span>
+<span style="font-weight: 700; font-size: 20px; letter-spacing: -0.01em">ctrl-free</span>
+<span style="font-size: 14px; color: #4B525A">Design research v1 · sprintd Zurich · Equans case · 9 Oct 2026</span>
+</div>
+<h1 style="margin: 0; font-size: 56px; line-height: 1.05; letter-spacing: -0.02em; font-weight: 600; max-width: 980px">From a 202-page tender to a first price an estimator trusts and can explain.</h1>
+<p style="margin: 0; font-size: 20px; color: #4B525A; max-width: 820px">Today an estimator reads the tender, hunts for products and hours with Ctrl+F, and adds it all up in Excel. ctrl-free does the reading and the arithmetic, shows where every number came from, and leaves the decisions to the person.</p>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px">
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6B727A">The problem today</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div><strong>Hundreds of pages.</strong> Conditions, specs and the bill of quantities (LV) in one German PDF. Oberglatt: pages 67–199 are the price list.</div>
+<div><strong>Data hunting.</strong> Products, supplier prices and install hours sit in separate files and handbooks.</div>
+<div><strong>Manual estimates.</strong> Labour, install time and costs are added up by hand. Experts gather data instead of judging risk.</div>
+</div>
+<div style="font-size: 13px; color: #6B727A">Source: Equans case slides, sprintd case page</div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6B727A">Who we design for</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-weight: 600; font-size: 18px">The estimator</div>
+<div style="color: #4B525A">Knows ventilation inside out, is not a software person. Lives in PDF, Excel and email. Has to defend every number to the bid lead.</div>
+<div style="font-size: 14px; color: #15181C; background: #F3F4F1; border-radius: 8px; padding: 10px 12px">Needs: "Tell me what needs me, show me the page, let me fix it."</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-weight: 600; font-size: 18px">The bid lead</div>
+<div style="color: #4B525A">Sets the margin. Today that is gut feel about the competition.</div>
+<div style="font-size: 14px; color: #15181C; background: #F3F4F1; border-radius: 8px; padding: 10px 12px">Needs: "Give me options and the trade-off, not one magic number."</div>
+</div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6B727A">What the jury rewards</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px"><div style="display: flex; justify-content: space-between; font-size: 15px"><span>Impact: a price they would trust</span><span style="font-family: 'IBM Plex Mono', monospace">30%</span></div><div style="height: 8px; background: #ECEDEA; border-radius: 4px"><div style="width: 100%; height: 8px; background: #15181C; border-radius: 4px"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><div style="display: flex; justify-content: space-between; font-size: 15px"><span>Feasibility: runs on Azure, fits the process</span><span style="font-family: 'IBM Plex Mono', monospace">25%</span></div><div style="height: 8px; background: #ECEDEA; border-radius: 4px"><div style="width: 83%; height: 8px; background: #15181C; border-radius: 4px"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><div style="display: flex; justify-content: space-between; font-size: 15px"><span>Traceability: every number links back</span><span style="font-family: 'IBM Plex Mono', monospace">20%</span></div><div style="height: 8px; background: #ECEDEA; border-radius: 4px"><div style="width: 67%; height: 8px; background: #15181C; border-radius: 4px"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: 600; color: #1F45C4"><span>Design: usable without training</span><span style="font-family: 'IBM Plex Mono', monospace">15%</span></div><div style="height: 8px; background: #E6ECFB; border-radius: 4px"><div style="width: 50%; height: 8px; background: #1F45C4; border-radius: 4px"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><div style="display: flex; justify-content: space-between; font-size: 15px"><span>Creativity</span><span style="font-family: 'IBM Plex Mono', monospace">10%</span></div><div style="height: 8px; background: #ECEDEA; border-radius: 4px"><div style="width: 33%; height: 8px; background: #15181C; border-radius: 4px"></div></div></div>
+</div>
+<div style="font-size: 13px; color: #6B727A">Design also carries impact and traceability: trust is a UI problem.</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6B727A">Market scan</div>
+<h2 style="margin: 0; font-size: 34px; line-height: 1.15; letter-spacing: -0.01em; font-weight: 600">How existing tools look and what we take from them</h2>
+</div>
+<div style="overflow-x: auto; background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px">
+<table style="width: 100%; min-width: 980px; border-collapse: collapse; font-size: 15px">
+<thead>
+<tr style="text-align: left; color: #4B525A; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em">
+<th style="padding: 16px 20px; border-bottom: 1px solid #DCDFDA; width: 18%">Tool</th>
+<th style="padding: 16px 20px; border-bottom: 1px solid #DCDFDA; width: 27%">What it does</th>
+<th style="padding: 16px 20px; border-bottom: 1px solid #DCDFDA; width: 27%">How the UI works</th>
+<th style="padding: 16px 20px; border-bottom: 1px solid #DCDFDA">What we take</th>
+</tr>
+</thead>
+<tbody>
+<tr style="vertical-align: top">
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA"><div style="font-weight: 600">Trimble Accubid</div><div style="font-size: 13px; color: #6B727A">MEP estimating</div></td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">AI takeoff from drawings (symbol counts, auto-routing), plus an AI assistant you ask in plain language about the estimate.</td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Dense estimate grid over a database of items and labour units. Powerful, needs training.</td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Labour hours per item are the trade's language. Keep "hours per piece" visible. Avoid the training-heavy grid as the first screen.</td>
+</tr>
+<tr style="vertical-align: top">
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA"><div style="font-weight: 600">Beam AI</div><div style="font-size: 13px; color: #6B727A">AI takeoff service</div></td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Upload plan PDFs, define scope, get a bill of quantities back. An expert reviews it. Flags changes between addenda.</td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Upload and wait, then a reviewed result with custom Excel export.</td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">"Upload and walk away" start. The result arrives reviewable, not raw.</td>
+</tr>
+<tr style="vertical-align: top">
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA"><div style="font-weight: 600">Kreo</div><div style="font-size: 13px; color: #6B727A">2D takeoff</div></td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">AI measurement of areas and lengths from plans.</td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Results in a familiar Excel-like table.</td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Estimators trust spreadsheets. Offer a table view and an Excel export with live formulas.</td>
+</tr>
+<tr style="vertical-align: top">
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA"><div style="font-weight: 600">BoqCalc</div><div style="font-size: 13px; color: #6B727A">AI BoQ pricing</div></td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Upload a bill of quantities (Excel or PDF), review AI results, adjust risk factors and lines, export to PDF or Excel.</td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Module-by-module flow ending in a bid package.</td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Closest to our journey. Confirms the step order: upload, review, adjust, export.</td>
+</tr>
+<tr style="vertical-align: top">
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA"><div style="font-weight: 600">Tendium, Tenderbolt</div><div style="font-size: 13px; color: #6B727A">Tender analysis</div></td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Read tender documents, pull out requirements, deadlines and risks.</td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Requirement lists and risk flags next to the documents.</td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Show "good to know" from the tender: award points (p. 9), deadline, SIA file required.</td>
+</tr>
+<tr style="vertical-align: top">
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA"><div style="font-weight: 600">Box AI, Docsumo</div><div style="font-size: 13px; color: #6B727A">Document review</div></td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Extract values from documents with a confidence score and a source citation per value.</td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">Click a value and the page scrolls to a box around the source text. Low-confidence values are flagged. Accept or edit inline. Keep the model's guess even when unsure.</td>
+<td style="padding: 18px 20px; border-bottom: 1px solid #ECEDEA">The core of our review screen: list, source page with highlight, one-click "Looks right".</td>
+</tr>
+<tr style="vertical-align: top">
+<td style="padding: 18px 20px"><div style="font-weight: 600">Swiss AVA software</div><div style="font-size: 13px; color: #6B727A">Messerli, Sorba, NEVARIS</div></td>
+<td style="padding: 18px 20px">Tender, award and billing software built on NPK and the SIA interface.</td>
+<td style="padding: 18px 20px">Classic desktop forms with columns Pos., Menge, Einheit, EP, Betrag.</td>
+<td style="padding: 18px 20px">Use the familiar column names in the table view. Export a SIA file, which the Oberglatt tender requires.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px">
+<div style="background: #15181C; color: #F3F4F1; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #A9B0B8">The gap</div>
+<div style="font-size: 22px; line-height: 1.3">Takeoff tools read drawings, AVA tools need experts, review tools don't know prices. Nobody turns a free-text Swiss LV PDF into a first price that explains itself in plain words.</div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6B727A">Market standard we keep</div>
+<div>Side-by-side source and result · Excel export · status per line · totals by system · manual override on everything</div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6B727A">Where we go further</div>
+<div>A "needs you" list sorted by francs at risk · every number as a sentence · supplier request drafted for you · price options instead of one number</div>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6B727A">Design principles</div>
+<h2 style="margin: 0; font-size: 34px; line-height: 1.15; letter-spacing: -0.01em; font-weight: 600">Five rules every screen follows</h2>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px">
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'IBM Plex Mono', monospace; color: #1F45C4; font-size: 14px">01</div><div style="font-weight: 600; font-size: 19px">Ask, don't dump</div><div style="color: #4B525A">Open on "6 things need you", sorted by money at risk. The 200-line table is one click away, never the start.</div></div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'IBM Plex Mono', monospace; color: #1F45C4; font-size: 14px">02</div><div style="font-weight: 600; font-size: 19px">Every number is a sentence</div><div style="color: #4B525A">"5 valves × CHF 74.80, plus 4% waste = CHF 388.96". No formulas without words.</div></div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'IBM Plex Mono', monospace; color: #1F45C4; font-size: 14px">03</div><div style="font-weight: 600; font-size: 19px">One click to the page</div><div style="color: #4B525A">Every line opens its tender page with the source text highlighted. Original German, English underneath.</div></div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'IBM Plex Mono', monospace; color: #1F45C4; font-size: 14px">04</div><div style="font-weight: 600; font-size: 19px">Never fake a price</div><div style="color: #4B525A">Unknown lines get a clear label and a next step: ask a supplier, add the quantity, or leave it out.</div></div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 10px"><div style="font-family: 'IBM Plex Mono', monospace; color: #1F45C4; font-size: 14px">05</div><div style="font-weight: 600; font-size: 19px">You decide</div><div style="color: #4B525A">The tool suggests, you confirm. Any change updates the total at once and is logged with your name.</div></div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6B727A">Plain words</div>
+<h2 style="margin: 0; font-size: 34px; line-height: 1.15; letter-spacing: -0.01em; font-weight: 600">What each line's status says on screen</h2>
+</div>
+<div style="overflow-x: auto; background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px">
+<table style="width: 100%; min-width: 760px; border-collapse: collapse; font-size: 15px">
+<thead>
+<tr style="text-align: left; color: #4B525A; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em">
+<th style="padding: 14px 20px; border-bottom: 1px solid #DCDFDA">On screen</th>
+<th style="padding: 14px 20px; border-bottom: 1px solid #DCDFDA">Data status (README)</th>
+<th style="padding: 14px 20px; border-bottom: 1px solid #DCDFDA">What the estimator does</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #E0F0E7; color: #17623F; font-weight: 600; font-size: 14px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8.5l3 3 7-7"></path></svg>Priced</span></td><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA; font-family: 'IBM Plex Mono', monospace; font-size: 13px">calculated</td><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA">Nothing, or a quick look</td></tr>
+<tr><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #E0F0E7; color: #17623F; font-weight: 600; font-size: 14px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8.5l3 3 7-7"></path></svg>Priced, with a guess</span></td><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA; font-family: 'IBM Plex Mono', monospace; font-size: 13px">assumption_applied</td><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA">Read the guess, confirm or change it</td></tr>
+<tr><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #E3EBF9; color: #1F4FA8; font-weight: 600; font-size: 14px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5"></rect><path d="M2.5 4.5l5.5 4 5.5-4"></path></svg>Ask supplier</span></td><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA; font-family: 'IBM Plex Mono', monospace; font-size: 13px">supplier_quote_required</td><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA">Send the drafted request, paste the reply</td></tr>
+<tr><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #FCEBCF; color: #8A4B00; font-weight: 600; font-size: 14px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3v6"></path><circle cx="8" cy="12.5" r="0.6" fill="currentColor"></circle></svg>Check this</span></td><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA; font-family: 'IBM Plex Mono', monospace; font-size: 13px">review_required</td><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA">Pick the right product or accept ours</td></tr>
+<tr><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #FCEBCF; color: #8A4B00; font-weight: 600; font-size: 14px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3v6"></path><circle cx="8" cy="12.5" r="0.6" fill="currentColor"></circle></svg>Missing info</span></td><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA; font-family: 'IBM Plex Mono', monospace; font-size: 13px">insufficient_information</td><td style="padding: 14px 20px; border-bottom: 1px solid #ECEDEA">Type the missing quantity or ask the client</td></tr>
+<tr><td style="padding: 14px 20px"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #ECEDEA; color: #4B525A; font-weight: 600; font-size: 14px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8h10"></path></svg>Not priced</span></td><td style="padding: 14px 20px; font-family: 'IBM Plex Mono', monospace; font-size: 13px">out_of_scope · non_priceable</td><td style="padding: 14px 20px">Nothing. Shown so nothing silently disappears</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6B727A">Journey</div>
+<h2 style="margin: 0; font-size: 34px; line-height: 1.15; letter-spacing: -0.01em; font-weight: 600">Four steps the estimator always sees at the top</h2>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px">
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 8px"><div style="display: flex; align-items: center; gap: 10px"><span style="display: inline-flex; width: 30px; height: 30px; border-radius: 999px; background: #15181C; color: #FFFFFF; align-items: center; justify-content: center; font-weight: 600">1</span><span style="font-weight: 600; font-size: 19px">Upload</span></div><div style="color: #4B525A">Drop the tender package. We read every page and find the lines to price.</div><div style="font-size: 13px; color: #6B727A">Screens 1–3</div></div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 8px"><div style="display: flex; align-items: center; gap: 10px"><span style="display: inline-flex; width: 30px; height: 30px; border-radius: 999px; background: #15181C; color: #FFFFFF; align-items: center; justify-content: center; font-weight: 600">2</span><span style="font-weight: 600; font-size: 19px">Check</span></div><div style="color: #4B525A">Go through what needs you: pick products, ask suppliers, fill gaps.</div><div style="font-size: 13px; color: #6B727A">Screens 4–6</div></div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 8px"><div style="display: flex; align-items: center; gap: 10px"><span style="display: inline-flex; width: 30px; height: 30px; border-radius: 999px; background: #15181C; color: #FFFFFF; align-items: center; justify-content: center; font-weight: 600">3</span><span style="font-weight: 600; font-size: 19px">Price</span></div><div style="color: #4B525A">Compare three price options by margin and chance to win. Pick one.</div><div style="font-size: 13px; color: #6B727A">Screen 7</div></div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFDA; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 8px"><div style="display: flex; align-items: center; gap: 10px"><span style="display: inline-flex; width: 30px; height: 30px; border-radius: 999px; background: #15181C; color: #FFFFFF; align-items: center; justify-content: center; font-weight: 600">4</span><span style="font-weight: 600; font-size: 19px">Send</span></div><div style="color: #4B525A">Download Excel with sources for SEAP, and the SIA file the client asks for.</div><div style="font-size: 13px; color: #6B727A">Screen 8</div></div>
+</div>
+</section>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

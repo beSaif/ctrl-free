@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lines</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1F4FD8}a:hover{color:#163A9E}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #FFFFFF; color: #121212; font-family: 'Work Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.45; display: flex; flex-direction: column">
+
+<header style="border-bottom: 1px solid #DEDEDB">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 12px 24px 0">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; flex: 1 1 520px; min-width: 0">
+<a href="N01-Tenders.dc.html" style="font-weight: 600; font-size: 15px; color: #121212; text-decoration: none">ctrl-free</a>
+<nav aria-label="Breadcrumb" style="font-size: 14px; color: #5A5A57"><a href="N01-Tenders.dc.html" style="color: #5A5A57">Tenders</a> / <span style="color: #121212; font-weight: 500">Neubau Primarschule Erlenstrasse, Oberglatt · BKP 244 Lüftung</span></nav>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px">
+<span style="font-size: 13px; color: #5A5A57">Due <span style="font-family: 'JetBrains Mono', monospace">22.09.2026 10:00</span> · <span style="color: #121212; font-weight: 600">12 days left</span></span>
+<div role="group" aria-label="Language" style="display: inline-flex; font-size: 13px; color: #5A5A57; gap: 2px"><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #121212; font-weight: 600">EN</button><span aria-hidden="true" style="align-self: center">|</span><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #5A5A57">DE</button></div>
+</div>
+</div>
+<nav aria-label="Tender" style="display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 12px 0">
+<a href="N03-Overview.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Overview</a>
+<a href="N04-Lines.dc.html" aria-current="page" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid #1F4FD8; color: #121212; font-weight: 600; text-decoration: none">Lines <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: {{ navLinesFg }}">{{ navLines }}</span></a>
+<a href="N06-Instructions.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Instructions &amp; norms <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: #C2410C">10 to confirm</span></a>
+<a href="N07-Pricing.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Pricing <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: #C2410C">price not chosen</span></a>
+<a href="N08-Export.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Export</a>
+<a href="N09-Outcome.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Outcome</a>
+</nav>
+</header>
+
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<div style="flex: 1 1 auto; display: flex; flex-direction: column">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding: 10px 24px; border-bottom: 1px solid #DEDEDB">
+<div role="tablist" aria-label="Filter lines" style="display: flex; gap: 4px">
+<sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+<button role="tab" aria-selected="{{ f.on }}" onClick="{{ f.pick }}" style="min-height: 34px; padding: 0 12px; border: 1px solid {{ f.border }}; border-radius: 2px; background: {{ f.bg }}; font: inherit; color: {{ f.fg }}; font-weight: {{ f.w }}; cursor: pointer">{{ f.label }} <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">{{ f.count }}</span></button>
+</sc-for>
+</div>
+<div style="flex: 1 1 200px"></div>
+<span style="font-size: 13px; color: #5A5A57">{{ listHint }}</span>
+<label style="display: flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 10px; border: 1px solid #DEDEDB; border-radius: 2px; flex: 0 1 260px">
+<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#5A5A57" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5l3.5 3.5"></path></svg>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Search</span>
+<input type="search" placeholder="Search lines or pages" style="flex: 1 1 auto; min-width: 0; border: 0; font: inherit; color: #121212; outline: none">
+</label>
+</div>
+
+<main style="flex: 1 1 auto">
+<sc-if value="{{ reviewDone }}" hint-placeholder-val="{{ false }}">
+<div style="max-width: 640px; padding: 48px 24px; display: flex; flex-direction: column; gap: 12px">
+<h1 style="margin: 0; font-size: 24px; font-weight: 600">Review done</h1>
+<p style="margin: 0; color: #5A5A57">Every line that needed you is confirmed. {{ doneNote }}</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; padding-top: 8px">
+<a href="N06-Instructions.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer">Continue to instructions</a>
+<button onClick="{{ showAll }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">See all 22 lines</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ hasRows }}" hint-placeholder-val="{{ true }}">
+<section aria-label="Lines" style="overflow-x: auto">
+<div style="min-width: 1080px">
+<div style="display: grid; grid-template-columns: 56px minmax(0, 1.5fr) 52px 40px minmax(0, 1fr) 92px 104px 84px 200px; gap: 0 12px; padding: 8px 24px; border-bottom: 1px solid #DEDEDB; font-size: 13px; color: #5A5A57; font-weight: 500">
+<span>Page</span><span>Description (tender text)</span><span style="text-align: right">Qty</span><span>Unit</span><span>Product</span><span style="text-align: right">Unit price</span><span style="text-align: right">Total</span><span>Match</span><span>Status</span>
+</div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
+<sc-if value="{{ r.isGroup }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 0 24px; border-bottom: 1px solid #DEDEDB; background: #F6F6F4">
+<span style="font-weight: 600">{{ r.name }}</span>
+<span style="color: #5A5A57">{{ r.meta }}</span>
+<span style="flex: 1 1 auto"></span>
+<span style="font-size: 13px; color: {{ r.reqFg }}">{{ r.req }}</span>
+<span style="font-family: 'JetBrains Mono', monospace; min-width: 110px; text-align: right">{{ r.sub }}</span>
+</div>
+</sc-if>
+<sc-if value="{{ r.isLine }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ r.pick }}" style="display: grid; grid-template-columns: 56px minmax(0, 1.5fr) 52px 40px minmax(0, 1fr) 92px 104px 84px 200px; gap: 0 12px; align-items: center; width: 100%; min-height: 36px; padding: 4px 24px; border: 0; border-bottom: 1px solid #EDEDEA; background: {{ r.bg }}; box-shadow: {{ r.mark }}; font: inherit; color: #121212; text-align: left; cursor: pointer">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #5A5A57">{{ r.page }}</span>
+<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ r.de }}</span>
+<span style="font-family: 'JetBrains Mono', monospace; text-align: right">{{ r.qty }}</span>
+<span style="color: #5A5A57">{{ r.unit }}</span>
+<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #5A5A57">{{ r.product }}</span>
+<span style="font-family: 'JetBrains Mono', monospace; text-align: right">{{ r.unitPrice }}</span>
+<span style="font-family: 'JetBrains Mono', monospace; text-align: right; font-weight: 500">{{ r.total }}</span>
+<span style="font-size: 13px; color: {{ r.matchFg }}; font-weight: {{ r.matchW }}">{{ r.match }}</span>
+<span style="display: flex; align-items: center; gap: 8px; color: {{ r.statusFg }}"><span style="flex: none; width: 8px; height: 8px; background: {{ r.marker }}"></span>{{ r.status }}</span>
+</button>
+</sc-if>
+</sc-for>
+<div style="padding: 10px 24px; font-size: 13px; color: #5A5A57">{{ showing }}</div>
+</div>
+</section>
+</sc-if>
+</main>
+</div>
+</sc-if>
+
+<sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1 1 auto; display: flex; flex-direction: column">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 24px; border-bottom: 1px solid #DEDEDB">
+<button onClick="{{ back }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font: inherit; cursor: pointer; padding: 0 14px 0 10px; color: #121212"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#121212" stroke-width="1.6" aria-hidden="true"><path d="M7.5 2.5L4 6l3.5 3.5"></path></svg>All lines</button>
+<span style="flex: 1 1 auto"></span>
+<span style="font-size: 13px; color: #5A5A57">{{ pos }}</span>
+<button onClick="{{ prev }}" disabled="{{ prevOff }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font: inherit; cursor: pointer; color: {{ prevFg }}">Previous <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 1px 5px; border: 1px solid currentColor; border-radius: 2px; opacity: 0.75">K</span></button>
+<button onClick="{{ next }}" disabled="{{ nextOff }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font: inherit; cursor: pointer; color: {{ nextFg }}">Next <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 1px 5px; border: 1px solid currentColor; border-radius: 2px; opacity: 0.75">J</span></button>
+</div>
+
+<main style="flex: 1 1 auto; display: flex; justify-content: center; padding: 28px 24px 48px">
+<div style="width: 100%; max-width: 1240px; display: flex; flex-direction: column; gap: 24px">
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #5A5A57">{{ sel.id }} · p. {{ sel.page }} · {{ sel.sysName }}</span>
+<h1 style="margin: 0; font-size: 26px; line-height: 1.25; font-weight: 600">{{ sel.de }}</h1>
+<span style="color: #5A5A57">{{ sel.en }}</span>
+<span style="display: flex; align-items: center; gap: 8px; color: {{ sel.statusFg }}"><span style="width: 8px; height: 8px; background: {{ sel.marker }}"></span>{{ sel.status }}</span>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px 40px">
+
+<div style="flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+<section style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Tender PDF · p. {{ sel.page }}</h2>
+<a href="#page" style="font-size: 13px">Open full page</a>
+</div>
+<div style="border: 1px solid #B5B5B0; background: #F6F6F4; padding: 16px">
+<div style="background: #FFFFFF; border: 1px solid #DEDEDB; padding: 16px 18px; display: flex; flex-direction: column">
+<sc-if value="{{ sel.hasQuote }}" hint-placeholder-val="{{ true }}">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.7; display: flex; flex-direction: column">
+<sc-for list="{{ sel.quote }}" as="q" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 0 4px; background: {{ q.bg }}"><span style="white-space: pre-wrap">{{ q.t }}</span><span style="flex: none; font-weight: {{ q.w }}">{{ q.q }}</span></div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ sel.noQuote }}" hint-placeholder-val="{{ false }}">
+<div style="min-height: 120px; display: flex; align-items: center; justify-content: center; border: 1px dashed #B5B5B0; padding: 16px; color: #5A5A57; text-align: center">[Crop of PDF page {{ sel.page }} with the position highlighted]</div>
+</sc-if>
+</div>
+</div>
+<span style="font-size: 13px; color: #5A5A57">The marked row is where the quantity {{ sel.baseQty }} {{ sel.unit }} was read.</span>
+</section>
+
+<sc-if value="{{ sel.hasRule }}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Tender rule for this line</h2>
+<div style="font-size: 13px; color: #5A5A57">{{ sel.ruleType }} · p. {{ sel.rulePage }} · 3.3.4 Technische Vorschriften Lüftung / Klima</div>
+<blockquote style="margin: 0; padding: 10px 12px; border: 1px solid #DEDEDB; font-size: 13.5px; line-height: 1.55">«{{ sel.ruleQuote }}»</blockquote>
+<a href="N06-Instructions.dc.html" style="font-size: 13px">Open in Instructions &amp; norms</a>
+</section>
+</sc-if>
+</div>
+
+<div style="flex: 1 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+<section style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Price for this line</h2>
+<sc-if value="{{ sel.changed }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ reset }}" style="min-height: 32px; padding: 0; border: 0; background: transparent; font: inherit; font-size: 13px; color: #1F4FD8; text-decoration: underline; cursor: pointer">Reset to calculated values</button>
+</sc-if>
+</div>
+<div style="display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 10px 14px; align-items: center">
+<label for="f-qty" style="color: #5A5A57">Quantity</label>
+<span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px"><input id="f-qty" type="number" value="{{ sel.qtyIn }}" onChange="{{ setQty }}" style="min-height: 36px; padding: 0 10px; border: 1px solid #121212; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #121212; background: #FFFFFF; width: 110px"><span>{{ sel.unit }}</span><span style="font-size: 13px; color: {{ sel.qtyFg }}">{{ sel.qtyNote }}</span></span>
+<span style="color: #5A5A57">Product</span>
+<span style="display: flex; flex-direction: column; gap: 2px"><span>{{ sel.product }} · <a href="N05-Change-product.dc.html">Change product</a></span><span style="font-size: 13px; color: {{ sel.matchFg }}">{{ sel.matchLine }}</span></span>
+<label for="f-unit" style="color: #5A5A57">{{ sel.unitLabel }}</label>
+<span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px"><span style="color: #5A5A57">CHF</span><input id="f-unit" type="number" value="{{ sel.unitIn }}" placeholder="{{ sel.unitPh }}" onChange="{{ setUnit }}" style="min-height: 36px; padding: 0 10px; border: 1px solid #121212; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #121212; background: #FFFFFF; width: 130px"><span style="font-size: 13px; color: {{ sel.unitFg }}">{{ sel.unitNote }}</span></span>
+<label for="f-hrs" style="color: #5A5A57">Hours</label>
+<span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px"><input id="f-hrs" type="number" value="{{ sel.hrsIn }}" onChange="{{ setHrs }}" style="min-height: 36px; padding: 0 10px; border: 1px solid #121212; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #121212; background: #FFFFFF; width: 110px"><span>h × CHF {{ sel.rate }} ({{ sel.role }})</span><span style="font-size: 13px; color: {{ sel.hrsFg }}">{{ sel.hrsNote }}</span></span>
+</div>
+<div style="display: flex; flex-direction: column">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid #121212; border-bottom: 1px solid #EDEDEA"><span>Material, incl. 4% waste</span><span style="flex: none; font-family: 'JetBrains Mono', monospace">{{ sel.material }}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid #EDEDEA"><span>Labour</span><span style="flex: none; font-family: 'JetBrains Mono', monospace">{{ sel.labour }}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; font-weight: 600; font-size: 16px"><span>Line total</span><span style="flex: none; font-family: 'JetBrains Mono', monospace">CHF {{ sel.total }}</span></div>
+<span style="font-size: 13px; color: #5A5A57">{{ sel.totalNote }} Hours include the site factors from <a href="N07-Pricing.dc.html">Pricing</a>: ÷ 0.88 site efficiency, × 1.10 ceiling height, × 1.07 school logistics{{ sel.timber }}.</span>
+</div>
+</section>
+
+<sc-if value="{{ sel.isSupplier }}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border: 1px solid {{ sel.supFg }}">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Supplier quote</h2>
+<span style="font-size: 13px; color: {{ sel.sentFg }}">{{ sel.sentState }}</span>
+</div>
+<span>{{ sel.supText }}</span>
+<span style="font-size: 13px; color: #5A5A57">One request covers the same product type across all areas ({{ sel.groupTitle }}):</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{ sel.siblings }}" as="s" hint-placeholder-count="3">
+<button onClick="{{ s.go }}" aria-pressed="{{ s.on }}" style="min-height: 36px; padding: 0 10px; border: 1px solid {{ s.border }}; border-radius: 2px; background: {{ s.bg }}; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #121212; cursor: pointer">{{ s.label }}</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button onClick="{{ toggleMail }}" aria-expanded="{{ mail }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer; min-height: 36px">{{ mailLabel }}</button>
+<button onClick="{{ markSent }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer; min-height: 36px">{{ sel.sentLabel }}</button>
+</div>
+<sc-if value="{{ mail }}" hint-placeholder-val="{{ false }}">
+<div style="border: 1px solid #DEDEDB; display: flex; flex-direction: column">
+<label style="display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: center; padding: 8px 12px; border-bottom: 1px solid #EDEDEA"><span style="color: #5A5A57">To</span><input type="email" placeholder="[Supplier email]" style="min-height: 30px; border: 0; font: inherit; color: #121212; outline: none"></label>
+<div style="display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 8px 12px; border-bottom: 1px solid #EDEDEA"><span style="color: #5A5A57">Subject</span><span>{{ sel.subject }}</span></div>
+<div style="padding: 12px; display: flex; flex-direction: column; gap: 8px; line-height: 1.6">
+<span>Guten Tag</span>
+<span>Für das Projekt Neubau Primarschule Erlenstrasse, Oberglatt (BKP 244 Lüftung) bitten wir Sie um ein Angebot für folgende Positionen:</span>
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; display: flex; flex-direction: column">
+<sc-for list="{{ sel.mailLines }}" as="m" hint-placeholder-count="3">
+<span>{{ m.t }}</span>
+</sc-for>
+</div>
+<sc-if value="{{ sel.hasGroupRule }}" hint-placeholder-val="{{ false }}">
+<span>Anforderungen gemäss Ausschreibung ({{ sel.groupRuleRef }}):</span>
+<blockquote style="margin: 0; padding: 8px 12px; border: 1px solid #EDEDEA; background: #F6F6F4; font-size: 13.5px">«{{ sel.groupRule }}»</blockquote>
+</sc-if>
+<span>Bitte nennen Sie uns Netto-Einheitspreis, Lieferzeit und Gültigkeit. Die Preise gelten als Festpreise bis Bauvollendung.</span>
+<span>Freundliche Grüsse<br>[Your name], Equans</span>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 12px; border-top: 1px solid #EDEDEA">
+<button style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer; min-height: 34px">Copy text</button>
+<button style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer; min-height: 34px">Open in Outlook</button>
+</div>
+</div>
+</sc-if>
+</section>
+</sc-if>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px">
+<sc-if value="{{ sel.open }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ confirm }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer">{{ sel.confirmLabel }} <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 1px 5px; border: 1px solid currentColor; border-radius: 2px; opacity: 0.75">Enter</span></button>
+</sc-if>
+<sc-if value="{{ sel.canFlag }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ flag }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">Flag for review</button>
+<span style="font-size: 13px; color: #5A5A57">Priced from the catalogue. Nothing to do unless something looks wrong.</span>
+</sc-if>
+<sc-if value="{{ sel.done }}" hint-placeholder-val="{{ false }}">
+<span style="display: flex; align-items: center; gap: 8px; font-weight: 500"><span style="width: 8px; height: 8px; background: #121212"></span>Confirmed by you · 10 Sep</span>
+<button onClick="{{ undo }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">Undo</button>
+</sc-if>
+</div>
+</div>
+
+</div>
+</div>
+</main>
+</div>
+</sc-if>
+
+<footer style="position: sticky; bottom: 0; display: flex; flex-wrap: wrap; gap: 8px 28px; padding: 12px 24px; border-top: 1px solid #121212; background: #FFFFFF; font-size: 14px">
+<span>Material <span style="font-family: 'JetBrains Mono', monospace">{{ fMaterial }}</span></span>
+<span>Labour <span style="font-family: 'JetBrains Mono', monospace">{{ fLabour }}</span></span>
+<span>Direct <span style="font-family: 'JetBrains Mono', monospace">{{ fDirect }}</span></span>
+<span>Cost incl. transport and overhead <span style="font-family: 'JetBrains Mono', monospace">{{ fCost }}</span></span>
+<span style="flex: 1 1 auto"></span>
+<span style="color: #5A5A57">{{ fNote }}</span>
+<span style="font-weight: 600">Price at standard margin <span style="font-family: 'JetBrains Mono', monospace">CHF {{ fPrice }}</span></span>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"start":{"editor":"enum","options":["list","detail"],"default":"list"},"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { filter: 'review', u: {}, qty: {}, hrs: {}, done: {}, flag: {}, sent: {}, mail: false };
+  }
+  renderVals() {
+    const fmt = (n, d) => {
+      const parts = Number(n).toFixed(d).split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+      return parts.join('.');
+    };
+    const SYS = { 'LA01': 'LA01 Nebenräume UG', 'LA02': 'LA02 Essenräume EG', 'LA04': 'LA04 Schulzimmer OG' };
+    const L = [
+      ['LV0001', 'LA01', 78, 'Supply air valve, plastic, DN100', 5, 'pc', 'Supply air valve DN100', 74.8, 4.35, 388.96, 417.3, 806.26, 'p'],
+      ['LV0002', 'LA01', 78, 'Supply air valve, plastic, DN125', 6, 'pc', 'Supply air valve DN125', 86.24, 5.22, 538.14, 500.76, 1038.9, 'p'],
+      ['LV0003', 'LA01', 79, 'Exhaust air valve, plastic, DN100', 5, 'pc', 'Exhaust air valve DN100', 72.16, 4.35, 375.23, 417.3, 792.53, 'p'],
+      ['LV0004', 'LA01', 79, 'Fire damper EI90-S with actuator, DN100', 4, 'pc', 'Fire damper EI90-S DN100', 1487.5, 18.49, 6188, 2181.77, 8369.77, 'p'],
+      ['LV0005', 'LA01', 80, 'Manual balancing damper, galvanized, DN125', 6, 'pc', 'Manual balancing damper DN125', 130.5, 11.24, 814.32, 1078.56, 1892.88, 'p'],
+      ['LV0006', 'LA01', 80, 'Rectangular silencer 400×300×1250 mm', 4, 'pc', 'Rect. silencer 400×300×1250', 2600, 11.24, 10816, 1078.56, 11894.56, 's'],
+      ['LV0007', 'LA02', 106, 'VAV controller 500×300 mm, actuator, Modbus', 4, 'pc', 'VAV controller 500×300', 4200, 12.84, 17472, 1515.12, 18987.12, 's'],
+      ['LV0008', 'LA02', 107, 'Constant volume controller DN250', 6, 'pc', 'CAV controller DN250', 862.4, 13.24, 5381.38, 1271.16, 6652.54, 'p'],
+      ['LV0009', 'LA02', 107, 'Compact silencer DN100, 900 mm', 6, 'pc', 'Compact silencer DN100', 369, 16.85, 2302.56, 1617.84, 3920.4, 'p'],
+      ['LV0010', 'LA02', 107, 'Rectangular duct silencer 600×600×1750 mm', 4, 'pc', 'Rect. silencer 600×600×1750', 5400, 11.24, 22464, 1078.56, 23542.56, 's'],
+      ['LV0011', 'LA04', 163, 'Rectangular silencer 540×400×1250 mm', 6, 'pc', 'Rect. silencer 540×400×1250', 3600, 16.85, 22464, 1617.84, 24081.84, 's'],
+      ['LV0012', 'LA04', 163, 'VAV controller 300×200 mm', 6, 'pc', 'VAV controller 300×200', 3100, 19.26, 19344, 2272.68, 21616.68, 's'],
+      ['LV0013', 'LA04', 164, 'VAV controller DN125', 10, 'pc', 'VAV controller DN125', 1276, 32.1, 13270.4, 3787.8, 17058.2, 'p'],
+      ['LV0014', 'LA04', 164, 'VAV controller DN160', 6, 'pc', 'VAV controller DN160', 1425.6, 19.26, 8895.74, 2272.68, 11168.42, 'p'],
+      ['LV0015', 'LA04', 164, 'VAV controller DN200', 12, 'pc', 'VAV controller DN200', 1654.4, 38.52, 20646.91, 4545.36, 25192.27, 'p'],
+      ['LV0016', 'LA04', 169, 'External duct insulation, mineral wool 30 mm', 52, 'm²', '30 mm mineral wool insulation', 50.6, 22.26, 2736.45, 2136.58, 4873.02, 'p'],
+      ['LV0017', 'LA04', 169, 'External duct insulation, mineral wool 60 mm', 12, 'm²', '60 mm mineral wool insulation', 71.76, 6.74, 895.56, 647.14, 1542.7, 'p'],
+      ['LV0018', 'LA04', 169, 'Weatherproof insulation 100 mm, stainless cladding', 440, 'm²', '100 mm ext. insulation with cladding', 245, 500.23, 112112, 59026.55, 171138.55, 's'],
+      ['LV0019', 'LA04', 170, 'EI30 penetration seal, rectangular 300×200 mm', 4, 'pc', 'EI30 rect. fire seal 300×200', 738, 18.38, 3070.08, 2169.38, 5239.46, 'p'],
+      ['LV0020', 'LA04', 170, 'EI30 penetration seal, circular DN160', 8, 'pc', 'EI30 circ. fire seal DN160', 459, 25.21, 3818.88, 2975.14, 6794.02, 'p'],
+      ['LV0021', 'LA04', 171, 'Connection angles, wall or ceiling mounting', 8, 'pc', 'Connection-angle set', 85.5, 9.24, 711.36, 887.5, 1598.86, 'p'],
+      ['LV0022', 'LA04', 171, 'Inspection cover for fire insulation 400×200 mm', 8, 'pc', 'Inspection cover 400×200', 351, 13.38, 2920.32, 1578.25, 4498.57, 'p']
+    ];
+    const Q = (t, q, h) => ({ t: t, q: q || '', bg: h === 2 ? '#FCE9DC' : (h === 1 ? '#F6F6F4' : 'transparent'), w: h === 2 ? '600' : '400' });
+    const QUOTES = {
+      LV0001: [Q('Zuluft - Tellerventil', '', 1), Q('aus Kunststoff, mit Luftmengeneinstellung', '', 1), Q('Fabrikat   z.B Trox Hesco · Typ z.B Z-LVS', '', 1), Q('Grösse     Ø 10 cm', 'Stk 5', 2), Q('           Ø 12.5 cm', 'Stk 6')],
+      LV0002: [Q('Zuluft - Tellerventil', '', 1), Q('aus Kunststoff, mit Luftmengeneinstellung', '', 1), Q('Grösse     Ø 10 cm', 'Stk 5'), Q('           Ø 12.5 cm', 'Stk 6', 2)],
+      LV0003: [Q('Abluft - Tellerventil', '', 1), Q('aus Kunststoff, mit Luftmengeneinstellung', '', 1), Q('Fabrikat   z.B Trox Hesco · Typ z.B LVS', '', 1), Q('Grösse     Ø 10 cm', 'Stk 5', 2)],
+      LV0004: [Q('Brandschutzklappen eingemauert', '', 1), Q('Feuerwiderstandsklasse EI 90-S', '', 1), Q('Klappe Fabrikat z.B. Troxhesco Typ z.B.FKRS-EU', '', 1), Q('Grösse (B x H)   10 Ø cm', 'Stk 4', 2)],
+      LV0011: [Q('Schalldämpfer', '', 1), Q('Typ z.B. MS-F/540x400x1250/2x200/P', '', 1), Q('BxHxL   54 x 40 x 125cm', '', 1), Q('Druckverlust   33Pa', 'Stk 6', 2)],
+      LV0016: [Q('Thermische Aussendämmung 30/5', '', 1), Q('aus 30 mm Mineralwollmatten ( = 80 kg/m3)', '', 1), Q('mit Alu-Folie, gestiftet', 'm2 52', 2)],
+      LV0017: [Q('Thermische Aussendämmung 60/10', '', 1), Q('aus 60 mm Mineralwollplatten ( = 80 kg/m3)', '', 1), Q('mit Alu-Folie, gestiftet', 'm2 12', 2)],
+      LV0018: [Q('Doppelwandige Blechkanäle mit Ummantelung in V2A', '', 1), Q('Thermische Aussendämmung 100/15', '', 1), Q('aus 100 mm Mineralwollplatten ( = 80 kg/m3)', '', 1), Q('mit Alu-Folie, gestiftet', '', 1), Q('Wetterfeste Ummantelung V2A inkl. Abdichtung', 'm2 440', 2)]
+    };
+    const SILENCER = 'Schalldämpfer ausgebildet als Absorptions- oder Relaxationsschalldämpfer mit breitbandiger Dämpfung. Die Schalldämpfung ist über das ganze Frequenzband anzugeben. Kulissen sind aus nicht brennbarem und nicht hygroskopischem Material, abriebfest bis 25 m/s, mit beidseitiger Lochblechabdeckung sowie mit nicht hygrostatischen Folien (ausgenommen trockene Luft) auszuführen.';
+    const RULES = {
+      LV0004: ['Brandschutzklappen', 38, 'Jede Brandschutzklappe muss mit Motorantrieb inkl. elektrischem Endschalter mit Öffnungs- und Schliesskontakt und Thermostat ausgerüstet sein. (Anzeige der beiden Endstellungen auf dem Schaltschrank).'],
+      LV0006: ['Schalldämpfer', 39, SILENCER], LV0009: ['Schalldämpfer', 39, SILENCER], LV0010: ['Schalldämpfer', 39, SILENCER], LV0011: ['Schalldämpfer', 39, SILENCER],
+      LV0021: ['Korrosionsschutz', 40, 'Sämtliches Aufhängematerial muss in verzinkter Ausführung eingerechnet werden (Dübel und Schrauben promatverzinkt).']
+    };
+    const TIMBER = { LV0004: 1, LV0019: 1, LV0020: 1, LV0021: 1 };
+    const DE = {
+      LV0001: 'Zuluft-Tellerventil aus Kunststoff, Ø 10 cm', LV0002: 'Zuluft-Tellerventil aus Kunststoff, Ø 12.5 cm',
+      LV0003: 'Abluft-Tellerventil aus Kunststoff, Ø 10 cm', LV0004: 'Brandschutzklappe eingemauert, EI 90-S, Ø 10 cm',
+      LV0005: 'Drosselklappe verzinkt, Ø 12.5 cm', LV0006: 'Schalldämpfer 400 x 300 x 1250 mm',
+      LV0007: 'Variabler Volumenstromregler eckig 500 x 300 mm, Modbus', LV0008: 'Konstant-Volumenstromregler Ø 25 cm',
+      LV0009: 'Rohrschalldämpfer Ø 10 cm, Länge 90 cm', LV0010: 'Schalldämpfer 600 x 600 x 1750 mm',
+      LV0011: 'Schalldämpfer 540 x 400 x 1250 mm', LV0012: 'Einkanal-Volumenstromregler TVJ-D 300 x 200 mm',
+      LV0013: 'Volumenstromregler variabel, Ø 12.5 cm', LV0014: 'Volumenstromregler variabel, Ø 16 cm',
+      LV0015: 'Volumenstromregler variabel, Ø 20 cm', LV0016: 'Thermische Aussendämmung 30/5, Mineralwollmatten 30 mm',
+      LV0017: 'Thermische Aussendämmung 60/10, Mineralwollplatten 60 mm', LV0018: 'Wetterfeste Ummantelung V2A inkl. Abdichtung, Dämmung 100 mm',
+      LV0019: 'Brandschutzabschottung EI 30, rechteckig 30 x 20 cm', LV0020: 'Brandschutzabschottung EI 30, rund Ø 16 cm',
+      LV0021: 'Anschlusswinkel für Wand- oder Deckenmontage', LV0022: 'Revisionsdeckel für Brandschutzdämmung 40 x 20 cm'
+    };
+    const MATCH = {
+      LV0001: ['Strong', 'Type and size match (Ø 10 cm = DN100)'],
+      LV0005: ['Close', 'Type and size match. The tender does not name the finish, galvanised assumed'],
+      LV0009: ['Close', 'Size matches. The tender names no make, compact type assumed'],
+      LV0021: ['Close', 'Matched to a set. Check what one set contains against the tender text']
+    };
+    const INS = 'Für die Ausführung der Dämmungen gelten die Bestimmungen des SIA und die Richtlinien der IsolSuisse und der örtlichen Vorschriften der Feuerpolizei und Kantonaler Energiefachstellen.';
+    const GROUPS = [
+      { id: 'ins', title: 'Weatherproof insulation', de: 'Wetterfeste Dämmung mit V2A-Ummantelung', ids: ['LV0018'], rule: INS, ruleRef: 'Dämmungen, S. 41' },
+      { id: 'sil', title: 'Silencers', de: 'Schalldämpfer', ids: ['LV0006', 'LV0010', 'LV0011'], rule: SILENCER, ruleRef: 'Schalldämpfer, S. 39' },
+      { id: 'vav', title: 'Air volume controllers', de: 'Volumenstromregler', ids: ['LV0007', 'LV0012'], rule: '', ruleRef: '' }
+    ];
+    const gOf = {};
+    GROUPS.forEach((g) => g.ids.forEach((id) => { gOf[id] = g; }));
+    const st = this.state, filter = st.filter;
+    const startDetail = this.props.start === 'detail';
+    const view = st.view || (startDetail ? 'detail' : 'list');
+    const selId = st.sel === undefined ? (startDetail ? 'LV0018' : null) : st.sel;
+    const pos = (s) => { const v = parseFloat(s); return isFinite(v) && v > 0 ? v : null; };
+    const ORANGE = '#C2410C', BLUE = '#1F4FD8', GREY = '#5A5A57';
+    const lines = L.map((a) => {
+      const id = a[0], sup = a[12] === 's';
+      const rate = Math.abs(a[10] / a[8] - 118) < 2 ? 118 : 96;
+      const q = pos(st.qty[id]), u = pos(st.u[id]), h = pos(st.hrs[id]);
+      const qty = q === null ? a[4] : q;
+      const unitP = u === null ? a[7] : u;
+      const hours = h === null ? a[8] * (qty / a[4]) : h;
+      const changed = q !== null || u !== null || h !== null;
+      const material = changed ? qty * unitP * 1.04 : a[9];
+      const labour = changed ? a[10] * (hours / a[8]) : a[10];
+      const total = changed ? material + labour : a[11];
+      const quoted = sup && u !== null;
+      const done = !!st.done[id], flagged = !!st.flag[id];
+      const open = !done && (sup || flagged);
+      const m = MATCH[id] || ['Strong', 'Type and size match the tender text'];
+      let status = 'Priced', fg = GREY, marker = '#B5B5B0';
+      if (done) { status = sup && !quoted ? 'Confirmed on budget price' : 'Confirmed'; fg = '#121212'; marker = '#121212'; }
+      else if (sup && quoted) { status = 'Quote entered, confirm'; fg = BLUE; marker = BLUE; }
+      else if (sup) { status = 'Needs supplier quote'; fg = ORANGE; marker = ORANGE; }
+      else if (flagged) { status = 'Flagged by you'; fg = ORANGE; marker = ORANGE; }
+      return {
+        id: id, a: a, sys: a[1], sysName: SYS[a[1]], page: String(a[2]), de: DE[id] || a[3], en: a[3],
+        qty: String(Math.round(qty * 100) / 100), baseQty: String(a[4]), unit: a[5], product: a[6],
+        unitN: unitP, hoursN: hours, materialN: material, labourN: labour, totalN: total,
+        unitPrice: fmt(unitP, 2), material: fmt(material, 2), labour: fmt(labour, 2), total: fmt(total, 2),
+        rate: String(rate), role: rate === 118 ? 'lead installer' : 'installer',
+        isSupplier: sup, quoted: quoted, changed: changed, done: done, flagged: flagged, open: open,
+        qSet: q !== null, uSet: u !== null, hSet: h !== null,
+        status: status, statusFg: fg, marker: marker,
+        match: sup ? 'No price' : m[0], matchN: m[0] === 'Close' ? 0 : 1, matchWhy: m[1],
+        matchFg: sup ? GREY : (m[0] === 'Close' ? '#121212' : GREY), matchW: !sup && m[0] === 'Close' ? '600' : '400',
+        quote: QUOTES[id] || [], hasQuote: !!QUOTES[id], noQuote: !QUOTES[id],
+        hasRule: !!RULES[id], ruleType: RULES[id] ? RULES[id][0] : '', rulePage: RULES[id] ? String(RULES[id][1]) : '', ruleQuote: RULES[id] ? RULES[id][2] : '',
+        timber: TIMBER[id] ? ', × 1.08 timber interface' : ''
+      };
+    });
+    const rows = [], queue = [];
+    let shown = 0;
+    const lineRow = (l) => {
+      shown++;
+      queue.push(l);
+      const on = l.id === selId;
+      rows.push(Object.assign({}, l, { isGroup: false, isLine: true, bg: on ? '#EEF2FD' : '#FFFFFF', mark: on ? 'inset 3px 0 0 #1F4FD8' : 'none', pick: () => this.setState({ sel: l.id, view: 'detail', mail: false }) }));
+    };
+    const sum = (ls) => ls.reduce((t, l) => t + l.totalN, 0);
+    const byAmount = (x, y) => y.totalN - x.totalN;
+    const groupRow = (name, meta, req, reqFg, ls) => rows.push({ isGroup: true, isLine: false, name: name, meta: meta, req: req, reqFg: reqFg, sub: fmt(sum(ls), 2) });
+    const openLines = lines.filter((l) => l.open);
+    if (filter === 'review') {
+      const gs = GROUPS.map((g) => ({ g: g, ls: openLines.filter((l) => l.isSupplier && g.ids.indexOf(l.id) >= 0).sort(byAmount) })).filter((x) => x.ls.length);
+      const whole = (g) => sum(lines.filter((l) => g.ids.indexOf(l.id) >= 0));
+      gs.sort((x, y) => whole(y.g) - whole(x.g));
+      gs.forEach((x) => {
+        const sent = !!st.sent[x.g.id];
+        groupRow(x.g.title, x.ls.length + (x.ls.length === 1 ? ' line' : ' lines') + ' · one supplier request', sent ? 'Request sent' : 'Request not sent', sent ? BLUE : ORANGE, x.ls);
+        x.ls.forEach(lineRow);
+      });
+      const fl = openLines.filter((l) => !l.isSupplier).sort(byAmount);
+      if (fl.length) {
+        groupRow('Flagged by you', fl.length + (fl.length === 1 ? ' line' : ' lines'), '', GREY, fl);
+        fl.forEach(lineRow);
+      }
+    } else if (filter === 'priced') {
+      lines.filter((l) => !l.isSupplier).sort((x, y) => x.matchN - y.matchN || y.totalN - x.totalN).forEach(lineRow);
+    } else {
+      ['LA01', 'LA02', 'LA04'].forEach((s) => {
+        const inSys = lines.filter((l) => l.sys === s);
+        groupRow(SYS[s], inSys.length + ' lines', '', GREY, inSys);
+        inSys.forEach(lineRow);
+      });
+    }
+    const openN = openLines.length;
+    const filters = [['review', 'To review', openN], ['priced', 'Priced', 16], ['all', 'All', 22]].map(([k, label, n]) => {
+      const on = filter === k;
+      return { label: label, count: String(n), on: on, border: on ? '#121212' : '#DEDEDB', bg: on ? '#121212' : '#FFFFFF', fg: on ? '#FFFFFF' : '#121212', w: on ? '600' : '400', pick: () => this.setState({ filter: k }) };
+    });
+    const sel = lines.find((l) => l.id === selId) || queue[0] || lines[0];
+    const qi = queue.findIndex((l) => l.id === sel.id);
+    const go = (d) => { const n = queue[qi + d]; if (n) this.setState({ sel: n.id, view: 'detail', mail: false }); };
+    const prevOff = qi <= 0;
+    const nextOff = qi < 0 || qi >= queue.length - 1;
+    const setMap = (k, v) => { const m = Object.assign({}, st[k]); m[sel.id] = v; this.setState({ [k]: m }); };
+    const a = sel.a, g = gOf[sel.id];
+    const sent = g ? !!st.sent[g.id] : false;
+    const diff = sel.totalN - a[11];
+    const byId = {};
+    lines.forEach((l) => { byId[l.id] = l; });
+    const deUnit = (u) => (u === 'pc' ? 'Stk' : (u === 'm²' ? 'm2' : u));
+    const selX = Object.assign({}, sel, {
+      qtyIn: st.qty[sel.id] !== undefined ? st.qty[sel.id] : String(a[4]),
+      qtyNote: sel.qSet ? 'Changed by you. Tender says ' + a[4] : 'Read from p. ' + sel.page,
+      qtyFg: sel.qSet ? BLUE : GREY,
+      unitLabel: sel.isSupplier ? 'Quoted unit price' : 'Unit price',
+      unitIn: st.u[sel.id] !== undefined ? st.u[sel.id] : (sel.isSupplier ? '' : a[7].toFixed(2)),
+      unitPh: sel.isSupplier ? fmt(a[7], 2) : '',
+      unitNote: sel.isSupplier ? (sel.quoted ? 'Supplier quote, typed by you' : 'Empty: budget price ' + fmt(a[7], 2) + ' is used') : (sel.uSet ? 'Changed by you. Catalogue says ' + fmt(a[7], 2) : 'Catalogue price'),
+      unitFg: sel.isSupplier ? (sel.quoted ? BLUE : ORANGE) : (sel.uSet ? BLUE : GREY),
+      hrsIn: st.hrs[sel.id] !== undefined ? st.hrs[sel.id] : sel.hoursN.toFixed(2),
+      hrsNote: sel.hSet ? 'Changed by you. Install rule gives ' + fmt(a[8], 2) : 'From the install rule',
+      hrsFg: sel.hSet ? BLUE : GREY,
+      matchLine: sel.isSupplier ? 'Catalogue has only a budget figure for this product' : sel.match + ' match: ' + sel.matchWhy,
+      totalNote: sel.changed ? 'Calculated total was ' + fmt(a[11], 2) + ' (' + (diff >= 0 ? '+' : '−') + fmt(Math.abs(diff), 2) + ').' : '',
+      canFlag: !sel.isSupplier && !sel.flagged && !sel.done,
+      confirmLabel: sel.isSupplier ? (sel.quoted ? 'Confirm quote' : 'Confirm with budget price') : 'Confirm line',
+      supFg: sel.done ? '#DEDEDB' : (sel.quoted ? BLUE : ORANGE),
+      supText: sel.quoted ? 'Quote entered: CHF ' + sel.unitPrice + ' per ' + sel.unit + ' instead of the budget ' + fmt(a[7], 2) + '. Confirm to use it.' : 'The budget price of CHF ' + fmt(a[7], 2) + ' per ' + sel.unit + ' is in use. Type the quoted unit price above when the supplier answers.',
+      sentState: sent ? 'Request sent · You · 10 Sep' : 'Request not sent', sentFg: sent ? BLUE : ORANGE,
+      sentLabel: sent ? 'Mark as not sent' : 'Mark request as sent',
+      groupTitle: g ? g.title : '',
+      siblings: g ? g.ids.map((id) => ({ label: id + ' · p. ' + byId[id].page + ' · ' + byId[id].qty + ' ' + byId[id].unit, on: id === sel.id, border: id === sel.id ? '#121212' : '#DEDEDB', bg: id === sel.id ? '#F6F6F4' : '#FFFFFF', go: () => this.setState({ sel: id, view: 'detail' }) })) : [],
+      subject: g ? 'Preisanfrage ' + g.de + ' (' + g.ids.length + (g.ids.length === 1 ? ' Position' : ' Positionen') + ') · Primarschule Erlenstrasse Oberglatt, BKP 244' : '',
+      mailLines: g ? g.ids.map((id) => ({ t: id + ' · Seite ' + byId[id].page + ' · ' + byId[id].de + ' · ' + byId[id].qty + ' ' + deUnit(byId[id].unit) })) : [],
+      hasGroupRule: !!(g && g.rule), groupRule: g ? g.rule : '', groupRuleRef: g ? g.ruleRef : ''
+    });
+    const material = lines.reduce((t, l) => t + l.materialN, 0);
+    const labour = lines.reduce((t, l) => t + l.labourN, 0);
+    const dDirect = lines.reduce((t, l) => t + (l.changed ? l.totalN - l.a[11] : 0), 0);
+    const direct = 372700.12 + dDirect;
+    const cost = direct * 1.025 * 1.085;
+    const price = Math.ceil(cost / 0.945 / 1000) * 1000;
+    const posLabel = filter === 'review' ? 'To review' : (filter === 'priced' ? 'Priced' : 'Line');
+    return {
+      rows: rows, filters: filters, sel: selX,
+      showList: view === 'list', showDetail: view === 'detail',
+      reviewDone: filter === 'review' && openN === 0, hasRows: rows.length > 0,
+      doneNote: 'Direct cost is now CHF ' + fmt(direct, 2) + '.',
+      showAll: () => this.setState({ filter: 'all' }),
+      listHint: filter === 'review' ? 'Same product type together, largest amount first' : (filter === 'priced' ? 'Least sure match first' : 'Tender order, by area'),
+      showing: 'Showing ' + shown + ' of 22 lines. Amounts in CHF, before transport, overhead and margin. Click a line to open it.',
+      navLines: openN ? openN + ' to review' : 'done', navLinesFg: openN ? ORANGE : GREY,
+      pos: qi < 0 ? '' : posLabel + ' ' + (qi + 1) + ' of ' + queue.length,
+      prevOff: prevOff, nextOff: nextOff, prevFg: prevOff ? '#B5B5B0' : '#121212', nextFg: nextOff ? '#B5B5B0' : '#121212',
+      prev: () => go(-1), next: () => go(1),
+      back: () => this.setState({ view: 'list', sel: sel.id }),
+      setQty: (e) => setMap('qty', e.target.value),
+      setUnit: (e) => setMap('u', e.target.value),
+      setHrs: (e) => setMap('hrs', e.target.value),
+      reset: () => {
+        const q = Object.assign({}, st.qty), u = Object.assign({}, st.u), h = Object.assign({}, st.hrs);
+        delete q[sel.id]; delete u[sel.id]; delete h[sel.id];
+        this.setState({ qty: q, u: u, hrs: h });
+      },
+      confirm: () => {
+        const done = Object.assign({}, st.done);
+        done[sel.id] = true;
+        if (filter !== 'review') { this.setState({ done: done }); return; }
+        const rest = queue.filter((l) => l.id !== sel.id);
+        const nxt = queue[qi + 1] || rest[0];
+        if (nxt) this.setState({ done: done, sel: nxt.id, mail: false });
+        else this.setState({ done: done, view: 'list' });
+      },
+      undo: () => { const done = Object.assign({}, st.done); delete done[sel.id]; this.setState({ done: done }); },
+      flag: () => setMap('flag', true),
+      mail: st.mail, mailLabel: st.mail ? 'Hide request email' : 'Show request email',
+      toggleMail: () => this.setState({ mail: !st.mail }),
+      markSent: () => { if (!g) return; const s = Object.assign({}, st.sent); s[g.id] = !s[g.id]; this.setState({ sent: s }); },
+      fMaterial: fmt(material, 2), fLabour: fmt(labour, 2), fDirect: fmt(direct, 2), fCost: fmt(cost, 2), fPrice: fmt(price, 0),
+      fNote: Math.abs(dDirect) < 0.005 ? 'offer price not chosen yet' : (dDirect > 0 ? '+' : '−') + fmt(Math.abs(dDirect), 2) + ' direct from your changes'
+    };
+  }
+}
+</script>
+</body>
+</html>

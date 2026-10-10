@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tenders</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1F4FD8}a:hover{color:#163A9E}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #FFFFFF; color: #121212; font-family: 'Work Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.45; display: flex; flex-direction: column">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; padding: 0 24px; border-bottom: 1px solid #DEDEDB">
+<a href="N01-Tenders.dc.html" style="font-weight: 600; font-size: 15px; color: #121212; text-decoration: none; padding: 14px 0">ctrl-free</a>
+<nav aria-label="Main" style="display: flex; gap: 4px; flex: 1 1 auto">
+<a href="N01-Tenders.dc.html" aria-current="page" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 12px; border-bottom: 2px solid #1F4FD8; color: #121212; font-weight: 600; text-decoration: none">Tenders</a>
+<a href="N10-Results-history.dc.html" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Results history</a>
+<a href="N11-Reference-data.dc.html" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Reference data</a>
+</nav>
+<div role="group" aria-label="Language" style="display: inline-flex; font-size: 13px; color: #5A5A57; gap: 2px"><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #121212; font-weight: 600">EN</button><span aria-hidden="true" style="align-self: center">|</span><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #5A5A57">DE</button></div>
+</header>
+
+<main style="padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px">
+<h1 style="margin: 0; font-size: 20px; font-weight: 600">Tenders</h1>
+<div role="tablist" aria-label="Filter tenders" style="display: flex; gap: 4px">
+<button role="tab" aria-selected="true" style="min-height: 34px; padding: 0 12px; border: 0; border-bottom: 2px solid #1F4FD8; background: transparent; font: inherit; color: #121212; font-weight: 600">In calculation <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">2</span></button>
+<button role="tab" aria-selected="false" style="min-height: 34px; padding: 0 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; font: inherit; color: #5A5A57">Submitted <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">0</span></button>
+<button role="tab" aria-selected="false" style="min-height: 34px; padding: 0 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; font: inherit; color: #5A5A57">Awarded <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">0</span></button>
+</div>
+<div style="flex: 1 1 auto"></div>
+<label style="display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 10px; border: 1px solid #DEDEDB; border-radius: 2px; flex: 0 1 260px">
+<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#5A5A57" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5l3.5 3.5"></path></svg>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Search tenders</span>
+<input type="search" placeholder="Search tenders" style="flex: 1 1 auto; min-width: 0; border: 0; font: inherit; color: #121212; outline: none">
+</label>
+<a href="N02-New-tender.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer; min-height: 36px">New tender</a>
+</div>
+
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 1080px; border-collapse: collapse">
+<thead>
+<tr style="text-align: left; font-size: 13px; color: #5A5A57">
+<th style="padding: 8px 12px 8px 0; border-bottom: 1px solid #121212; font-weight: 500">Tender</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Client</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Trade</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Submission due</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Open work</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500; text-align: right">Offer price (CHF)</th>
+<th style="padding: 8px 0 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Updated</th>
+</tr>
+</thead>
+<tbody>
+<tr style="vertical-align: top">
+<td style="padding: 12px 12px 12px 0; border-bottom: 1px solid #EDEDEA"><a href="N03-Overview.dc.html" style="color: #121212; font-weight: 600">Neubau Primarschule Erlenstrasse, Oberglatt</a><div style="font-size: 13px; color: #5A5A57">BKP_244_LV_Lueftung_260804.pdf · 202 pages</div></td>
+<td style="padding: 12px; border-bottom: 1px solid #EDEDEA">Gemeinde Oberglatt</td>
+<td style="padding: 12px; border-bottom: 1px solid #EDEDEA">BKP 244 Lüftung</td>
+<td style="padding: 12px; border-bottom: 1px solid #EDEDEA"><span style="font-weight: 600">12 days left</span><div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #5A5A57">22.09.2026 10:00</div></td>
+<td style="padding: 12px; border-bottom: 1px solid #EDEDEA"><span style="display: flex; align-items: center; gap: 8px; color: #C2410C"><span style="width: 8px; height: 8px; background: #C2410C"></span>6 lines to review</span><div style="font-size: 13px; color: #5A5A57; padding-left: 16px">10 instructions to confirm · price not chosen</div></td>
+<td style="padding: 12px; border-bottom: 1px solid #EDEDEA; text-align: right"><span style="font-family: 'JetBrains Mono', monospace; font-weight: 500">439'000</span><div style="font-size: 13px; color: #5A5A57">standard margin, not final</div></td>
+<td style="padding: 12px 0 12px 12px; border-bottom: 1px solid #EDEDEA; color: #5A5A57">10 Sep · You</td>
+</tr>
+<tr style="vertical-align: top">
+<td style="padding: 12px 12px 12px 0; border-bottom: 1px solid #EDEDEA"><span style="font-weight: 600; color: #5A5A57">[Tender that was just uploaded]</span><div style="font-size: 13px; color: #5A5A57">[File name] · 202 pages</div></td>
+<td style="padding: 12px; border-bottom: 1px solid #EDEDEA; color: #5A5A57">[Client]</td>
+<td style="padding: 12px; border-bottom: 1px solid #EDEDEA; color: #5A5A57">[Trade]</td>
+<td style="padding: 12px; border-bottom: 1px solid #EDEDEA; color: #5A5A57">[Read from the tender]</td>
+<td style="padding: 12px; border-bottom: 1px solid #EDEDEA"><span style="display: flex; align-items: center; gap: 8px"><span style="width: 8px; height: 8px; background: #1F4FD8"></span>Reading p. 112 of 202</span><div role="img" aria-label="Reading progress 55%" style="margin: 6px 0 0 16px; width: 180px; height: 4px; background: #EDEDEA"><div style="width: 55%; height: 4px; background: #1F4FD8"></div></div></td>
+<td style="padding: 12px; border-bottom: 1px solid #EDEDEA; text-align: right; color: #5A5A57">after reading</td>
+<td style="padding: 12px 0 12px 12px; border-bottom: 1px solid #EDEDEA; color: #5A5A57">just now · You</td>
+</tr>
+</tbody>
+</table>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

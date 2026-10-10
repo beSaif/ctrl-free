@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Reference data</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1F4FD8}a:hover{color:#163A9E}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #FFFFFF; color: #121212; font-family: 'Work Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.45; display: flex; flex-direction: column">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; padding: 0 24px; border-bottom: 1px solid #DEDEDB">
+<a href="N01-Tenders.dc.html" style="font-weight: 600; font-size: 15px; color: #121212; text-decoration: none; padding: 14px 0">ctrl-free</a>
+<nav aria-label="Main" style="display: flex; gap: 4px; flex: 1 1 auto">
+<a href="N01-Tenders.dc.html" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Tenders</a>
+<a href="N10-Results-history.dc.html" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Results history</a>
+<a href="N11-Reference-data.dc.html" aria-current="page" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 12px; border-bottom: 2px solid #1F4FD8; color: #121212; font-weight: 600; text-decoration: none">Reference data</a>
+</nav>
+<div role="group" aria-label="Language" style="display: inline-flex; font-size: 13px; color: #5A5A57; gap: 2px"><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #121212; font-weight: 600">EN</button><span aria-hidden="true" style="align-self: center">|</span><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #5A5A57">DE</button></div>
+</header>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding: 16px 24px 10px; border-bottom: 1px solid #DEDEDB">
+<h1 style="margin: 0; font-size: 20px; font-weight: 600">Reference data</h1>
+<div role="tablist" aria-label="Reference data" style="display: flex; gap: 4px">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+<button role="tab" aria-selected="{{ t.on }}" onClick="{{ t.pick }}" style="min-height: 34px; padding: 0 12px; border: 1px solid {{ t.border }}; border-radius: 2px; background: {{ t.bg }}; font: inherit; color: {{ t.fg }}; font-weight: {{ t.w }}; cursor: pointer">{{ t.label }} <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">{{ t.count }}</span></button>
+</sc-for>
+</div>
+<span style="flex: 1 1 auto"></span>
+<span style="font-size: 13px; color: #5A5A57">{{ source }}</span>
+<button style="min-height: 34px; padding: 0 14px; border: 1px solid #121212; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit">Import new version</button>
+</div>
+
+<main style="padding: 0 24px 32px">
+<sc-if value="{{ isCat }}" hint-placeholder-val="{{ true }}">
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 1000px; border-collapse: collapse">
+<thead><tr style="text-align: left; font-size: 13px; color: #5A5A57">
+<th style="padding: 8px 12px 8px 0; border-bottom: 1px solid #121212; font-weight: 500">Product</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Description</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Category</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Model</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Unit</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500; text-align: right">Net cost</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Install rule</th>
+<th style="padding: 8px 0 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Price source</th>
+</tr></thead>
+<tbody>
+<sc-for list="{{ cat }}" as="c" hint-placeholder-count="12">
+<tr>
+<td style="padding: 7px 12px 7px 0; border-bottom: 1px solid #EDEDEA; font-family: 'JetBrains Mono', monospace; font-size: 13px">{{ c.id }}</td>
+<td style="padding: 7px 12px; border-bottom: 1px solid #EDEDEA">{{ c.desc }}</td>
+<td style="padding: 7px 12px; border-bottom: 1px solid #EDEDEA; color: #5A5A57">{{ c.cat }}</td>
+<td style="padding: 7px 12px; border-bottom: 1px solid #EDEDEA; color: #5A5A57">{{ c.model }}</td>
+<td style="padding: 7px 12px; border-bottom: 1px solid #EDEDEA">{{ c.unit }}</td>
+<td style="padding: 7px 12px; border-bottom: 1px solid #EDEDEA; text-align: right; font-family: 'JetBrains Mono', monospace">{{ c.net }}</td>
+<td style="padding: 7px 12px; border-bottom: 1px solid #EDEDEA; font-family: 'JetBrains Mono', monospace; font-size: 13px">{{ c.rule }}</td>
+<td style="padding: 7px 0 7px 12px; border-bottom: 1px solid #EDEDEA"><span style="display: inline-flex; align-items: center; gap: 8px; color: {{ c.srcFg }}"><span style="width: 8px; height: 8px; background: {{ c.srcFg }}"></span>{{ c.src }}</span></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+<p style="margin: 10px 0 0; font-size: 13px; color: #5A5A57">Showing 19 of 56 products. "Supplier package" prices are budget figures: lines using them go to Review until a quote is entered.</p>
+</sc-if>
+
+<sc-if value="{{ isRules }}" hint-placeholder-val="{{ false }}">
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 960px; border-collapse: collapse">
+<thead><tr style="text-align: left; font-size: 13px; color: #5A5A57">
+<th style="padding: 8px 12px 8px 0; border-bottom: 1px solid #121212; font-weight: 500">Rule</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Work</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Unit</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500; text-align: right">Hours per unit</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Role</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #121212; font-weight: 500; text-align: right">CHF / h</th>
+<th style="padding: 8px 0 8px 12px; border-bottom: 1px solid #121212; font-weight: 500">Site factors applied</th>
+</tr></thead>
+<tbody>
+<sc-for list="{{ rules }}" as="r" hint-placeholder-count="12">
+<tr>
+<td style="padding: 7px 12px 7px 0; border-bottom: 1px solid #EDEDEA; font-family: 'JetBrains Mono', monospace; font-size: 13px">{{ r.code }}</td>
+<td style="padding: 7px 12px; border-bottom: 1px solid #EDEDEA">{{ r.work }}</td>
+<td style="padding: 7px 12px; border-bottom: 1px solid #EDEDEA">{{ r.unit }}</td>
+<td style="padding: 7px 12px; border-bottom: 1px solid #EDEDEA; text-align: right; font-family: 'JetBrains Mono', monospace">{{ r.hours }}</td>
+<td style="padding: 7px 12px; border-bottom: 1px solid #EDEDEA; color: #5A5A57">{{ r.role }}</td>
+<td style="padding: 7px 12px; border-bottom: 1px solid #EDEDEA; text-align: right; font-family: 'JetBrains Mono', monospace">{{ r.rate }}</td>
+<td style="padding: 7px 0 7px 12px; border-bottom: 1px solid #EDEDEA; color: #5A5A57; font-size: 13px">{{ r.factors }}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</sc-if>
+
+<sc-if value="{{ isParams }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-wrap: wrap; gap: 32px; padding-top: 16px">
+<sc-for list="{{ params }}" as="g" hint-placeholder-count="4">
+<section style="flex: 1 1 300px; display: flex; flex-direction: column">
+<h2 style="margin: 0 0 6px; font-size: 15px; font-weight: 600">{{ g.title }}</h2>
+<sc-for list="{{ g.rows }}" as="p" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid #EDEDEA"><span>{{ p.k }}</span><span style="font-family: 'JetBrains Mono', monospace">{{ p.v }}</span></div>
+</sc-for>
+</section>
+</sc-for>
+</div>
+<p style="margin: 14px 0 0; font-size: 13px; color: #5A5A57">These are the starting values for every new tender. In a tender, the estimator overrides them under Pricing; overrides apply to that tender only.</p>
+</sc-if>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'cat' };
+  }
+  renderVals() {
+    const C = [
+      ['P-AIR-001', 'Supply air valve DN100', 'Air terminal', 'DemoVent DV-Z-100', 'pc', '74.80', 'DIFFUSER', 0],
+      ['P-AIR-002', 'Supply air valve DN125', 'Air terminal', 'DemoVent DV-Z-125', 'pc', '86.24', 'DIFFUSER', 0],
+      ['P-AIR-003', 'Exhaust air valve DN100', 'Air terminal', 'DemoVent DV-A-100', 'pc', '72.16', 'DIFFUSER', 0],
+      ['P-FIR-001', 'Fire damper EI90-S DN100 with actuator', 'Fire protection', 'DemoFire FD-EI90-100', 'pc', '1’487.50', 'FIRE_DAMPER', 0],
+      ['P-DAM-001', 'Manual balancing damper DN125', 'Damper', 'DemoDuct MD-125', 'pc', '130.50', 'DAMPER', 0],
+      ['P-SIL-001', 'Rectangular silencer 400x300x1250 mm', 'Silencer', 'DemoAcoustic RS-400-300-1250', 'pc', '2’600.00', 'SILENCER', 1],
+      ['P-VAV-001', 'VAV controller 500x300 mm with actuator', 'Flow controller', 'DemoControl VAV-500-300', 'pc', '4’200.00', 'VAV_CONTROLLER', 1],
+      ['P-CAV-001', 'Constant volume controller DN250', 'Flow controller', 'DemoControl CAV-250', 'pc', '862.40', 'CAV_CONTROLLER', 0],
+      ['P-SIL-002', 'Compact silencer DN100 length 900 mm', 'Silencer', 'DemoAcoustic CS-100-900', 'pc', '369.00', 'SILENCER', 0],
+      ['P-SIL-003', 'Rectangular silencer 600x600x1750 mm', 'Silencer', 'DemoAcoustic RS-600-600-1750', 'pc', '5’400.00', 'SILENCER', 1],
+      ['P-SIL-004', 'Rectangular silencer 540x400x1250 mm', 'Silencer', 'DemoAcoustic RS-540-400-1250', 'pc', '3’600.00', 'SILENCER', 1],
+      ['P-VAV-002', 'VAV controller 300x200 mm', 'Flow controller', 'DemoControl VAV-300-200', 'pc', '3’100.00', 'VAV_CONTROLLER', 1],
+      ['P-VAV-003', 'Variable volume controller DN125', 'Flow controller', 'DemoControl VAV-125', 'pc', '1’276.00', 'VAV_CONTROLLER', 0],
+      ['P-VAV-004', 'Variable volume controller DN160', 'Flow controller', 'DemoControl VAV-160', 'pc', '1’425.60', 'VAV_CONTROLLER', 0],
+      ['P-VAV-005', 'Variable volume controller DN200', 'Flow controller', 'DemoControl VAV-200', 'pc', '1’654.40', 'VAV_CONTROLLER', 0],
+      ['P-INS-001', '30 mm mineral wool duct insulation', 'Insulation', 'DemoInsulation MW-30', 'm²', '50.60', 'INSULATION_30', 0],
+      ['P-INS-002', '60 mm mineral wool duct insulation', 'Insulation', 'DemoInsulation MW-60', 'm²', '71.76', 'INSULATION_60', 0],
+      ['P-INS-003', '100 mm external insulation with cladding', 'Insulation', 'DemoInsulation MW-100-SS', 'm²', '245.00', 'INSULATION_EXT', 1],
+      ['P-FIR-002', 'EI30 rectangular fire seal 300x200 mm', 'Fire protection', 'DemoFire FS-R-300-200', 'pc', '738.00', 'FIRE_SEAL_RECT', 0]
+    ];
+    const cat = C.map((c) => ({ id: c[0], desc: c[1], cat: c[2], model: c[3], unit: c[4], net: c[5], rule: c[6], src: c[7] ? 'Supplier package' : 'Catalogue', srcFg: c[7] ? '#C2410C' : '#5A5A57' }));
+    const F = { s: '÷ site efficiency', m: 'height', l: 'logistics', t: 'timber' };
+    const R = [
+      ['DIFFUSER', 'Install grille or air valve', 'pc', '0.65', 'installer', 96, 'sml'],
+      ['DAMPER', 'Install manual/control damper', 'pc', '1.40', 'installer', 96, 'sml'],
+      ['FIRE_DAMPER', 'Install fire damper incl. normal interfaces', 'pc', '3.20', 'lead installer', 118, 'smtl'],
+      ['SILENCER', 'Install silencer', 'pc', '2.10', 'installer', 96, 'sml'],
+      ['VAV_CONTROLLER', 'Install variable air-volume controller', 'pc', '2.40', 'lead installer', 118, 'sml'],
+      ['CAV_CONTROLLER', 'Install constant air-volume controller', 'pc', '1.65', 'installer', 96, 'sml'],
+      ['DUCT_ROUND', 'Install circular galvanized duct', 'm', '0.38', 'installer', 96, 'sml'],
+      ['DUCT_RECT', 'Install rectangular galvanized duct', 'm²', '0.42', 'installer', 96, 'sml'],
+      ['DUCT_FITTING', 'Install duct fitting/transition', 'pc', '0.75', 'installer', 96, 'sml'],
+      ['INSULATION_30', 'Install 30 mm duct insulation', 'm²', '0.32', 'installer', 96, 'sml'],
+      ['INSULATION_60', 'Install 60 mm duct insulation', 'm²', '0.42', 'installer', 96, 'sml'],
+      ['INSULATION_EXT', 'Install weatherproof insulation with cladding', 'm²', '0.85', 'lead installer', 118, 'sml'],
+      ['FIRE_SEAL_RECT', 'Install certified rectangular fire seal', 'pc', '3.50', 'lead installer', 118, 'stl'],
+      ['FIRE_SEAL_ROUND', 'Install certified circular fire seal', 'pc', '2.40', 'lead installer', 118, 'stl'],
+      ['FIRE_ACCESS', 'Install inspection cover in fire insulation', 'pc', '1.25', 'lead installer', 118, 'sml'],
+      ['SUPPORT_SET', 'Install support/connection-angle set', 'pc', '0.80', 'installer', 96, 'stml'],
+      ['AHU_LARGE', 'Place and mechanically assemble large AHU', 'pc', '34.00', 'lead installer', 118, 'slm'],
+      ['FAN', 'Install fan unit', 'pc', '5.00', 'installer', 96, 'slm'],
+      ['CONTROL_POINT', 'Install field control device', 'pc', '1.10', 'commissioning specialist', 155, 'sl'],
+      ['COMMISSION_SYSTEM', 'Test, balance and commission one system', 'system', '16.00', 'commissioning specialist', 155, 'sl'],
+      ['DOCUMENT_SYSTEM', 'Prepare system documentation/as-built handover', 'system', '10.00', 'project engineer', 145, 'l'],
+      ['UNKNOWN', 'Manual review only', 'pc', '0.00', 'manual', 0, '']
+    ];
+    const rules = R.map((r) => ({ code: r[0], work: r[1], unit: r[2], hours: r[3], role: r[4], rate: r[5] ? String(r[5]) : '—', factors: r[6].split('').map((k) => F[k]).join(' · ') || '—' }));
+    const params = [
+      { title: 'Bid model', rows: [{ k: 'Reference win chance', v: '0.55' }, { k: 'Competition', v: '−0.05' }, { k: 'Strategic appetite', v: '+0.05' }, { k: 'Price sensitivity per 1%', v: '0.05' }, { k: 'Win chance range', v: '0.05–0.95' }, { k: 'Option margins', v: '2.5 / 4.0 / 6.5%' }] },
+      { title: 'Commercial', rows: [{ k: 'Overhead', v: '8.5%' }, { k: 'Standard margin', v: '5.5%' }, { k: 'Round price to', v: 'CHF 1’000' }] },
+      { title: 'Allowances', rows: [{ k: 'Material waste', v: '4.0%' }, { k: 'Small material', v: '3.5%' }, { k: 'Transport and equipment', v: '2.5%' }, { k: 'Supplier package contingency', v: '3.0%' }] },
+      { title: 'Site factors (school)', rows: [{ k: 'Site efficiency', v: '0.88' }, { k: 'School logistics', v: '× 1.07' }, { k: 'Mounting height, school', v: '× 1.10' }, { k: 'Mounting height, sports hall', v: '× 1.25' }, { k: 'Timber interface', v: '× 1.08' }] },
+      { title: 'Project costs', rows: [{ k: 'Engineering', v: '420 h × 145' }, { k: 'Commissioning', v: '160 h × 155' }, { k: 'Hygiene inspection', v: '18’000' }, { k: 'Documentation', v: '12’000' }] }
+    ];
+    const T = [['cat', 'Product catalogue', '56', 'catalog.csv · imported 9 Sep'], ['rules', 'Install rules', '22', 'productivity.csv · imported 9 Sep'], ['params', 'Default parameters', '', 'project_parameters.json · School · imported 9 Sep']];
+    const tab = this.state.tab;
+    const tabs = T.map(([k, label, n]) => {
+      const on = tab === k;
+      return { label: label, count: n, on: on, border: on ? '#121212' : '#DEDEDB', bg: on ? '#121212' : '#FFFFFF', fg: on ? '#FFFFFF' : '#121212', w: on ? '600' : '400', pick: () => this.setState({ tab: k }) };
+    });
+    return {
+      tabs: tabs, cat: cat, rules: rules, params: params,
+      isCat: tab === 'cat', isRules: tab === 'rules', isParams: tab === 'params',
+      source: T.find((t) => t[0] === tab)[3]
+    };
+  }
+}
+</script>
+</body>
+</html>

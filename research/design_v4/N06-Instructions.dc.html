@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Instructions and norms</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1F4FD8}a:hover{color:#163A9E}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #FFFFFF; color: #121212; font-family: 'Work Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.45; display: flex; flex-direction: column">
+
+<header style="border-bottom: 1px solid #DEDEDB">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 12px 24px 0">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; flex: 1 1 520px; min-width: 0">
+<a href="N01-Tenders.dc.html" style="font-weight: 600; font-size: 15px; color: #121212; text-decoration: none">ctrl-free</a>
+<nav aria-label="Breadcrumb" style="font-size: 14px; color: #5A5A57"><a href="N01-Tenders.dc.html" style="color: #5A5A57">Tenders</a> / <span style="color: #121212; font-weight: 500">Neubau Primarschule Erlenstrasse, Oberglatt · BKP 244 Lüftung</span></nav>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px">
+<span style="font-size: 13px; color: #5A5A57">Due <span style="font-family: 'JetBrains Mono', monospace">22.09.2026 10:00</span> · <span style="color: #121212; font-weight: 600">12 days left</span></span>
+<div role="group" aria-label="Language" style="display: inline-flex; font-size: 13px; color: #5A5A57; gap: 2px"><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #121212; font-weight: 600">EN</button><span aria-hidden="true" style="align-self: center">|</span><button style="min-height: 32px; padding: 0 6px; border: 0; background: transparent; font: inherit; color: #5A5A57">DE</button></div>
+</div>
+</div>
+<nav aria-label="Tender" style="display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 12px 0">
+<a href="N03-Overview.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Overview</a>
+<a href="N04-Lines.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Lines <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: #C2410C">6 to review</span></a>
+<a href="N06-Instructions.dc.html" aria-current="page" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid #1F4FD8; color: #121212; font-weight: 600; text-decoration: none">Instructions &amp; norms <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: {{ navInstrFg }}">{{ navInstr }}</span></a>
+<a href="N07-Pricing.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Pricing <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 400; color: #C2410C">price not chosen</span></a>
+<a href="N08-Export.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Export</a>
+<a href="N09-Outcome.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-bottom: 2px solid transparent; color: #5A5A57; text-decoration: none">Outcome</a>
+</nav>
+</header>
+
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<div style="flex: 1 1 auto; display: flex; flex-direction: column">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding: 10px 24px; border-bottom: 1px solid #DEDEDB">
+<div role="tablist" aria-label="Filter instructions" style="display: flex; flex-wrap: wrap; gap: 4px">
+<sc-for list="{{ tabs }}" as="f" hint-placeholder-count="6">
+<button role="tab" aria-selected="{{ f.on }}" onClick="{{ f.pick }}" style="min-height: 34px; padding: 0 12px; border: 1px solid {{ f.border }}; border-radius: 2px; background: {{ f.bg }}; font: inherit; color: {{ f.fg }}; font-weight: {{ f.w }}; cursor: pointer">{{ f.label }} <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">{{ f.count }}</span></button>
+</sc-for>
+</div>
+<div style="flex: 1 1 200px"></div>
+<span style="font-size: 13px; color: #5A5A57">Quoted from 3.3.4 Technische Vorschriften Lüftung / Klima, PDF pp. 36 to 41</span>
+</div>
+
+<main style="flex: 1 1 auto">
+<sc-if value="{{ allDone }}" hint-placeholder-val="{{ false }}">
+<div style="max-width: 640px; padding: 48px 24px; display: flex; flex-direction: column; gap: 12px">
+<h1 style="margin: 0; font-size: 24px; font-weight: 600">All instructions handled</h1>
+<p style="margin: 0; color: #5A5A57">{{ doneNote }}</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; padding-top: 8px">
+<a href="N07-Pricing.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer">Continue to pricing</a>
+<button onClick="{{ showAll }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">See all 12</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ hasRows }}" hint-placeholder-val="{{ true }}">
+<section aria-label="Instructions" style="overflow-x: auto">
+<div style="min-width: 900px">
+<div style="display: grid; grid-template-columns: 200px minmax(0, 1fr) 56px 170px 110px 110px; gap: 0 14px; padding: 8px 24px; border-bottom: 1px solid #DEDEDB; font-size: 13px; color: #5A5A57; font-weight: 500">
+<span>Type (tender's margin label)</span><span>Requirement (tender text)</span><span>Page</span><span>Applies to</span><span>Impact</span><span>Confirmed</span>
+</div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
+<button onClick="{{ r.pick }}" style="display: grid; grid-template-columns: 200px minmax(0, 1fr) 56px 170px 110px 110px; gap: 0 14px; align-items: center; width: 100%; min-height: 40px; padding: 6px 24px; border: 0; border-bottom: 1px solid #EDEDEA; background: {{ r.bg }}; box-shadow: {{ r.mark }}; font: inherit; color: #121212; text-align: left; cursor: pointer">
+<span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ r.type }}</span>
+<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #3A3A38">{{ r.full }}</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #5A5A57">{{ r.page }}</span>
+<span style="color: #5A5A57; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ r.applies }}</span>
+<span style="display: flex; align-items: center; gap: 8px"><span style="flex: none; width: 8px; height: 8px; background: {{ r.marker }}"></span>{{ r.impact }}</span>
+<span style="color: {{ r.confFg }}">{{ r.confirmed }}</span>
+</button>
+</sc-for>
+<div style="padding: 10px 24px; font-size: 13px; color: #5A5A57">The requirement text is copied from the tender and cannot be edited. Click a row to open it.</div>
+</div>
+</section>
+</sc-if>
+</main>
+</div>
+</sc-if>
+
+<sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1 1 auto; display: flex; flex-direction: column">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 24px; border-bottom: 1px solid #DEDEDB">
+<button onClick="{{ back }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font: inherit; cursor: pointer; padding: 0 14px 0 10px; color: #121212"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#121212" stroke-width="1.6" aria-hidden="true"><path d="M7.5 2.5L4 6l3.5 3.5"></path></svg>All instructions</button>
+<span style="flex: 1 1 auto"></span>
+<span style="font-size: 13px; color: #5A5A57">{{ pos }}</span>
+<button onClick="{{ prev }}" disabled="{{ prevOff }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font: inherit; cursor: pointer; color: {{ prevFg }}">Previous <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 1px 5px; border: 1px solid currentColor; border-radius: 2px; opacity: 0.75">K</span></button>
+<button onClick="{{ next }}" disabled="{{ nextOff }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; font: inherit; cursor: pointer; color: {{ nextFg }}">Next <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 1px 5px; border: 1px solid currentColor; border-radius: 2px; opacity: 0.75">J</span></button>
+</div>
+
+<main style="flex: 1 1 auto; display: flex; justify-content: center; padding: 28px 24px 48px">
+<div style="width: 100%; max-width: 1240px; display: flex; flex-direction: column; gap: 24px">
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #5A5A57">p. {{ sel.page }} · 3.3.4 Technische Vorschriften Lüftung / Klima</span>
+<h1 style="margin: 0; font-size: 26px; line-height: 1.25; font-weight: 600">{{ sel.type }}</h1>
+<span style="display: flex; align-items: center; gap: 8px; color: {{ sel.stateFg }}"><span style="width: 8px; height: 8px; background: {{ sel.stateFg }}"></span>{{ sel.state }}</span>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px 40px">
+
+<div style="flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+<section style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Tender PDF · p. {{ sel.page }}</h2>
+<a href="#page" style="font-size: 13px">Open full page</a>
+</div>
+<div style="border: 1px solid #B5B5B0; background: #F6F6F4; padding: 16px">
+<div style="background: #FFFFFF; border: 1px solid #DEDEDB; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12.5px; font-weight: 600">{{ sel.type }}</span>
+<span style="font-size: 14px; line-height: 1.65; background: #FCE9DC; padding: 2px 4px">{{ sel.full }}</span>
+</div>
+</div>
+<span style="font-size: 13px; color: #5A5A57">Copied word for word from p. {{ sel.page }}, margin label "{{ sel.type }}".</span>
+</section>
+<section style="display: flex; flex-direction: column; gap: 6px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Machine translation</h2>
+<p style="margin: 0; color: #3A3A38; line-height: 1.6">{{ sel.en }}</p>
+</section>
+</div>
+
+<div style="flex: 1 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">{{ sel.sugTitle }}</h2>
+<div style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px 14px; padding: 12px 0; border-top: 1px solid #121212; border-bottom: 1px solid #DEDEDB">
+<span style="color: #5A5A57">Impact</span><span style="display: flex; align-items: center; gap: 8px; font-weight: 500"><span style="width: 8px; height: 8px; background: {{ sel.marker }}"></span>{{ sel.impact }}</span>
+<span style="color: #5A5A57">Applies to</span><span>{{ sel.appliesLong }} <a href="N04-Lines.dc.html">Open lines</a></span>
+<span style="color: #5A5A57">Why</span><span>{{ sel.why }}</span>
+</div>
+</section>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px">
+<sc-if value="{{ sel.open }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ confirm }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 2px; background: #1F4FD8; color: #FFFFFF; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer">Confirm <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 1px 5px; border: 1px solid currentColor; border-radius: 2px; opacity: 0.75">Enter</span></button>
+<button style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">Change impact or lines</button>
+<button onClick="{{ notRelevant }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">Not relevant</button>
+</sc-if>
+<sc-if value="{{ sel.closed }}" hint-placeholder-val="{{ false }}">
+<span style="display: flex; align-items: center; gap: 8px; font-weight: 500"><span style="width: 8px; height: 8px; background: #121212"></span>{{ sel.closedText }}</span>
+<button onClick="{{ undo }}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid #DEDEDB; border-radius: 2px; background: #FFFFFF; color: #121212; font: inherit; text-decoration: none; cursor: pointer">Undo</button>
+</sc-if>
+</div>
+<span style="font-size: 13px; color: #5A5A57">"Impact" and "Applies to" are suggestions until you confirm them.</span>
+</div>
+
+</div>
+</div>
+</main>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"start":{"editor":"enum","options":["list","detail"],"default":"list"},"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'open', ok: { 3: true, 8: true }, nr: {} };
+  }
+  renderVals() {
+    const IMP = { cost: ['Adds cost', '#C2410C'], risk: ['Risk', '#121212'], scope: ['Scope', '#8A8A86'], covered: ['Covered', '#1F4FD8'] };
+    const D = [
+      { type: 'Varianten', page: 36, kind: 'scope', applies: 'Product changes', appliesLong: 'Any line where you pick a product other than the one specified.', why: 'Swapping a product turns that line into a variant that needs a written reason.',
+        full: 'Sofern mit der Submission andere als vorgeschriebene Materialien offeriert werden, hat dies als Variante mit einer entsprechenden Begründung - z.B. technisch besser oder gleichwertig, preisgünstiger oder ähnliches - zu geschehen.',
+        en: 'If materials other than those specified are offered with the submission, this must be done as a variant with a corresponding justification, e.g. technically better or equivalent, cheaper or similar.' },
+      { type: 'Filter', page: 36, kind: 'cost', applies: 'Air-handling units', appliesLong: 'Air-handling units (none in the 22-line demo set).', why: 'A spare set of filter cells must be supplied, so it belongs in the price.',
+        full: 'Je 1 Satz Ersatzfilterzellen gleicher Qualität ist mitzuliefern.',
+        en: 'One set of spare filter cells of the same quality must be supplied with each unit.' },
+      { type: 'Kanäle', page: 37, kind: 'scope', applies: 'Duct lines', appliesLong: 'All duct lines (section B Kanäle).', why: 'Sets the construction standard for ducts; no price change if the catalogue items follow it.',
+        full: 'Kanäle: Generell gemäss Suissetec-Kanalnormen, keine Schiebefälze.',
+        en: 'Ducts: generally according to Suissetec duct standards, no slide-in seams.' },
+      { type: 'Brandschutzklappen', page: 38, kind: 'covered', applies: 'LV0004', appliesLong: 'LV0004 Fire damper EI90-S DN100, 4 pc, p. 79.', why: 'The matched product already includes the actuator and limit switch, so nothing extra to price.',
+        full: 'Die Brandschutzklappen müssen von der zuständigen Feuerpolizei sowie der kantonalen Gebäudeversicherung anerkannt sein. Kontrollöffnung unmittelbar vor oder nach der Klappe. Die Stellung der Klappe muss von aussen ersichtlich sein. Jede Brandschutzklappe muss mit Motorantrieb inkl. elektrischem Endschalter mit Öffnungs- und Schliesskontakt und Thermostat ausgerüstet sein. (Anzeige der beiden Endstellungen auf dem Schaltschrank).',
+        en: 'Fire dampers must be approved by the responsible fire police and the cantonal building insurance. Inspection opening directly before or after the damper. The damper position must be visible from outside. Every fire damper must have a motor drive incl. electrical limit switch with open and close contacts and a thermostat (both end positions shown on the control cabinet).' },
+      { type: 'Flexible Rohre', page: 38, kind: 'scope', applies: 'Flexible duct lines', appliesLong: 'Flexible pipe and hose lines (none in the 22-line demo set).', why: 'Limits which flexible ducts may be offered.',
+        full: 'Es dürfen nur flexible Rohre bzw. Schläuche aus nichtbrennbaren Materialien verwendet werden. Der Anschluss ist aus einer mit mindestens 5mm breiten Bride aus Nitrostahl auszuführen.',
+        en: 'Only flexible pipes or hoses made of non-combustible materials may be used. The connection must be made with a clamp band of nitro steel at least 5 mm wide.' },
+      { type: 'Dichtheitsanforderungen', page: 38, kind: 'risk', applies: 'Whole installation', appliesLong: 'The whole duct installation.', why: 'Re-tests and their follow-up costs are ours if the first leak test fails.',
+        full: 'Die erste Messung wird dem Unternehmer, sofern die Forderungen erfüllt werden, vergütet. Nachprüfungen und allfällige Folgekosten hat der Unternehmer zu tragen.',
+        en: 'The first measurement is paid to the contractor if the requirements are met. Re-tests and any follow-up costs are borne by the contractor.' },
+      { type: 'Schalldämpfer', page: 39, kind: 'scope', applies: 'LV0006, 0009, 0010, 0011', appliesLong: 'LV0006 (p. 80), LV0009 and LV0010 (p. 107), LV0011 (p. 163).', why: 'Three of these lines need a supplier quote. The text is attached to that request so the quote matches the spec.',
+        full: 'Schalldämpfer ausgebildet als Absorptions- oder Relaxationsschalldämpfer mit breitbandiger Dämpfung. Die Schalldämpfung ist über das ganze Frequenzband anzugeben. Kulissen sind aus nicht brennbarem und nicht hygroskopischem Material, abriebfest bis 25 m/s, mit beidseitiger Lochblechabdeckung sowie mit nicht hygrostatischen Folien (ausgenommen trockene Luft) auszuführen.',
+        en: 'Silencers designed as absorption or relaxation silencers with broadband attenuation. The attenuation must be stated over the whole frequency band. Splitters must be made of non-combustible, non-hygroscopic material, abrasion-resistant up to 25 m/s, with perforated sheet covers on both sides and with non-hygrostatic foils (except for dry air).' },
+      { type: 'Korrosionsschutz', page: 40, kind: 'cost', applies: 'LV0021', appliesLong: 'LV0021 Connection angles, 8 pc, p. 171, and all hangers.', why: 'The tender says galvanised hanging material must be "eingerechnet": included in our price.',
+        full: 'Sämtliches Aufhängematerial muss in verzinkter Ausführung eingerechnet werden (Dübel und Schrauben promatverzinkt).',
+        en: 'All hanging material must be included in galvanised design (anchors and screws Promat-galvanised).' },
+      { type: 'Transport', page: 40, kind: 'covered', applies: 'Whole installation', appliesLong: 'The whole installation.', why: 'Covered by the 2.5% transport and equipment allowance in Pricing.',
+        full: 'Der Transport der Materialien zum Montageort ist Sache des Unternehmers.',
+        en: 'Transporting materials to the installation site is the contractor’s responsibility.' },
+      { type: 'Mauer- und Deckendurchführungen', page: 41, kind: 'scope', applies: 'p. 169 Kanal-Aussendämmung', appliesLong: 'p. 169 "Kanal-Aussendämmung aus 15 mm Mineralwollplatten", 30 m² (outside the demo set).', why: 'Describes how wall and ceiling penetrations are wrapped; matches the 15 mm line on p. 169.',
+        full: 'Mauer- und Deckendurchführungen (exkl. Brandschutzklappen) müssen mit mindestens 15 mm Mineralwollplatten 80 kg/m3 umwickelt werden, die beidseits 10 cm vorstehen.',
+        en: 'Wall and ceiling penetrations (excl. fire dampers) must be wrapped with at least 15 mm mineral wool boards of 80 kg/m³ projecting 10 cm on both sides.' },
+      { type: 'Überschreiten der geforderten Werte', page: 41, kind: 'risk', applies: 'Whole installation', appliesLong: 'The whole installation, at commissioning.', why: 'If noise limits are exceeded, all costs of the fix are ours. Relevant to silencer choice.',
+        full: 'Ergeben sich bei der Inbetriebnahme Überschreitungen der geforderten Geräuschpegel, werden dem Unternehmer sämtliche im Zusammenhang mit der Änderung entstehenden Kosten belastet.',
+        en: 'If the required noise levels are exceeded at commissioning, all costs arising from the change are charged to the contractor.' },
+      { type: 'Innendämmungen', page: 41, kind: 'scope', applies: 'Insulation lines', appliesLong: 'Insulation lines LV0016–LV0018 (all external insulation).', why: 'Internal insulation is not allowed; the matched products are all external.',
+        full: 'Innendämmungen sind nicht zugelassen.',
+        en: 'Internal insulation is not permitted.' }
+    ];
+    const st = this.state, tab = st.tab, ok = st.ok, nr = st.nr;
+    const startDetail = this.props.start === 'detail';
+    const view = st.view || (startDetail ? 'detail' : 'list');
+    const selI = st.sel === undefined ? (startDetail ? 6 : null) : st.sel;
+    const isOpen = (i) => !ok[i] && !nr[i];
+    const all = D.map((d, i) => Object.assign({}, d, {
+      i: i, page: String(d.page), impact: IMP[d.kind][0], marker: IMP[d.kind][1], open: isOpen(i),
+      confirmed: ok[i] ? 'Yes · You' : (nr[i] ? 'Not relevant' : 'To confirm'), confFg: isOpen(i) ? '#C2410C' : '#5A5A57'
+    }));
+    const queue = all.filter((r) => (tab === 'open' ? r.open : (tab === 'all' || r.kind === tab)));
+    const rows = queue.map((r) => Object.assign({}, r, {
+      bg: r.i === selI ? '#EEF2FD' : '#FFFFFF', mark: r.i === selI ? 'inset 3px 0 0 #1F4FD8' : 'none',
+      pick: () => this.setState({ sel: r.i, view: 'detail' })
+    }));
+    const openN = all.filter((r) => r.open).length;
+    const count = (k) => String(k === 'open' ? openN : all.filter((d) => k === 'all' || d.kind === k).length);
+    const tabs = [['open', 'To confirm'], ['all', 'All'], ['cost', 'Adds cost'], ['risk', 'Risk'], ['scope', 'Scope'], ['covered', 'Covered']].map(([k, label]) => {
+      const on = tab === k;
+      return { label: label, count: count(k), on: on, border: on ? '#121212' : '#DEDEDB', bg: on ? '#121212' : '#FFFFFF', fg: on ? '#FFFFFF' : '#121212', w: on ? '600' : '400', pick: () => this.setState({ tab: k }) };
+    });
+    const s = all[selI === null ? -1 : selI] || queue[0] || all[0];
+    const qi = queue.findIndex((r) => r.i === s.i);
+    const go = (d) => { const n = queue[qi + d]; if (n) this.setState({ sel: n.i, view: 'detail' }); };
+    const prevOff = qi <= 0, nextOff = qi < 0 || qi >= queue.length - 1;
+    const close = (key) => {
+      const m = Object.assign({}, st[key]);
+      m[s.i] = true;
+      if (tab !== 'open') { this.setState({ [key]: m }); return; }
+      const rest = queue.filter((r) => r.i !== s.i);
+      const nxt = queue[qi + 1] || rest[0];
+      if (nxt) this.setState({ [key]: m, sel: nxt.i });
+      else this.setState({ [key]: m, view: 'list' });
+    };
+    const sel = Object.assign({}, s, {
+      sugTitle: s.open ? 'Suggested by ctrl-free' : 'Your decision',
+      state: s.open ? 'To confirm' : (ok[s.i] ? 'Confirmed by you' : 'Marked not relevant'),
+      stateFg: s.open ? '#C2410C' : '#121212',
+      closed: !s.open, closedText: ok[s.i] ? 'Confirmed by you · 10 Sep' : 'Marked not relevant · 10 Sep'
+    });
+    const nOk = all.filter((r) => ok[r.i]).length, nNr = all.filter((r) => nr[r.i]).length;
+    return {
+      rows: rows, tabs: tabs, sel: sel,
+      showList: view === 'list', showDetail: view === 'detail',
+      allDone: tab === 'open' && openN === 0, hasRows: rows.length > 0,
+      doneNote: nOk + ' confirmed' + (nNr ? ', ' + nNr + ' marked not relevant' : '') + '. They go into the pricing report.',
+      showAll: () => this.setState({ tab: 'all' }),
+      navInstr: openN ? openN + ' to confirm' : 'done', navInstrFg: openN ? '#C2410C' : '#5A5A57',
+      pos: qi < 0 ? '' : (tab === 'open' ? 'To confirm ' : 'Instruction ') + (qi + 1) + ' of ' + queue.length,
+      prevOff: prevOff, nextOff: nextOff, prevFg: prevOff ? '#B5B5B0' : '#121212', nextFg: nextOff ? '#B5B5B0' : '#121212',
+      prev: () => go(-1), next: () => go(1),
+      back: () => this.setState({ view: 'list', sel: s.i }),
+      confirm: () => close('ok'),
+      notRelevant: () => close('nr'),
+      undo: () => {
+        const o = Object.assign({}, ok), n = Object.assign({}, nr);
+        delete o[s.i]; delete n[s.i];
+        this.setState({ ok: o, nr: n });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

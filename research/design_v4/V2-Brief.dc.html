@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>v2 brief</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1A1A1A}a:hover{color:#555555}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #FFFFFF; color: #1A1A1A; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+<div style="max-width: 1280px; margin: 0 auto; padding: 48px 32px 80px; display: flex; flex-direction: column; gap: 48px">
+
+<section style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 2px solid #1A1A1A">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #555555">ctrl-free · design v2 · 10 Oct 2026</div>
+<h1 style="margin: 0; font-size: 32px; line-height: 1.2; font-weight: 600">Five directions for a professional tender pricing tool</h1>
+</div>
+<div style="font-size: 14px; color: #555555; max-width: 420px">Each direction below has three screens: the main working screen, instructions and norms, and price and outcome. Same data, same rules, different flow and look.</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">What changed from v1</h2>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 900px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left"><th style="padding: 8px 12px 8px 0; border-bottom: 1px solid #1A1A1A; width: 32%; font-weight: 600">Your feedback</th><th style="padding: 8px 12px; border-bottom: 1px solid #1A1A1A; font-weight: 600">What v2 does</th></tr></thead>
+<tbody>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E2E2DE">No stepper flow</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Removed. Each direction opens straight into a working screen. Navigation is a menu, tabs, a sidebar or function keys, depending on the direction.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E2E2DE">Looks like iLovePDF, not a business tool</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">No drop-zone home screen. The tender is a project with an attached PDF. Screens use real product chrome (menus, breadcrumbs, column headers, status bars) and dense tables.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E2E2DE">"We will price with" doesn't fit</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Catalogue, install rules and project parameters are reference data: a metadata line, a menu or a navigation module. They are never a card on the start screen.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E2E2DE">Loading shown too much</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">No loading screen. Processing appears as one status line or as content filling in progressively. The tender is read once, and the estimator can start reviewing the first lines while the rest is parsed.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E2E2DE">"Good to know" not needed</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Dropped as a section. We keep only the two conditions that change the bid: the award points (price 60 of 100, p. 9) on the price screen, and the SIA file requirement at export. Everything else lives with the general instructions.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E2E2DE">Add general instructions and norms, grounded</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">New screen in every direction. 12 requirements quoted word for word from section 3.3.4 Technische Vorschriften (PDF pp. 36–41), each with its page, a labelled machine translation, and suggested links and cost impact that the estimator confirms.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E2E2DE">"Needs you" → "Review"</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Renamed everywhere.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E2E2DE">Competitor count is unknown before bidding</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">The competitor question is gone. The win chance uses the starting model from the project parameters, labelled as such. New: "Record outcome" after the award (winner, winning price, our rank, number of bidders from the award notice). Every recorded result trains the model for the next tender. The past-results table starts empty.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0">Looks AI-generated</td><td style="padding: 10px 12px">Rules below. Every direction has its own committed typeface and palette.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section style="display: flex; flex-wrap: wrap; gap: 40px">
+<div style="flex: 1 1 520px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">Why v1 looked AI-generated</h2>
+<p style="margin: 0; color: #555555">Generated UIs fall back to the statistical average of every SaaS screen. Designers now call this "AI slop". The tells named most often:</p>
+<ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px">
+<li>The same large border radius on cards, buttons, inputs and badges, so hierarchy disappears.</li>
+<li>Decorative gradients and glows, usually purple to blue.</li>
+<li>Uppercase, wide-tracked eyebrow labels above every heading.</li>
+<li>Pills and "Live"/"New" badges on things that are neither.</li>
+<li>Thick coloured left borders on rounded cards.</li>
+<li>The default font (Inter) and generic copy.</li>
+</ol>
+<p style="margin: 0; color: #555555">v1 had 1, 3, 4 and a soft card-on-card layout. The fix is not a better prompt but a committed system: explicit tokens, a radius scale by role, one meaningful accent, real product chrome and specific copy.</p>
+</div>
+<div style="flex: 1 1 520px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">Rules all five follow</h2>
+<table style="width: 100%; border-collapse: collapse; font-size: 14px">
+<tbody>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE; width: 34%; font-weight: 600">Radius</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">0–4 px, by role. Tables and panes are square.</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">Colour</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">Neutral ground plus one accent that means something (Review, or primary action). No gradients.</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">Type</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">13–14 px data, tabular numerals, sentence case. No Inter, Roboto or Arial.</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">Status</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">Text with a small marker, not pills.</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; font-weight: 600">Chrome</td><td style="padding: 8px 0">Menus, breadcrumbs, column headers, keyboard hints, status bar.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">How instructions stay grounded</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 32px">
+<div style="flex: 1 1 520px; display: flex; flex-direction: column; gap: 8px">
+<div style="padding: 16px; border: 1px solid #1A1A1A; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 13px"><span style="font-weight: 600">Flexible Rohre</span><span style="font-family: 'IBM Plex Mono', monospace">p. 38 · 3.3.4 Technische Vorschriften Lüftung / Klima</span></div>
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.6">«Es dürfen nur flexible Rohre bzw. Schläuche aus nichtbrennbaren Materialien verwendet werden. Der Anschluss ist aus einer mit mindestens 5mm breiten Bride aus Nitrostahl auszuführen.»</div>
+<div style="font-size: 13px; color: #555555">Machine translation: Only flexible pipes or hoses made of non-combustible materials may be used. The connection must use a band clamp of nitro steel at least 5 mm wide.</div>
+</div>
+</div>
+<ol style="flex: 1 1 420px; margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px">
+<li><strong>Quote, don't summarise.</strong> The German text is copied exactly from the PDF text layer, never generated.</li>
+<li><strong>Always cite.</strong> PDF page and section on every item, with a link that opens the page with the text highlighted.</li>
+<li><strong>Type = the tender's own label.</strong> The topic word comes from the tender's right margin (Flexible Rohre, Filter, Brandschutzklappen), not from the model.</li>
+<li><strong>Label everything machine-made.</strong> Translation, applies-to links and cost impact are marked as suggestions until the estimator confirms them.</li>
+<li><strong>Check before showing.</strong> If a quote can't be found again in the PDF text, it is not shown.</li>
+</ol>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">The five directions</h2>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 1100px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left">
+<th style="padding: 8px 12px 8px 0; border-bottom: 1px solid #1A1A1A; font-weight: 600">Direction</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #1A1A1A; font-weight: 600">Flow</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #1A1A1A; font-weight: 600">Look</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #1A1A1A; font-weight: 600">Best for</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #1A1A1A; font-weight: 600">Trade-off</th>
+</tr></thead>
+<tbody>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">A · Ledger</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">One workbench: LV table by system, inspector on the right, Review as a filter, totals bar.</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Swiss spreadsheet. White, hairlines, Geist, signal red.</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Estimators who live in Excel and AVA software.</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Dense from the first second, so less guided.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">B · Dossier</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">The tender page is the workspace. Prices written into the empty columns, margin notes explain each one.</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Editorial paper. Serif document, pen-blue fill-ins.</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Traceability: the source and the number are on the same sheet.</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Hard to see totals across 130 LV pages.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">C · Bid desk</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Multi-panel cockpit with function keys: positions, review, instructions, price, outcome on one screen.</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Dark terminal. Mono numbers, amber accent.</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">The bid lead and the pitch demo.</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Intimidating for a first-time user.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">D · Review queue</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Triage inbox: lines, instructions and supplier items as one queue, one decision at a time, keyboard first.</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">Calm neutral. Schibsted Grotesk, green action, ochre review.</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">"Usable without training": the tool asks, you answer.</td><td style="padding: 10px 12px; border-bottom: 1px solid #E2E2DE">The full LV is one click away rather than in view.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 10px 12px 10px 0; font-weight: 600">E · Suite</td><td style="padding: 10px 12px">Enterprise object page: tender header with key figures, tabs for positions, instructions, suppliers, price, outcome.</td><td style="padding: 10px 12px">Corporate. Public Sans, shell bar, blue actions.</td><td style="padding: 10px 12px">Feasibility story: looks like it already belongs next to Equans' ERP.</td><td style="padding: 10px 12px">The most familiar, so the least memorable in a pitch.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

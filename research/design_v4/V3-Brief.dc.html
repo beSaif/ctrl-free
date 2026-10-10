@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>v3 brief</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1A1A1A}a:hover{color:#555555}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #FFFFFF; color: #1A1A1A; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+<div style="max-width: 1280px; margin: 0 auto; padding: 48px 32px 72px; display: flex; flex-direction: column; gap: 40px">
+
+<section style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 2px solid #1A1A1A">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #555555">ctrl-free · design v3 · 10 Oct 2026</div>
+<h1 style="margin: 0; font-size: 32px; line-height: 1.2; font-weight: 600">Simpler screens, and the estimator owns the assumptions</h1>
+</div>
+<div style="font-size: 14px; color: #555555; max-width: 440px">Five styles from the simplest (1) to about as rich as v2 (5). Every row ends with a live assumptions screen.</div>
+</section>
+
+<section style="display: flex; flex-wrap: wrap; gap: 40px">
+<div style="flex: 1 1 520px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">What changed from v2</h2>
+<table style="width: 100%; border-collapse: collapse; font-size: 14px">
+<tbody>
+<tr style="vertical-align: top"><td style="padding: 9px 12px 9px 0; border-bottom: 1px solid #E2E2DE; width: 38%; font-weight: 600">Too much at once</td><td style="padding: 9px 0; border-bottom: 1px solid #E2E2DE">One main task per screen. Details open on demand. No cockpits, tickers or function-key bars.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 9px 12px 9px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">Estimator's judgment</td><td style="padding: 9px 0; border-bottom: 1px solid #E2E2DE">Competition, how much we want the job and price sensitivity are back, as the estimator's call: plain choices with the exact number shown.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 9px 12px 9px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">Source of truth</td><td style="padding: 9px 0; border-bottom: 1px solid #E2E2DE">Every changed value shows its source ("Your judgment" or "Project parameters"), who changed it and when, and an optional note such as "Heard 4 firms took the documents". Reset to default at any time.</td></tr>
+<tr style="vertical-align: top"><td style="padding: 9px 12px 9px 0; font-weight: 600">Live</td><td style="padding: 9px 0">Change a value and the price, win chance and expected contribution update right away.</td></tr>
+</tbody>
+</table>
+</div>
+<div style="flex: 1 1 520px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">The ladder</h2>
+<table style="width: 100%; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left"><th style="padding: 8px 12px 8px 0; border-bottom: 1px solid #1A1A1A; font-weight: 600">Level</th><th style="padding: 8px 12px; border-bottom: 1px solid #1A1A1A; font-weight: 600">Structure</th><th style="padding: 8px 0; border-bottom: 1px solid #1A1A1A; font-weight: 600">On screen at once</th></tr></thead>
+<tbody>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">1 · Sheet</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE">One centred column, lines open inline</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">1 area</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">2 · Split</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE">List and detail, assumptions in a side sheet</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">2 panes</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">3 · Tabs</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE">Review · All lines · Price &amp; assumptions</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">1 tab</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE; font-weight: 600">4 · Table</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE">Calmer Ledger: table plus inspector on demand</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">Table and 1 panel</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; font-weight: 600">5 · Workspace</td><td style="padding: 8px 12px">Navigation, tender header, 4 tabs, change log</td><td style="padding: 8px 0">Nav, tab and 1 panel</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">Assumptions the estimator controls</h2>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 980px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left">
+<th style="padding: 8px 12px 8px 0; border-bottom: 1px solid #1A1A1A; font-weight: 600">Question on screen</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #1A1A1A; font-weight: 600">Parameter</th>
+<th style="padding: 8px 12px; border-bottom: 1px solid #1A1A1A; font-weight: 600">Default</th>
+<th style="padding: 8px 0; border-bottom: 1px solid #1A1A1A; font-weight: 600">Choices offered</th>
+</tr></thead>
+<tbody style="font-size: 14px">
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE">How strong is the competition?</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE; font-family: 'IBM Plex Mono', monospace; font-size: 13px">competition_adjustment</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE; font-family: 'IBM Plex Mono', monospace">−0.05</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">Light +0.05 · Normal 0 · Strong −0.05 · Very strong −0.10</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE">How much do we want this job?</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE; font-family: 'IBM Plex Mono', monospace; font-size: 13px">strategic_appetite_adjustment</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE; font-family: 'IBM Plex Mono', monospace">+0.05</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">Not a priority −0.05 · Neutral 0 · We want it +0.05 · Must win +0.10</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE">How price-sensitive is this client?</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE; font-family: 'IBM Plex Mono', monospace; font-size: 13px">price_sensitivity_…_per_1pct_price</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE; font-family: 'IBM Plex Mono', monospace">0.05</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">Low 0.03 · Normal 0.05 · High 0.08 (win-chance points lost per 1% above the standard price)</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE">More: starting win chance, min/max</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE; font-family: 'IBM Plex Mono', monospace; font-size: 13px">reference_win_probability …</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE; font-family: 'IBM Plex Mono', monospace">0.55 · 0.05–0.95</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">Number fields</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE">More: option margins, overhead, standard margin</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE; font-family: 'IBM Plex Mono', monospace; font-size: 13px">scenario_margins_pct, commercial</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE; font-family: 'IBM Plex Mono', monospace">2.5/4.0/6.5 · 8.5% · 5.5%</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">Number fields</td></tr>
+<tr><td style="padding: 8px 12px 8px 0; border-bottom: 1px solid #E2E2DE">More: allowances and site factors</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE; font-family: 'IBM Plex Mono', monospace; font-size: 13px">allowances, productivity_factors</td><td style="padding: 8px 12px; border-bottom: 1px solid #E2E2DE; font-family: 'IBM Plex Mono', monospace">4 · 3.5 · 2.5 · 3% · 0.88 …</td><td style="padding: 8px 0; border-bottom: 1px solid #E2E2DE">Number fields; changes apply to all lines</td></tr>
+<tr><td style="padding: 8px 12px 8px 0">Include project costs?</td><td style="padding: 8px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px">project_costs</td><td style="padding: 8px 12px; font-family: 'IBM Plex Mono', monospace">off</td><td style="padding: 8px 0">Engineering 60,900 · Commissioning 24,800 · Hygiene 18,000 · Documentation 12,000</td></tr>
+</tbody>
+</table>
+</div>
+<div style="font-size: 14px; color: #555555">Win chance = starting value + appetite + competition − sensitivity × % above the standard-margin price, kept between the min and max. With the defaults this gives the golden numbers: 426k / 69%, 432k / 63%, 444k / 49%.</div>
+</section>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

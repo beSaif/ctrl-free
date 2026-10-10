@@ -1,0 +1,855 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "01-Upload.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "page": "v1",
+      "title": "1 · Start a tender",
+      "w": 1440,
+      "x": 0,
+      "y": 2500
+    },
+    "02-Reading.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "page": "v1",
+      "title": "2 · Reading the tender",
+      "w": 1440,
+      "x": 1520,
+      "y": 2500
+    },
+    "03-Overview.dc.html": {
+      "expand": "fill",
+      "h": 1080,
+      "page": "v1",
+      "title": "3 · First price overview",
+      "w": 1440,
+      "x": 3040,
+      "y": 2500
+    },
+    "04-Review.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v1",
+      "title": "4 · Check a line (click the list)",
+      "w": 1440,
+      "x": 0,
+      "y": 3980
+    },
+    "05-Swap-product.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "page": "v1",
+      "title": "5 · Pick a different product",
+      "w": 1440,
+      "x": 1520,
+      "y": 3980
+    },
+    "06-Supplier-quote.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v1",
+      "title": "6 · Ask a supplier",
+      "w": 1440,
+      "x": 3040,
+      "y": 3980
+    },
+    "07-Bid-range.dc.html": {
+      "expand": "fill",
+      "h": 1100,
+      "is_interactive": true,
+      "page": "v1",
+      "title": "7 · Decide your price (try the controls)",
+      "w": 1440,
+      "x": 0,
+      "y": 5380
+    },
+    "08-Send.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "page": "v1",
+      "title": "8 · Ready to send",
+      "w": 1440,
+      "x": 1520,
+      "y": 5380
+    },
+    "A1-Ledger.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v2",
+      "title": "A · Ledger · positions workbench",
+      "w": 1440,
+      "x": 0,
+      "y": 1800
+    },
+    "A2-Ledger-Instructions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v2",
+      "title": "A · Ledger · instructions & norms",
+      "w": 1440,
+      "x": 1520,
+      "y": 1800
+    },
+    "A3-Ledger-Bid.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v2",
+      "title": "A · Ledger · price & outcome",
+      "w": 1440,
+      "x": 3040,
+      "y": 1800
+    },
+    "B1-Dossier.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v2",
+      "title": "B · Dossier · tender with margin notes",
+      "w": 1440,
+      "x": 0,
+      "y": 3200
+    },
+    "B2-Dossier-Instructions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v2",
+      "title": "B · Dossier · instructions & norms",
+      "w": 1440,
+      "x": 1520,
+      "y": 3200
+    },
+    "B3-Dossier-Bid.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v2",
+      "title": "B · Dossier · price & outcome",
+      "w": 1440,
+      "x": 3040,
+      "y": 3200
+    },
+    "C1-Desk.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v2",
+      "title": "C · Bid desk · tender cockpit",
+      "w": 1440,
+      "x": 0,
+      "y": 4600
+    },
+    "C2-Desk-Instructions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v2",
+      "title": "C · Bid desk · instructions & norms",
+      "w": 1440,
+      "x": 1520,
+      "y": 4600
+    },
+    "C3-Desk-Bid.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v2",
+      "title": "C · Bid desk · price & outcome",
+      "w": 1440,
+      "x": 3040,
+      "y": 4600
+    },
+    "D1-Queue.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v2",
+      "title": "D · Review queue · triage",
+      "w": 1440,
+      "x": 0,
+      "y": 6000
+    },
+    "D2-Queue-Instructions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v2",
+      "title": "D · Review queue · instructions & norms",
+      "w": 1440,
+      "x": 1520,
+      "y": 6000
+    },
+    "D3-Queue-Bid.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v2",
+      "title": "D · Review queue · price & outcome",
+      "w": 1440,
+      "x": 3040,
+      "y": 6000
+    },
+    "E1-Suite.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v2",
+      "title": "E · Suite · tender object page",
+      "w": 1440,
+      "x": 0,
+      "y": 7400
+    },
+    "E2-Suite-Instructions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v2",
+      "title": "E · Suite · instructions & norms",
+      "w": 1440,
+      "x": 1520,
+      "y": 7400
+    },
+    "E3-Suite-Bid.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v2",
+      "title": "E · Suite · price & outcome",
+      "w": 1440,
+      "x": 3040,
+      "y": 7400
+    },
+    "L1a-Sheet.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v3",
+      "title": "1 · Sheet · main",
+      "w": 1440,
+      "x": 0,
+      "y": 1400
+    },
+    "L1b-Sheet-Line.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v3",
+      "title": "1 · Sheet · a line opened",
+      "w": 1440,
+      "x": 1520,
+      "y": 1400
+    },
+    "L1c-Sheet-Assumptions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v3",
+      "title": "1 · Sheet · assumptions (try it)",
+      "w": 1440,
+      "x": 3040,
+      "y": 1400
+    },
+    "L2a-Split.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v3",
+      "title": "2 · Split · main (click the list)",
+      "w": 1440,
+      "x": 0,
+      "y": 2800
+    },
+    "L2b-Split-Line.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v3",
+      "title": "2 · Split · silencer line",
+      "w": 1440,
+      "x": 1520,
+      "y": 2800
+    },
+    "L2c-Split-Assumptions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v3",
+      "title": "2 · Split · assumptions sheet (try it)",
+      "w": 1440,
+      "x": 3040,
+      "y": 2800
+    },
+    "L3a-Tabs.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v3",
+      "title": "3 · Tabs · Review tab",
+      "w": 1440,
+      "x": 0,
+      "y": 4200
+    },
+    "L3b-Tabs-Line.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v3",
+      "title": "3 · Tabs · line detail",
+      "w": 1440,
+      "x": 1520,
+      "y": 4200
+    },
+    "L3c-Tabs-Assumptions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v3",
+      "title": "3 · Tabs · price & assumptions (try it)",
+      "w": 1440,
+      "x": 3040,
+      "y": 4200
+    },
+    "L4a-Table.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v3",
+      "title": "4 · Table · lines (click a row)",
+      "w": 1440,
+      "x": 0,
+      "y": 5600
+    },
+    "L4b-Table-Instructions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v3",
+      "title": "4 · Table · instructions & norms",
+      "w": 1440,
+      "x": 1520,
+      "y": 5600
+    },
+    "L4c-Table-Assumptions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v3",
+      "title": "4 · Table · assumptions (try it)",
+      "w": 1440,
+      "x": 3040,
+      "y": 5600
+    },
+    "L5a-Workspace.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v3",
+      "title": "5 · Workspace · lines (click a row)",
+      "w": 1440,
+      "x": 0,
+      "y": 7000
+    },
+    "L5b-Workspace-Instructions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v3",
+      "title": "5 · Workspace · instructions & norms",
+      "w": 1440,
+      "x": 1520,
+      "y": 7000
+    },
+    "L5c-Workspace-Assumptions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v3",
+      "title": "5 · Workspace · assumptions & log (try it)",
+      "w": 1440,
+      "x": 3040,
+      "y": 7000
+    },
+    "Main.dc.html": {
+      "expand": "fill",
+      "h": 2100,
+      "page": "v1",
+      "title": "Research & design principles",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "N01-Tenders.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "1 · Tenders: open work and days left",
+      "w": 1440,
+      "x": 0,
+      "y": 2800
+    },
+    "N02-New-tender.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "2 · New tender",
+      "w": 1440,
+      "x": 1520,
+      "y": 2800
+    },
+    "N03-Overview.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "3 · Overview: what is left (new)",
+      "w": 1440,
+      "x": 3040,
+      "y": 2800
+    },
+    "N04-Lines.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "4 · Lines: review by product type (click a row)",
+      "w": 1440,
+      "x": 4560,
+      "y": 2800
+    },
+    "N04b-Line-detail.dc.html": {
+      "expand": "fill",
+      "h": 1400,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "4b · Line detail: PDF, price, quote, confirm (try it)",
+      "w": 1440,
+      "x": 6080,
+      "y": 2800
+    },
+    "N05-Change-product.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "5 · Change product: full screen (pick one)",
+      "w": 1440,
+      "x": 7600,
+      "y": 2800
+    },
+    "N06-Instructions.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "6 · Instructions & norms (click a row)",
+      "w": 1440,
+      "x": 0,
+      "y": 4700
+    },
+    "N06b-Instruction-detail.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "6b · Instruction detail: confirm and next",
+      "w": 1440,
+      "x": 1520,
+      "y": 4700
+    },
+    "N07-Pricing.dc.html": {
+      "expand": "fill",
+      "h": 1300,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "7 · Pricing: plain words, one offer price (try it)",
+      "w": 1440,
+      "x": 3040,
+      "y": 4700
+    },
+    "N08-Export.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "8 · Export",
+      "w": 1440,
+      "x": 4560,
+      "y": 4700
+    },
+    "N09-Outcome.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "9 · Outcome after award (type figures)",
+      "w": 1440,
+      "x": 6080,
+      "y": 4700
+    },
+    "N10-Results-history.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "10 · Results history: its own screen (new)",
+      "w": 1440,
+      "x": 7600,
+      "y": 4700
+    },
+    "N11-Reference-data.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "11 · Reference data",
+      "w": 1440,
+      "x": 9120,
+      "y": 4700
+    },
+    "S01-Assist.dc.html": {
+      "expand": "fill",
+      "h": 1200,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "A · Assist in place: it proposes, you approve (try it)",
+      "w": 1440,
+      "x": 0,
+      "y": 6600
+    },
+    "S02-Assist-command.dc.html": {
+      "expand": "fill",
+      "h": 1200,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "B · Assist command bar: tell it what to do, it shows a plan first",
+      "w": 1440,
+      "x": 1520,
+      "y": 6600
+    },
+    "S03-Assist-tray.dc.html": {
+      "expand": "fill",
+      "h": 1200,
+      "is_interactive": true,
+      "page": "v4",
+      "title": "C · Assist tray: needs your OK, working on, done",
+      "w": 1440,
+      "x": 3040,
+      "y": 6600
+    },
+    "V2-Brief.dc.html": {
+      "expand": "fill",
+      "h": 1400,
+      "page": "v2",
+      "title": "v2 brief · feedback, research, rules",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "V3-Brief.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "page": "v3",
+      "title": "v3 brief · simpler, estimator owns the assumptions",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-09T22:45:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "page": "v4",
+    "view": "canvas"
+  },
+  "notes": {
+    "as-s-howto": {
+      "fill": "blue",
+      "page": "v4",
+      "size": 24,
+      "text": "Assist layer · 10 Oct 2026\n\nThree surfaces, no chat window.\n\nA · In place: Assist puts a proposal next to the field it would fill, with the source beside it.\n\nB · Command bar: opens on Ctrl K, takes one request, shows a plan before it acts, then closes.\n\nC · Tray: a small button in the header. What needs your OK, what it is working on, what it did.\n\nRule: it never changes a price or confirms anything without your OK. Filled values are marked and can be undone.",
+      "w": 460,
+      "x": 4560,
+      "y": 6600
+    },
+    "as-t-1": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v4",
+      "text": "Assist layer · helps in place, not a chat window",
+      "w": 240,
+      "x": 0,
+      "y": 6300
+    },
+    "s-feedback": {
+      "fill": "orange",
+      "page": "v1",
+      "size": 24,
+      "text": "Design v1 · 9 Oct 2026\n\nSuperseded by v2 (see the v2 page). Kept for reference.",
+      "w": 440,
+      "x": 1520,
+      "y": 0
+    },
+    "t-research": {
+      "kind": "title1",
+      "maxW": 1440,
+      "page": "v1",
+      "text": "Research · v1",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "t-row1": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v1",
+      "text": "Flow A · Upload and read the tender",
+      "w": 240,
+      "x": 0,
+      "y": 2200
+    },
+    "t-row2": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v1",
+      "text": "Flow B · Check what needs you",
+      "w": 240,
+      "x": 0,
+      "y": 3680
+    },
+    "t-row3": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v1",
+      "text": "Flow C · Decide the price and send",
+      "w": 240,
+      "x": 0,
+      "y": 5080
+    },
+    "v2-s-howto": {
+      "fill": "orange",
+      "page": "v2",
+      "size": 24,
+      "text": "Design v2 · 10 Oct 2026\n\nFive directions, each with 3 screens: the main working screen, instructions & norms, and price & outcome.\n\nPick one direction (or mix parts) and comment on any screen. The first screen of each row is clickable: press Play.",
+      "w": 460,
+      "x": 1520,
+      "y": 0
+    },
+    "v2-t-a": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v2",
+      "text": "A · Ledger: the LV as a spreadsheet you can trust",
+      "w": 240,
+      "x": 0,
+      "y": 1500
+    },
+    "v2-t-b": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v2",
+      "text": "B · Dossier: the tender document is the workspace",
+      "w": 240,
+      "x": 0,
+      "y": 2900
+    },
+    "v2-t-brief": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v2",
+      "text": "v2 · Five directions",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "v2-t-c": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v2",
+      "text": "C · Bid desk: dense cockpit for the bid lead",
+      "w": 240,
+      "x": 0,
+      "y": 4300
+    },
+    "v2-t-d": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v2",
+      "text": "D · Review queue: one decision at a time, keyboard first",
+      "w": 240,
+      "x": 0,
+      "y": 5700
+    },
+    "v2-t-e": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v2",
+      "text": "E · Suite: classic enterprise object page with tabs",
+      "w": 240,
+      "x": 0,
+      "y": 7100
+    },
+    "v3-s-howto": {
+      "fill": "orange",
+      "page": "v3",
+      "size": 24,
+      "text": "Design v3 · 10 Oct 2026\n\nFive styles on a simplicity ladder. Every row ends with an interactive assumptions screen: change competition, how much you want the job or price sensitivity and the price updates live.\n\nPick a level (or mix) and comment on any screen.",
+      "w": 460,
+      "x": 1520,
+      "y": 0
+    },
+    "v3-t-1": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v3",
+      "text": "1 · Sheet: one calm column (simplest)",
+      "w": 240,
+      "x": 0,
+      "y": 1100
+    },
+    "v3-t-2": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v3",
+      "text": "2 · Split: a list and one detail pane",
+      "w": 240,
+      "x": 0,
+      "y": 2500
+    },
+    "v3-t-3": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v3",
+      "text": "3 · Tabs: Review, All lines, Price & assumptions",
+      "w": 240,
+      "x": 0,
+      "y": 3900
+    },
+    "v3-t-4": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v3",
+      "text": "4 · Table: a calmer Ledger with an inspector",
+      "w": 240,
+      "x": 0,
+      "y": 5300
+    },
+    "v3-t-5": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v3",
+      "text": "5 · Workspace: tabs, instructions, change log (most advanced)",
+      "w": 240,
+      "x": 0,
+      "y": 6700
+    },
+    "v3-t-brief": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v3",
+      "text": "v3 · From simplest to most advanced",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "v5-s-howto": {
+      "fill": "green",
+      "page": "v4",
+      "size": 24,
+      "text": "Improved flow · 10 Oct 2026\n\nA copy of the flow above with the 8 improvements. The screens above are untouched.\n\nNew: Overview tab. Tabs show what is left. Supplier quotes sit inside the line. Every line has Confirm. PDF crop next to the price. One full screen detail pattern. Simpler Pricing. Results history on its own.\n\nPress Play on Tenders and click through.",
+      "w": 460,
+      "x": 9120,
+      "y": 2800
+    },
+    "v5-t-1": {
+      "kind": "title1",
+      "maxW": 8000,
+      "page": "v4",
+      "text": "Improved flow · start, overview, review with quotes in the line",
+      "w": 240,
+      "x": 0,
+      "y": 2500
+    },
+    "v5-t-2": {
+      "kind": "title1",
+      "maxW": 8000,
+      "page": "v4",
+      "text": "Improved flow · rules, pricing, submit, learn from the award",
+      "w": 240,
+      "x": 0,
+      "y": 4400
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "01-Upload.dc.html",
+    "02-Reading.dc.html",
+    "03-Overview.dc.html",
+    "04-Review.dc.html",
+    "05-Swap-product.dc.html",
+    "06-Supplier-quote.dc.html",
+    "07-Bid-range.dc.html",
+    "08-Send.dc.html",
+    "V2-Brief.dc.html",
+    "A1-Ledger.dc.html",
+    "A2-Ledger-Instructions.dc.html",
+    "A3-Ledger-Bid.dc.html",
+    "B1-Dossier.dc.html",
+    "B2-Dossier-Instructions.dc.html",
+    "B3-Dossier-Bid.dc.html",
+    "C1-Desk.dc.html",
+    "C2-Desk-Instructions.dc.html",
+    "C3-Desk-Bid.dc.html",
+    "D1-Queue.dc.html",
+    "D2-Queue-Instructions.dc.html",
+    "D3-Queue-Bid.dc.html",
+    "E1-Suite.dc.html",
+    "E2-Suite-Instructions.dc.html",
+    "E3-Suite-Bid.dc.html",
+    "V3-Brief.dc.html",
+    "L1a-Sheet.dc.html",
+    "L1b-Sheet-Line.dc.html",
+    "L1c-Sheet-Assumptions.dc.html",
+    "L2a-Split.dc.html",
+    "L2b-Split-Line.dc.html",
+    "L2c-Split-Assumptions.dc.html",
+    "L3a-Tabs.dc.html",
+    "L3b-Tabs-Line.dc.html",
+    "L3c-Tabs-Assumptions.dc.html",
+    "L4a-Table.dc.html",
+    "L4b-Table-Instructions.dc.html",
+    "L4c-Table-Assumptions.dc.html",
+    "L5a-Workspace.dc.html",
+    "L5b-Workspace-Instructions.dc.html",
+    "L5c-Workspace-Assumptions.dc.html",
+    "N01-Tenders.dc.html",
+    "N02-New-tender.dc.html",
+    "N03-Overview.dc.html",
+    "N04-Lines.dc.html",
+    "N04b-Line-detail.dc.html",
+    "N05-Change-product.dc.html",
+    "N06-Instructions.dc.html",
+    "N06b-Instruction-detail.dc.html",
+    "N07-Pricing.dc.html",
+    "N08-Export.dc.html",
+    "N09-Outcome.dc.html",
+    "N10-Results-history.dc.html",
+    "N11-Reference-data.dc.html",
+    "S01-Assist.dc.html",
+    "S02-Assist-command.dc.html",
+    "S03-Assist-tray.dc.html"
+  ],
+  "pages": [
+    {
+      "id": "v4",
+      "name": "v4 · Table full flow"
+    },
+    {
+      "id": "v3",
+      "name": "v3 · simple to advanced"
+    },
+    {
+      "id": "v2",
+      "name": "v2 · 5 directions"
+    },
+    {
+      "id": "v1",
+      "name": "v1 · first pass"
+    }
+  ],
+  "title": "ctrl-free · Tender Pricing Assistant"
+}
