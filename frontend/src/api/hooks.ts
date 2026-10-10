@@ -1,7 +1,7 @@
 // React Query hooks. Every mutation invalidates all queries of its tender, so totals,
 // tab counts and the footer update everywhere at once.
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
-import { api } from './client'
+import { api, useActor } from './client'
 import type {
   InstructionPatch,
   Outcome,
@@ -221,6 +221,13 @@ export function useImportReference() {
 
 export function usePeople() {
   return useQuery({ queryKey: ['people'] as const, queryFn: () => api.getPeople(), staleTime: Infinity })
+}
+
+/** Display name of the person working now (as stamped into the log), or undefined before people load. */
+export function useMyName(): string | undefined {
+  const actor = useActor()
+  const { data } = usePeople()
+  return data?.find((x) => x.id === actor)?.name
 }
 
 export function useChanges(id: string, enabled = true) {

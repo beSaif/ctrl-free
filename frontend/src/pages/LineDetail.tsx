@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
-import { useInstructions, useLineLog, useMarkSent, usePatchPosition, usePosition, usePricing, useReference, useTender, useVerification } from '../api/hooks'
+import { useInstructions, useLineLog, useMarkSent, useMyName, usePatchPosition, usePosition, usePricing, useReference, useTender, useVerification } from '../api/hooks'
 import type { Position, PositionPatch, QuoteGroup } from '../api/types'
 import { Button, ErrorBox, IconBack, IconCheck, Kbd, LinkButton, Loading } from '../components/ui'
 import { cx } from '../lib/cx'
@@ -31,6 +31,7 @@ import {
 } from '../lib/lines'
 import { groupParam, linesQuery, useCatalog, useLineFilter, useLineQueue } from './linesShared'
 import { HoursSource, QtySource, RateSource, UnitPriceSource, WasteSource, type Trace } from './lineSources'
+import { changedBy, lastChange } from '../lib/trace'
 import { LineHistory } from './LineHistory'
 
 const inEditable = (el: EventTarget | null) => {
@@ -358,6 +359,8 @@ function PriceSection({
   const hoursSet = o.hours != null
   const priceSet = !sup && o.unit_price != null
   const hourly = pr?.unit_price_source === 'labour'
+  const me = useMyName()
+  const by = (path: string) => changedBy(lastChange(trace.log, path)?.by, me, t)
 
   const commitQty = (s: string) => {
     const v = parseNum(s)
@@ -380,17 +383,18 @@ function PriceSection({
   let unitFg = C.muted
   if (sup) {
     if (quoted === null) {
-      unitNote = t('Empty: budget price {b} is used', { b: fmt2(catalogue ?? pr?.net_unit_cost) })
+      const budget = catalogue ?? pr?.net_unit_cost
+      unitNote = budget != null ? t('Empty: budget price {b} is used', { b: fmt2(budget) }) : t('Empty: no budget price, the line is not priced yet')
       unitFg = C.attn
     } else if (filledByAssist) {
       unitNote = t('Filled by Assist from the reply')
       unitFg = C.ink
     } else {
-      unitNote = t('Supplier quote, typed by you')
+      unitNote = t('Supplier quote, typed by {who}', { who: changedBy(p.supplier_quote?.by ?? lastChange(trace.log, 'supplier_quote')?.by, me, t) })
       unitFg = C.accent
     }
   } else if (priceSet) {
-    unitNote = catalogue !== undefined ? t('Changed by you. Catalogue says {c}', { c: fmt2(catalogue) }) : t('Changed by you')
+    unitNote = catalogue !== undefined ? t('Changed by {who}. Catalogue says {c}', { who: by('overrides.unit_price'), c: fmt2(catalogue) }) : t('Changed by {who}', { who: by('overrides.unit_price') })
     unitFg = C.accent
   } else unitNote = pr?.unit_price_source === 'manual' ? t('Typed by you') : pr?.price_list ? t('From {l}', { l: pr.price_list.name }) : t('Catalogue price')
 
@@ -417,7 +421,7 @@ function PriceSection({
             p={p}
             trace={trace}
             color={qtySet ? C.accent : C.muted}
-            label={qtySet ? t('Changed by you. Tender says {q}, p. {page}', { q: fmtQty(p.quantity), page: p.page }) : t('Read from p. {page}', { page: p.page })}
+            label={qtySet ? t('Changed by {who}. Tender says {q}, p. {page}', { who: by('overrides.quantity'), q: fmtQty(p.quantity), page: p.page }) : t('Read from p. {page}', { page: p.page })}
           />
         </span>
 
@@ -428,7 +432,7 @@ function PriceSection({
           </span>
           {o.product_id && o.product_id !== p.match?.product_id && !hourly && !sup ? (
             <span className="text-[13px] text-accent">
-              {p.match?.product_id ? t('Changed by you. The match was {p}', { p: p.match.product_id }) : t('Chosen by you. The code found no product.')}
+              {p.match?.product_id ? t('Changed by {who}. The match was {p}', { who: by('overrides.product_id'), p: p.match.product_id }) : t('Chosen by {who}. The code found no product.', { who: by('overrides.product_id') })}
             </span>
           ) : p.match?.method === 'learned' && !sup ? null : (
             <span className="text-[13px]" style={{ color: hourly ? C.muted : m.fg }}>
@@ -477,8 +481,8 @@ function PriceSection({
             label={
               hoursSet
                 ? calcHours !== undefined
-                  ? t('Changed by you. Install rule gives {h}', { h: fmt2(calcHours) })
-                  : t('Changed by you')
+                  ? t('Changed by {who}. Install rule gives {h}', { who: by('overrides.hours'), h: fmt2(calcHours) })
+                  : t('Changed by {who}', { who: by('overrides.hours') })
                 : hourly
                   ? t('From the tender (hourly work)')
                   : t('From the install rule')
@@ -499,10 +503,10 @@ function PriceSection({
               <span className="text-accent">
                 {' · '}
                 {qtySet && priceSet
-                  ? t('quantity and unit price changed by you')
+                  ? t('quantity and unit price changed by {who}', { who: by('overrides.quantity') })
                   : qtySet
-                    ? t('quantity changed by you (tender: {q})', { q: fmtQty(p.quantity) })
-                    : t('unit price changed by you')}
+                    ? t('quantity changed by {who} (tender: {q})', { who: by('overrides.quantity'), q: fmtQty(p.quantity) })
+                    : t('unit price changed by {who}', { who: by('overrides.unit_price') })}
               </span>
             )}
           </span>
@@ -512,7 +516,7 @@ function PriceSection({
           </div>
           <span className="text-[12.5px] text-muted">
             {hourly && !hoursSet ? t('{h} h from the tender (hourly work)', { h: fmtQty(pr.quantity) }) : hoursSentence(pr, p.unit, t, hoursSet)}
-            {hoursSet && calcHours !== undefined && <span className="text-accent"> · {t('changed by you (install rule: {h} h)', { h: fmt2(calcHours) })}</span>}
+            {hoursSet && calcHours !== undefined && <span className="text-accent"> · {t('changed by {who} (install rule: {h} h)', { who: by('overrides.hours'), h: fmt2(calcHours) })}</span>}
           </span>
           <span className="pb-1.5 border-b border-rowrule text-[12.5px] text-muted">{labourSentence(pr, t, hourly)}</span>
           <div className="flex justify-between gap-3 py-2 font-semibold text-[16px]">
@@ -610,7 +614,7 @@ function SupplierSection({
   const [to, setTo] = useState('')
   const [copied, setCopied] = useState(false)
   const quoted = quotedPrice(p)
-  const budget = p.product?.net_cost_chf ?? p.pricing?.calculated?.net_unit_cost ?? p.pricing?.net_unit_cost ?? 0
+  const budget = p.product?.net_cost_chf ?? p.pricing?.calculated?.net_unit_cost ?? p.pricing?.net_unit_cost ?? null
   const unit = fmtUnit(p.unit)
   const sent = !!group?.sent
   const border = p.confirmed ? '#DEDEDB' : quoted !== null ? C.accent : C.attn
@@ -638,8 +642,12 @@ function SupplierSection({
       </div>
       <span>
         {quoted !== null
-          ? t('Quote entered: CHF {q} per {u} instead of the budget {b}. Confirm to use it.', { q: fmt2(quoted), u: unit, b: fmt2(budget) })
-          : t('The budget price of CHF {b} per {u} is in use. Type the quoted unit price above when the supplier answers.', { b: fmt2(budget), u: unit })}
+          ? budget !== null
+            ? t('Quote entered: CHF {q} per {u} instead of the budget {b}. Confirm to use it.', { q: fmt2(quoted), u: unit, b: fmt2(budget) })
+            : t('Quote entered: CHF {q} per {u}. Confirm to use it.', { q: fmt2(quoted), u: unit })
+          : budget !== null
+            ? t('The budget price of CHF {b} per {u} is in use. Type the quoted unit price above when the supplier answers.', { b: fmt2(budget), u: unit })
+            : t('There is no budget price, so the line is not priced yet. Type the quoted unit price above when the supplier answers.')}
       </span>
       {group && (
         <>
@@ -688,7 +696,8 @@ function GroupLines({ ids, current, positions, lineHref }: { ids: string[]; curr
     if (!s) return { label: '–', fg: C.faint }
     if (s.confirmed) return { label: quotedPrice(s) !== null ? t('Quote confirmed') : t('Confirmed on budget price'), fg: C.ink }
     if (quotedPrice(s) !== null) return { label: t('Quoted'), fg: C.accent }
-    return { label: t('Budget price'), fg: C.attn }
+    // no catalogue product (or no price on it): nothing in the line yet, not even a budget
+    return { label: s.pricing ? t('Budget price') : t('No price yet'), fg: C.attn }
   }
   return (
     <div className="max-h-[260px] overflow-y-auto border-t border-rowrule">

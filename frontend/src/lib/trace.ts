@@ -10,6 +10,11 @@ export function whoLabel(by: string | undefined | null, t: T, inSentence = false
   return by === 'You' ? t(inSentence ? 'you' : 'You') : by
 }
 
+/** Who made a change, inside a sentence: "you" for the person working now (or an unattributed change), else the name. */
+export function changedBy(by: string | undefined | null, me: string | undefined, t: T): string {
+  return !by || by === 'You' || by === me ? t('you') : by
+}
+
 /** The log entry that set `path` and is still in effect (log newest first; undone entries and undos skipped). */
 export function lastChange(log: LogEntry[], path: string): LogEntry | undefined {
   return log.find((e) => !e.undone && e.action !== 'undo' && path in rec(e.after))
