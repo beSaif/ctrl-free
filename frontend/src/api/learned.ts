@@ -3,7 +3,7 @@
 // The line detail and candidates carry the comparison fields; read them with `lineExtras(p)`.
 // In mock mode there are no learned rules and the actions are not offered.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ApiError, useApiMode } from './client'
+import { req, useApiMode } from './client'
 import { invalidateTender } from './hooks'
 import type { Candidate, Match, Position } from './types'
 
@@ -159,23 +159,9 @@ export interface LearnedResponse {
   counts: { total: number; active: number; applied: number }
 }
 
-async function call<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const res = await fetch('/api' + path, {
-    method,
-    headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  })
-  if (!res.ok) {
-    let msg = res.statusText
-    try {
-      const j = await res.json()
-      msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail ?? j)
-    } catch {
-      /* not json */
-    }
-    throw new ApiError(res.status, msg || 'Request failed')
-  }
-  return res.json() as Promise<T>
+// through the shared client, so the X-Actor header attributes the change to the current person
+function call<T>(method: string, path: string, body?: unknown): Promise<T> {
+  return req<T>(method, path, body)
 }
 
 const EMPTY: LearnedResponse = { rules: [], counts: { total: 0, active: 0, applied: 0 } }
