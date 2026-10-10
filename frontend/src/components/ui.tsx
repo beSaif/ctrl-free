@@ -362,6 +362,12 @@ export function Dialog({
 }) {
   const id = useId()
   const ref = useRef<HTMLElement>(null)
+  // callers pass a fresh onClose every render; keep it in a ref so typing (a re-render) does not
+  // re-run the effect below and pull focus back to the first field
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
   useEffect(() => {
     if (!open) return
     const prev = document.activeElement as HTMLElement | null
@@ -371,7 +377,7 @@ export function Dialog({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation()
-        onClose()
+        onCloseRef.current()
       }
       if (e.key === 'Tab' && el) {
         const f = Array.from(el.querySelectorAll<HTMLElement>('a[href], button:not(:disabled), input, select, textarea, [tabindex]:not([tabindex="-1"])'))
@@ -395,7 +401,7 @@ export function Dialog({
       document.body.style.overflow = overflow
       prev?.focus?.()
     }
-  }, [open, onClose])
+  }, [open])
   if (!open) return null
   return createPortal(
     <div
