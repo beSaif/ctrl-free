@@ -146,11 +146,11 @@ function TenderShell({ id }: { id: string }) {
     <div className="min-h-screen flex flex-col">
       <header className="border-b border-rule">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-6 pt-3">
-          <div className="flex flex-wrap items-baseline gap-x-3.5 gap-y-2 flex-[1_1_520px] min-w-0">
-            <Link to="/" className="font-semibold text-[15px] text-ink! no-underline">
+          <div className="flex items-baseline gap-x-3.5 flex-[1_1_380px] min-w-0">
+            <Link to="/" className="font-semibold text-[15px] text-ink! no-underline whitespace-nowrap">
               ctrl-free
             </Link>
-            <nav aria-label={t('Breadcrumb')} className="text-[14px] text-muted min-w-0">
+            <nav aria-label={t('Breadcrumb')} className="text-[14px] text-muted min-w-0 truncate" title={tender ? `${tender.name} · ${trade}` : undefined}>
               <Link to="/" className="text-muted!">
                 {t('Tenders')}
               </Link>{' '}

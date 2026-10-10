@@ -151,6 +151,7 @@ def summary(t: dict) -> dict:
             "created_at", "updated_at", "updated_by", "profile", "meta_sources", "submission_rule", "award_criteria",
             "warnings", "timings", "user_fields")
     out = {k: t.get(k) for k in keys}
+    _add_plain_summaries(out)
     out["days_left"] = _days_left(t.get("due_at"))
     out["open_work"] = None
     out["offer_price"] = None
@@ -186,6 +187,68 @@ def summary(t: dict) -> dict:
     return out
 
 
+def _n(n: int, one: str, many: str) -> str:
+    return (one if n == 1 else many).format(n=n)
+
+
+def review_breakdown(review: list[dict], direct: float) -> list[str]:
+    """Plain sentences for the lines that need the estimator, one per kind of open work."""
+    budget = [p for p in review if (p.get("pricing") or {}).get("unit_price_source") == "supplier_package"
+              and not _has_quote(p)]
+    ids = {p["lv_id"] for p in budget}
+    rest = [p for p in review if p["lv_id"] not in ids]
+    no_cat = [p for p in rest if p["status"] == "supplier_quote_required" and not p.get("pricing")]
+    no_qty = [p for p in rest if p["status"] == "insufficient_information"]
+    guess = [p for p in rest if p["status"] == "assumption_applied"]
+    check = [p for p in rest if p["status"] == "review_required"]
+    counted = len(no_cat) + len(no_qty) + len(guess) + len(check)
+    other = len(rest) - counted
+    out = []
+    if budget:
+        b = sum(_direct(p) for p in budget)
+        share = round(b / direct * 100) if direct else 0
+        out.append(_n(len(budget), "1 runs on a budget price", "{n} run on budget prices")
+                   + f": CHF {swiss(b, 0)} of direct cost ({share}%).")
+    if no_cat:
+        out.append(_n(len(no_cat), "1 is not in the catalogue and needs a supplier price.",
+                      "{n} are not in the catalogue and need a supplier price."))
+    if no_qty:
+        out.append(_n(len(no_qty), "1 has no quantity in the tender.", "{n} have no quantity in the tender."))
+    if guess:
+        out.append(_n(len(guess), "1 is priced with an assumption: check it.",
+                      "{n} are priced with an assumption: check them."))
+    if check:
+        out.append(_n(len(check), "1 needs a product checked.", "{n} need a product checked."))
+    if other > 0:
+        out.append(_n(other, "1 more is flagged or has a quote to confirm.",
+                      "{n} more are flagged or have a quote to confirm."))
+    return out
+
+
+def _has_quote(p: dict) -> bool:
+    return bool((p.get("supplier_quote") or {}).get("unit_price") is not None
+                or (p.get("overrides") or {}).get("unit_price") is not None)
+
+
+def _add_plain_summaries(out: dict) -> None:
+    """Code-built plain sentences next to the verbatim German (submission rule, price award criterion)."""
+    meta = mod("meta")
+    if meta is None:
+        return
+    try:
+        rule = out.get("submission_rule")
+        if rule:
+            out["submission_rule"] = {**rule, "summary": meta.submission_summary(rule, out.get("due_at"), out.get("client"))}
+        crits = out.get("award_criteria") or []
+        if crits:
+            total = sum(float(c.get("points") or 0) for c in crits) or None
+            out["award_criteria"] = [
+                {**c, **(meta.award_price_summary(c, total) or {})} if re.search(r"preis|price", c.get("label") or "", re.I) else c
+                for c in crits]
+    except Exception as e:  # a summary must never break the tender view
+        log.warning("plain summaries failed: %s", e)
+
+
 def overview(t: dict) -> dict:
     v = pipeline.view(t)
     totals, settings = v["totals"], v["settings"]
@@ -202,25 +265,9 @@ def overview(t: dict) -> dict:
     pc_on = any((settings.get("project_costs") or {}).values())
     budget_direct = totals.get("budget_direct") or 0.0
     budget_share = totals.get("budget_share") or 0.0
-    quote_lines = [p for p in review if p["status"] == "supplier_quote_required"]
 
     if review:
-        unpriced = [p for p in review if not p.get("pricing")]
-        others = len(review) - len(quote_lines) - len(unpriced)
-        parts = []
-        if quote_lines:
-            q_direct = sum(_direct(p) for p in quote_lines)
-            parts.append(
-                (f"They run on budget prices: CHF {swiss(q_direct)} of direct cost "
-                 f"({round(q_direct / direct * 100) if direct else 0}%). " if len(quote_lines) == len(review) else
-                 f"{len(quote_lines)} run on budget prices: CHF {swiss(q_direct)} of direct cost "
-                 f"({round(q_direct / direct * 100) if direct else 0}%). ")
-                + "Enter the supplier quote on the line or confirm the budget price.")
-        if unpriced:
-            parts.append(f"{len(unpriced)} have no price yet: pick a product or enter a unit price.")
-        if others > 0:
-            parts.append(f"{others} are priced with a guess or are flagged: check product and quantity.")
-        detail = " ".join(parts)
+        detail = " ".join(review_breakdown(review, direct)) or "Check the product or the quantity and confirm."
     else:
         detail = "Every line that needed you is confirmed."
     s1 = {"key": "review", "title": "Review lines", "done": not review, "count": len(review), "total": lines,

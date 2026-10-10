@@ -6,8 +6,8 @@ import { useInstructions, usePositions, usePricing, useReference, useTender, use
 import { IconCheck, LinkButton, Loading } from '../components/ui'
 import { cx } from '../lib/cx'
 import { PageViewer } from '../components/PdfCrop'
-import { fmt0, fmt2, fmtDateTime, fmtDaysLeft, fmtShare, translationLabel } from '../lib/format'
-import { isOpen, isPriceable, isSupplier, quotedPrice } from '../lib/lines'
+import { fmt0, fmt2, fmtDateTime, fmtDaysLeft, fmtShare } from '../lib/format'
+import { isOpen, isPriceable, isSupplier, quotedPrice, reviewBreakdown } from '../lib/lines'
 import { allProjectCosts, standardMargin } from '../lib/pricing'
 
 interface Step {
@@ -37,10 +37,8 @@ export function Overview() {
   const open = ps.filter(isOpen)
   const priceable = ps.filter(isPriceable)
   const pricedLines = ps.filter((p) => (p.pricing?.direct ?? 0) > 0).length
-  const budgetOpen = open.filter((p) => isSupplier(p) && quotedPrice(p) === null && (p.pricing?.direct ?? 0) > 0)
-  const unpricedOpen = open.filter((p) => !(p.pricing?.direct ?? 0))
+  const supplierOpen = open.filter((p) => isSupplier(p) && isPriceable(p) && quotedPrice(p) === null && p.status !== 'insufficient_information')
   const tot = pr.totals
-  const budgetDirect = budgetOpen.reduce((a, p) => a + (p.pricing?.direct ?? 0), 0)
   const openIns = ins.instructions.filter((i) => i.state === 'open')
   const costN = openIns.filter((i) => i.kind === 'cost').length
   const riskN = openIns.filter((i) => i.kind === 'risk').length
@@ -61,17 +59,8 @@ export function Overview() {
       body: open.length ? (
         <>
           <span className="text-attn font-medium">{t('{n} of {total} lines need you.', { n: open.length, total: priceable.length })}</span>{' '}
-          {budgetOpen.length > 0 &&
-            t(budgetOpen.length === open.length ? 'They run on budget prices: CHF {amount} of direct cost ({share}).' : '{k} of them run on budget prices: CHF {amount} of direct cost ({share}).', {
-              k: budgetOpen.length,
-              amount: fmt0(budgetDirect),
-              share: fmtShare(tot.direct ? budgetDirect / tot.direct : 0),
-            }) + ' '}
-          {unpricedOpen.length > 0 &&
-            t(unpricedOpen.length === 1 ? '1 has no price yet (not in the catalogue or no quantity in the tender).' : '{u} have no price yet (not in the catalogue or no quantity in the tender).', {
-              u: unpricedOpen.length,
-            }) + ' '}
-          {budgetOpen.length || unpricedOpen.length ? t('Supplier requests are drafted per product type.') : t('Check the product or the quantity and confirm.')}
+          {reviewBreakdown(open, tot.direct, t).join(' ') + ' '}
+          {supplierOpen.length ? t('Supplier requests are drafted per product type.') : t('Check the product or the quantity and confirm.')}
         </>
       ) : (
         <span className="text-muted">{t('Every line that needed you is confirmed. Direct cost is CHF {d}.', { d: fmt2(tot.direct) })}</span>
@@ -217,7 +206,7 @@ export function Overview() {
           <span className="font-mono">{fmtDateTime(tender.due_at)}</span>
           {rule && (
             <span className="text-[13px] text-muted">
-              {lang === 'de' || !rule.text_en ? rule.text_de : `${rule.text_en} (${t(translationLabel(rule.text_en_method)).toLowerCase()})`} {t('Read from the tender, p. {page}.', { page: rule.page })}{' '}
+              {rule.summary ? (lang === 'de' ? rule.summary.short_de : rule.summary.short_en) : `«${rule.text_de}»`} {t('Read from the tender, p. {page}.', { page: rule.page })}{' '}
               <button type="button" onClick={() => setPageOpen(true)} className="border-0 bg-transparent p-0 min-h-0 text-accent underline underline-offset-2">
                 {t('Show on page')}
               </button>

@@ -20,6 +20,7 @@ import re
 from pathlib import Path
 
 from . import config, llm, matcher
+from . import pricing as P
 from .meta import norm_ws, verbatim_in
 
 UNIT_DE = {"pc": "Stk", "m2": "m²", "m": "m", "LS": "psch", "h": "h", "kg": "kg", "system": "Anlage"}
@@ -35,6 +36,8 @@ def _attrs(p: dict, matches: dict | None) -> dict:
 def _needs_quote(p: dict, matches: dict | None, rows_by_id: dict) -> bool:
     if p.get("kind", "item") in matcher.SKIP_KINDS:
         return False
+    if (p.get("pricing") or {}).get("unit_price_source") == "labour" or P.is_hourly_work(p):
+        return False  # hourly work is priced as our own labour, a supplier has nothing to quote
     if p.get("status") == "supplier_quote_required" or p.get("offer_ref"):
         return True
     m = (matches or {}).get(p["lv_id"]) or p.get("match") or {}
@@ -44,23 +47,97 @@ def _needs_quote(p: dict, matches: dict | None, rows_by_id: dict) -> bool:
     return bool(pid and rows_by_id.get(pid, {}).get("supplier_quote_required"))
 
 
+# Extra type words that put a line into a supplier group. Grouping only: the product families in
+# matcher.FAMILIES (used for rules and matching) stay as they are.
+GROUP_TYPES: list[tuple[str, re.Pattern]] = [(k, re.compile(rx, re.I)) for k, rx in (
+    ("controls", r"smoke detector|frost|thermostat|pressure switch|manometer|gauge|measur"),
+    ("air_terminal", r"transfer air|overflow|air outlet|nozzle"),
+    ("duct", r"flexible connector|sleeve|leakage test|\bpipe\b|\bduct\b"),
+    ("support", r"mounting (?:feet|foot|rail)|bracket|hanger"),
+    ("marking", r"label|arrow|marking|\bsign\b|equipotential|bonding"),
+)]
+GROUP_LABELS = {"marking": ("Labels and bonding", "Beschriftung und Potentialausgleich")}
+# common section names of Swiss bills of quantities (NPK / SIA 451), for groups of leftover lines
+SECTION_EN = {"apparate": "Equipment", "geräte": "Equipment", "kanäle": "Ducts", "rohre": "Pipes",
+              "armaturen und instrumente": "Fittings and instruments", "armaturen": "Fittings",
+              "regulierung": "Controls", "steuerung und regelung": "Controls", "msr": "Controls",
+              "montage, dienstleistungen": "Installation and services", "montage": "Installation",
+              "dienstleistungen": "Services", "dämmungen": "Insulation", "isolierungen": "Insulation",
+              "brandschutz": "Fire protection", "diverses": "Miscellaneous", "allgemeines": "General items"}
+
+
+def _own_group(p: dict, matches: dict | None) -> str | None:
+    typ = _attrs(p, matches).get("type")
+    fam = matcher.family_of(typ)
+    if fam or not typ:
+        return fam
+    return next((k for k, rx in GROUP_TYPES if rx.search(typ)), None)
+
+
+def _group_label(key: str, lang: str) -> str:
+    if key in GROUP_LABELS:
+        return GROUP_LABELS[key][0 if lang == "en" else 1]
+    return matcher.family_label(key, lang) or key
+
+
+def _section_title(name: str) -> tuple[str, str]:
+    de = norm_ws(name).strip(" ,.:")
+    en = SECTION_EN.get(de.lower())
+    if de.count(",") == 1:  # "Montage, Dienstleistungen" -> "Montage und Dienstleistungen"
+        de = de.replace(", ", " und ")
+    if not en:
+        from .translate import gloss
+
+        en = (gloss(de)[0] or de).strip()
+        en = en[:1].upper() + en[1:]
+    return en, de
+
+
+def _resolve_groups(positions: list[dict], matches: dict | None) -> dict[str, str | None]:
+    """Group key per item line: its own product family; else the parent device's family (parts of an
+    air-handling unit go with the unit); else the family of the nearest neighbour in the same system and
+    section (a colour coating or a mounting frame goes with the device it belongs to)."""
+    items = [p for p in positions if p.get("kind", "item") not in matcher.SKIP_KINDS]
+    own = {p["lv_id"]: _own_group(p, matches) for p in items}
+    res: dict[str, str | None] = {}
+    for p in items:
+        parent = p.get("parent_lv_id")
+        res[p["lv_id"]] = (own.get(parent) if parent and own.get(parent) else None) or own[p["lv_id"]]
+    block = lambda p: (p.get("system_key") or p.get("system"), p.get("section"), p.get("section_name"))  # noqa: E731
+    for i, p in enumerate(items):
+        if res[p["lv_id"]]:
+            continue
+        found = None
+        for step in (-1, -2, -3, 1, 2):  # nearest neighbour first, before the line, then after it
+            j = i + step
+            if 0 <= j < len(items) and block(items[j]) == block(p) and not P.is_hourly_work(items[j]):
+                found = res.get(items[j]["lv_id"]) if step < 0 else own.get(items[j]["lv_id"])
+                if found:
+                    break
+        res[p["lv_id"]] = found
+    return res
+
+
 def group_for_quotes(positions: list[dict], matches: dict | None = None, catalog=None,
                      instructions: list[dict] | None = None) -> list[dict]:
+    """One supplier request per product family (silencers, dampers, ...). Lines of no family go with their
+    parent device or neighbour, else into one request per tender section ("Regulierung", "Montage")."""
     rows_by_id = {r["product_id"]: r for r in matcher._as_rows(catalog)}
+    fam_of = _resolve_groups(positions, matches)
     groups: dict[str, dict] = {}
     for p in positions:
         if not _needs_quote(p, matches, rows_by_id):
             continue
-        a = _attrs(p, matches)
-        fam = matcher.family_of(a.get("type"))
+        fam = fam_of.get(p["lv_id"])
         if fam:
-            key, title, title_de = fam, matcher.family_label(fam), matcher.family_label(fam, "de")
+            key, title, title_de = fam, _group_label(fam, "en"), _group_label(fam, "de")
         else:
-            head = (p.get("title_de") or (p.get("text_de") or "").split("\n")[0] or p["lv_id"]).strip()
-            key = "x_" + re.sub(r"[^a-z0-9]+", "_", head.lower())[:30]
-            from .translate import gloss
-
-            title, title_de = gloss(head)[0] or head, head
+            sec = (p.get("section_name") or "").strip()
+            if sec:
+                title, title_de = _section_title(sec)
+                key = "sec_" + re.sub(r"[^a-z0-9]+", "_", title_de.lower()).strip("_")[:30]
+            else:
+                key, title, title_de = "other", "Other items", "Weitere Positionen"
         g = groups.setdefault(key, {"id": key, "title": title, "title_de": title_de, "lv_ids": []})
         g["lv_ids"].append(p["lv_id"])
     out = list(groups.values())

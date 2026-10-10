@@ -26,6 +26,8 @@ export interface SubmissionRule {
   text_en: string
   text_en_method?: string
   bbox?: number[] | null
+  /** Plain sentences built by code from the rule (where to, what, by when); null when not recognisable. */
+  summary?: { short_en: string; short_de: string; full_en: string; full_de: string } | null
 }
 
 export interface AwardCriterion {
@@ -35,6 +37,10 @@ export interface AwardCriterion {
   rule_de?: string
   rule_en?: string
   rule_en_method?: string
+  /** Price criterion only: plain sentence built from the points and the zero-points threshold. */
+  summary_en?: string
+  summary_de?: string
+  zero_above_pct?: number | null
 }
 
 export interface TenderSummary {

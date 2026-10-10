@@ -5,10 +5,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useLang, useT, type T } from '../i18n'
 import { usePricing, usePutPricing, useResetPricing, useTender } from '../api/hooks'
-import type { PricingPut, PricingResponse, PricingSettings, Scenario, Totals } from '../api/types'
+import type { AwardCriterion, PricingPut, PricingResponse, PricingSettings, Scenario, Totals } from '../api/types'
 import { Button, ErrorBox, IconChevron, Loading, SegmentedControl, Stepper, Toggle } from '../components/ui'
 import { cx } from '../lib/cx'
-import { fmt0, fmt2, fmtShortDate, translationLabel } from '../lib/format'
+import { fmt0, fmt2, fmtShortDate } from '../lib/format'
+import { PageViewer } from '../components/PdfCrop'
 import { C } from '../lib/lines'
 import { APPETITE, COMPETITION, SENSITIVITY, bestScenario, previewScenario, projectCostItems, sortScenarios, standardMargin, winWords } from '../lib/pricing'
 
@@ -63,10 +64,34 @@ function localTotals(server: PricingResponse, s: PricingSettings): Totals {
 
 const pts = (v: number) => Math.round(Math.abs(v) * 100)
 
+/** "Price is worth 60 of 100 award points (p. 9). ..." built by code from the award criterion, with the page. */
+function AwardNote({ id, crit, pageCount }: { id: string; crit: AwardCriterion; pageCount?: number }) {
+  const t = useT()
+  const lang = useLang()
+  const [open, setOpen] = useState(false)
+  const text =
+    (lang === 'de' ? crit.summary_de : crit.summary_en) ?? t('Price is worth {p} of 100 award points (p. {page}).', { p: crit.points, page: crit.page })
+  return (
+    <>
+      {' ' + text + ' '}
+      <button type="button" onClick={() => setOpen(true)} className="border-0 bg-transparent p-0 min-h-0 text-accent underline underline-offset-2">
+        {t('Show on page')}
+      </button>
+      <PageViewer
+        open={open}
+        onClose={() => setOpen(false)}
+        tenderId={id}
+        pageCount={pageCount}
+        source={{ page: crit.page, page_size: [595, 842], block_bbox: null, lines: [] }}
+        fallback={crit.rule_de ? <blockquote className="m-0 text-[13.5px] leading-[1.55] bg-hl px-1">«{crit.rule_de}»</blockquote> : null}
+      />
+    </>
+  )
+}
+
 export function Pricing() {
   const { id = '' } = useParams()
   const t = useT()
-  const lang = useLang()
   const nav = useNavigate()
   const { data: server, isLoading, error } = usePricing(id)
   const { data: tender } = useTender(id)
@@ -241,8 +266,8 @@ export function Pricing() {
           <div className="flex flex-col gap-2">
             <h2 className="m-0 text-[15px] font-semibold">{t('Pick a price')}</h2>
             <div className="overflow-x-auto">
-              <div className="min-w-[620px]" role="radiogroup" aria-label={t('Pick a price')}>
-                <div className="grid grid-cols-[minmax(0,1.3fr)_64px_96px_124px_96px_104px] gap-x-2.5 py-2 border-b border-ink text-[13px] text-muted font-medium">
+              <div className="min-w-[580px]" role="radiogroup" aria-label={t('Pick a price')}>
+                <div className="grid grid-cols-[minmax(0,1.3fr)_56px_88px_112px_88px_96px] gap-x-2.5 py-2 border-b border-ink text-[13px] text-muted font-medium">
                   <span className="pl-2.5">{t('Option')}</span>
                   <span className="text-right">{t('Margin')}</span>
                   <span className="text-right">{t('Offer price')}</span>
@@ -261,7 +286,7 @@ export function Pricing() {
                       aria-checked={on}
                       onClick={() => choose(o.name)}
                       className={cx(
-                        'grid grid-cols-[minmax(0,1.3fr)_64px_96px_124px_96px_104px] gap-x-2.5 items-center w-full min-h-12 p-0 border-0 border-b border-rowrule text-left text-ink',
+                        'grid grid-cols-[minmax(0,1.3fr)_56px_88px_112px_88px_96px] gap-x-2.5 items-center w-full min-h-12 p-0 border-0 border-b border-rowrule text-left text-ink',
                         on ? 'row-selected' : 'bg-white hover:bg-panel',
                       )}
                     >
@@ -286,8 +311,7 @@ export function Pricing() {
             </div>
             <span className="text-[13px] text-muted">
               {t('Expected profit = win chance × profit if won.')}
-              {price && ' ' + t('Price is worth {p} of 100 award points (p. {page}).', { p: price.points, page: price.page })}
-              {price?.rule_en && ' ' + (lang === 'de' ? (price.rule_de ?? price.rule_en) : `${price.rule_en} (${t(translationLabel(price.rule_en_method)).toLowerCase()})`)}
+              {price && <AwardNote id={id} crit={price} pageCount={tender?.page_count} />}
             </span>
           </div>
 

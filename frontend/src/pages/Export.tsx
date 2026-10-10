@@ -7,7 +7,7 @@ import { api, type ExportKind } from '../api/client'
 import { useInstructions, usePositions, usePricing, useSubmit, useTender } from '../api/hooks'
 import { Button, Loading, Td, Th } from '../components/ui'
 import { PageViewer } from '../components/PdfCrop'
-import { fmt0, fmtDateTime, fmtDaysLeft, fmtShare, translationLabel } from '../lib/format'
+import { fmt0, fmtDateTime, fmtDaysLeft, fmtShare } from '../lib/format'
 import { C, isOpen, isPriceable, isSupplier, quotedPrice } from '../lib/lines'
 import { allProjectCosts, previewScenario } from '../lib/pricing'
 
@@ -46,7 +46,9 @@ export function Export() {
   const unpricedSup = unpriced.filter((p) => isSupplier(p) && p.status !== 'insufficient_information').length
   const unpricedQty = unpriced.filter((p) => p.status === 'insufficient_information').length
   const quotes = ps.filter((p) => isSupplier(p) && quotedPrice(p) !== null).length
-  const otherOpen = ps.filter((p) => isOpen(p) && hasPrice(p) && !budget.includes(p)).length
+  const otherOpenLines = ps.filter((p) => isOpen(p) && hasPrice(p) && !budget.includes(p))
+  const otherOpen = otherOpenLines.length
+  const allGuesses = otherOpenLines.every((p) => p.status === 'assumption_applied' && !p.flagged)
   const openIns = ins.instructions.filter((i) => i.state === 'open')
   const cost = openIns.filter((i) => i.kind === 'cost').length
   const risk = openIns.filter((i) => i.kind === 'risk').length
@@ -108,7 +110,8 @@ export function Export() {
           )}
           {otherOpen > 0 && (
             <Check color={C.attn} link={lnk(`/t/${id}/lines`, t('Lines'))}>
-              <strong className="font-semibold text-attn">{t('{n} more lines to review', { n: otherOpen })}</strong>
+              <strong className="font-semibold text-attn">{allGuesses ? (otherOpen === 1 ? t('1 line priced with an assumption') : t('{n} lines priced with an assumption', { n: otherOpen })) : t('{n} more lines to review', { n: otherOpen })}</strong>
+              {allGuesses && <> · {t('check them before you submit')}</>}
             </Check>
           )}
           {openIns.length > 0 ? (
@@ -147,15 +150,21 @@ export function Export() {
           <div className="flex flex-col gap-1.5 pt-2">
             <h2 className="m-0 text-[15px] font-semibold">{t('Submission rules from the tender')}</h2>
             <div className="text-[13px] text-muted">
-              p. {rule.page} · {rule.heading}
+              {t('p. {page}', { page: rule.page })} · {rule.heading}
             </div>
             <blockquote className="m-0 px-3 py-2.5 border border-rule text-[13.5px] leading-[1.55]">«{rule.text_de}»</blockquote>
-            <span className="text-[13px] text-muted">
-              {t(translationLabel(rule.text_en_method))}: {rule.text_en} ·{' '}
-              <button type="button" onClick={() => setPageOpen(true)} className="border-0 bg-transparent p-0 text-accent underline underline-offset-2">
+            <span className="text-[13.5px]">
+              {rule.summary && lang === 'en' ? rule.summary.full_en + ' ' : ''}
+              <button type="button" onClick={() => setPageOpen(true)} className="border-0 bg-transparent p-0 text-[13px] text-accent underline underline-offset-2">
                 {t('Show on page')}
               </button>
             </span>
+            {lang === 'en' && rule.text_en && (
+              <details className="text-[13px] text-muted">
+                <summary className="cursor-pointer w-fit">{t(rule.text_en_method === 'glossary' ? 'Machine translation (rough)' : 'Machine translation')}</summary>
+                <p className="m-0 mt-1 leading-[1.55]">{rule.text_en}</p>
+              </details>
+            )}
             <PageViewer
               open={pageOpen}
               onClose={() => setPageOpen(false)}

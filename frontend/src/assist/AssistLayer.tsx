@@ -547,20 +547,22 @@ function WhyLabour({ p, onBack, onClose, tenderId }: { p: Position; onBack: () =
   )
 }
 
-/** Floating "Tell Assist what to do  Ctrl K" button (S01), shown above the footer on line pages. */
+/** "Tell Assist what to do  Ctrl K" (S01), at the left end of the footer totals bar: it never covers content. */
 export function AssistBarButton() {
   const t = useT()
   const ctx = useAssistCtx()
-  if (ctx.barOpen) return null
   const mac = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform)
   return (
     <button
       type="button"
       onClick={ctx.openBar}
-      className="sticky bottom-[62px] self-center z-20 inline-flex items-center gap-3 min-h-11 pl-4 pr-3.5 border border-ink rounded-[2px] bg-white shadow-[0_4px_16px_rgba(18,18,18,0.10)] text-muted hover:text-ink"
+      aria-expanded={ctx.barOpen}
+      aria-label={t('Tell Assist what to do')}
+      title={t('Tell Assist what to do')}
+      className="inline-flex items-center gap-2 h-8 min-h-0 pl-2.5 pr-2 -my-1 border border-rule rounded-[2px] bg-white text-[13px] text-muted hover:text-ink hover:border-ink whitespace-nowrap"
     >
       <AssistMark />
-      <span>{t('Tell Assist what to do')}</span>
+      <span aria-hidden="true">{t('Assist')}</span>
       <Kbd>{mac ? '⌘ K' : 'Ctrl K'}</Kbd>
     </button>
   )

@@ -484,3 +484,118 @@ def extract_meta(pages_text: dict[int, str] | None = None, pdf=None, use_llm: bo
         "meta_sources": sources, "submission_rule": sub, "award_criteria": awards,
         "offer_validity": validity, "method": method,
     }
+
+
+# --------------------------------------------------------------------------- plain summaries (built by code)
+# Short sentences for prominent spots (Overview, Pricing, Export), built from the numbers and facts the
+# rules read. The verbatim German stays the source; a rough glossary translation is never the headline.
+
+def _fmt_due(due_at: str | None) -> tuple[str, str] | None:
+    try:
+        d = dt.datetime.fromisoformat(due_at) if due_at else None
+    except ValueError:
+        d = None
+    if not d:
+        return None
+    day = d.strftime("%d.%m.%Y")
+    if d.hour or d.minute:
+        return f"{day}, {d:%H:%M}", f"{day}, {d:%H.%M} Uhr"
+    return day, day
+
+
+def _parts_to_submit(text: str) -> tuple[list[str], list[str]]:
+    en, de = [], []
+    m = re.search(r"(\d+)\s*-?\s*fach\s+Papier|(\d+)\s+(?:Exemplar|Papierexemplar)", text, re.I)
+    if m:
+        n = int(m.group(1) or m.group(2))
+        en.append(f"{n} paper cop{'y' if n == 1 else 'ies'}")
+        de.append(f"{n} Exemplar{'e' if n != 1 else ''} auf Papier")
+    if re.search(r"USB|Datenträger|Stick", text, re.I):
+        n_m = re.search(r"(\d+)\s+USB", text)
+        n = n_m.group(1) if n_m else "1"
+        pdf = bool(re.search(r"pdf", text, re.I))
+        sia = bool(re.search(r"SIA[- ]?Schnittstelle|SIA\s*451", text, re.I))
+        what_en = " with all files as PDF" if pdf else ""
+        what_de = " mit allen Dateien als PDF" if pdf else ""
+        if sia:
+            what_en += (" and" if pdf else " with") + " the SIA interface file"
+            what_de += (" und" if pdf else " mit") + " der SIA-Schnittstelle"
+        en.append(f"{n} USB stick{what_en}")
+        de.append(f"{n} USB-Stick{what_de}")
+    elif re.search(r"SIA[- ]?Schnittstelle|SIA\s*451", text, re.I):
+        en.append("the SIA interface file")
+        de.append("die SIA-Schnittstelle")
+    return en, de
+
+
+def submission_summary(rule: dict | None, due_at: str | None, client: str | None = None) -> dict | None:
+    """{short_en, short_de, full_en, full_de} from the submission paragraph, or None when its structure
+    (where to and what) is not recognisable."""
+    text = norm_ws((rule or {}).get("text_de") or "")
+    if not text:
+        return None
+    addr = None
+    m = re.search(r"\b(?:bei|an)\s+(?:der|die|den|dem)?\s*(.+?)\s+(?:bis\s+(?:zum|spätestens|am)|bis\s+\d|spätestens|einzureichen|eintreffend)", text)
+    if m:
+        addr = m.group(1).strip(" ,")
+    where_short = None
+    if addr:
+        if client and client.lower() in addr.lower():
+            where_short = client
+        else:
+            where_short = re.sub(r"^(?:Beschaffungsstelle|Bauherrschaft|Vergabestelle)\s+", "", addr.split(",")[0]).strip()
+    parts_en, parts_de = _parts_to_submit(text)
+    if not addr and not parts_en:
+        return None
+    sealed = bool(re.search(r"verschlossen|Couvert|Umschlag", text, re.I))
+    signed = bool(re.search(r"unterzeichnet|unterschrieben", text, re.I))
+    due = _fmt_due(due_at)
+    lead_en = "Sealed envelope" if sealed else "Offer"
+    lead_de = "Verschlossener Umschlag" if sealed else "Angebot"
+    what_en = " and ".join(parts_en) if parts_en else ""
+    what_de = " und ".join(parts_de) if parts_de else ""
+    short_en = f"{lead_en} to {where_short}" if where_short else lead_en
+    short_de = f"{lead_de} an {where_short}" if where_short else lead_de
+    short_en += f": {what_en}." if what_en else "."
+    short_de += f": {what_de}." if what_de else "."
+    offer_en = ("The complete, signed offer" if signed else "The offer")
+    offer_de = ("Das vollständige, unterzeichnete Angebot" if signed else "Das Angebot")
+    full_en = offer_en + (f" ({what_en})" if what_en else "") + (" in a sealed envelope" if sealed else "")
+    full_de = offer_de + (f" ({what_de})" if what_de else "") + (" im verschlossenen Umschlag" if sealed else "")
+    if addr:
+        full_en += f" to {addr}"
+        full_de += f" an {addr}"
+    if due:
+        full_en += f", by {due[0]}"
+        full_de += f", bis {due[1]}"
+    return {"short_en": short_en, "short_de": short_de, "full_en": full_en + ".", "full_de": full_de + "."}
+
+
+def award_price_summary(crit: dict | None, total_points: float | None = None) -> dict | None:
+    """Plain sentence for the price criterion: points, and the % above the lowest offer that gives 0 points."""
+    if not crit or crit.get("points") is None:
+        return None
+    pts = crit["points"]
+    pts_s = f"{pts:g}" if isinstance(pts, (int, float)) else str(pts)
+    tot = f"{total_points:g}" if total_points else "100"
+    page = crit.get("page")
+    rule = norm_ws(crit.get("rule_de") or "")
+    zero = None
+    m = re.search(r"(?:bei|ab)\s+(\d{2,3})\s*%\s*(?:des|vom)\s+(?:tiefsten|niedrigsten|günstigsten)", rule, re.I)
+    if m and int(m.group(1)) > 100:
+        zero = int(m.group(1)) - 100
+    else:
+        m = re.search(r"(\d{1,3})\s*%\s*(?:über|höher als|teurer als)\s+(?:dem\s+)?(?:tiefsten|niedrigsten|günstigsten)", rule, re.I)
+        if m:
+            zero = int(m.group(1))
+    linear = bool(re.search(r"linear", rule, re.I))
+    p_en = f" (p. {page})" if page else ""
+    p_de = f" (S. {page})" if page else ""
+    en = f"Price is worth {pts_s} of {tot} award points{p_en}."
+    de = f"Der Preis zählt {pts_s} von {tot} Zuschlagspunkten{p_de}."
+    if zero is not None:
+        en += f" The lowest offer gets all {pts_s}; an offer {zero}% above the lowest gets 0"
+        de += f" Das tiefste Angebot erhält alle {pts_s}, ein Angebot {zero} % über dem tiefsten erhält 0"
+        en += ", linear in between." if linear else "."
+        de += ", linear dazwischen." if linear else "."
+    return {"summary_en": en, "summary_de": de, "zero_above_pct": zero}

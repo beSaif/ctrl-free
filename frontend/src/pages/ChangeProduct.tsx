@@ -176,7 +176,7 @@ export function ChangeProduct() {
                 >
                   {searching ? t('Back to the closest products') : t('Search all {n} products', { n: ref?.catalog.length ?? 56 })}
                 </button>
-                <Link to={back}>{t('None fits: ask a supplier from the line')}</Link>
+                <Link to={back} className="inline-flex items-center min-h-8 underline underline-offset-2">{t('None fits: ask a supplier from the line')}</Link>
               </div>
 
               {isVariant && (

@@ -98,6 +98,36 @@ export function title(p: Position, lang: 'en' | 'de'): { main: string; sub: stri
   return { main: p.title_de, sub: lang === 'en' ? (p.title_en ?? '') : '' }
 }
 
+/** Plain sentences for the open lines, one per kind of open work (Overview step 1). */
+export function reviewBreakdown(open: Position[], totalDirect: number, t: T): string[] {
+  const d = (p: Position) => p.pricing?.direct ?? 0
+  const budget = open.filter((p) => isSupplier(p) && quotedPrice(p) === null && p.pricing?.unit_price_source === 'supplier_package')
+  const rest = open.filter((p) => !budget.includes(p))
+  const noCat = rest.filter((p) => p.status === 'supplier_quote_required' && !p.pricing)
+  const noQty = rest.filter((p) => p.status === 'insufficient_information')
+  const guess = rest.filter((p) => p.status === 'assumption_applied')
+  const check = rest.filter((p) => p.status === 'review_required')
+  const other = rest.length - noCat.length - noQty.length - guess.length - check.length
+  const out: string[] = []
+  if (budget.length) {
+    const b = budget.reduce((a, p) => a + d(p), 0)
+    out.push(
+      t(budget.length === 1 ? '1 runs on a budget price: CHF {amount} of direct cost ({share}).' : '{n} run on budget prices: CHF {amount} of direct cost ({share}).', {
+        n: budget.length,
+        amount: fmtNum(b, 0),
+        share: Math.round(totalDirect ? (b / totalDirect) * 100 : 0) + '%',
+      }),
+    )
+  }
+  const add = (n: number, one: string, many: string) => n > 0 && out.push(t(n === 1 ? one : many, { n }))
+  add(noCat.length, '1 is not in the catalogue and needs a supplier price.', '{n} are not in the catalogue and need a supplier price.')
+  add(noQty.length, '1 has no quantity in the tender.', '{n} have no quantity in the tender.')
+  add(guess.length, '1 is priced with an assumption: check it.', '{n} are priced with an assumption: check them.')
+  add(check.length, '1 needs a product checked.', '{n} need a product checked.')
+  add(other, '1 more is flagged or has a quote to confirm.', '{n} more are flagged or have a quote to confirm.')
+  return out
+}
+
 // ---- grouping for the list ------------------------------------------------------------
 
 export type LineFilter = 'review' | 'priced' | 'all' | 'check' | 'missing' | 'notpriced'
@@ -247,8 +277,8 @@ export function hoursSentence(pr: PositionPrice, unit: string | null, t: T, type
   return `${fmtQty(pr.quantity)} ${fmtUnit(unit)} × ${fmt2(pr.base_hours_per_unit)} h ${f} = ${fmt2(pr.hours)} h`
 }
 
-export function labourSentence(pr: PositionPrice, t: T): string {
-  return t('{hours} h × CHF {rate}/h ({role}) = CHF {total}', {
+export function labourSentence(pr: PositionPrice, t: T, hourly = false): string {
+  return t(hourly ? '{hours} h × CHF {rate}/h ({role}, hourly work) = CHF {total}' : '{hours} h × CHF {rate}/h ({role}) = CHF {total}', {
     hours: fmt2(pr.hours),
     rate: fmtNum(pr.rate, 0),
     role: roleLabel(pr.role, t),

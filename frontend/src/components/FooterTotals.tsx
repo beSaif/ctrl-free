@@ -2,6 +2,7 @@ import { useT } from '../i18n'
 import { usePositions, usePricing } from '../api/hooks'
 import { fmt0, fmt2 } from '../lib/format'
 import { wasChanged } from '../lib/lines'
+import { AssistBarButton } from '../assist/AssistLayer'
 
 /** Sticky totals bar on the line screens. Always reflects the server totals. */
 export function FooterTotals({ tenderId }: { tenderId: string }) {
@@ -22,8 +23,9 @@ export function FooterTotals({ tenderId }: { tenderId: string }) {
   return (
     <footer
       aria-label={t('Totals')}
-      className="sticky bottom-0 z-10 flex flex-wrap gap-x-5 gap-y-2 px-6 py-3 border-t border-ink bg-white text-[14px]"
+      className="sticky bottom-0 z-10 flex flex-wrap items-center gap-x-4 min-[1400px]:gap-x-5 gap-y-2 px-6 py-3 border-t border-ink bg-white text-[14px]"
     >
+      <AssistBarButton />
       <span>
         {t('Material')} <span className="font-mono">{fmt2(tot?.material)}</span>
       </span>
@@ -34,10 +36,11 @@ export function FooterTotals({ tenderId }: { tenderId: string }) {
         {t('Direct')} <span className="font-mono">{fmt2(tot?.direct)}</span>
       </span>
       <span>
-        {t('Cost incl. transport and overhead')} <span className="font-mono">{fmt2(tot?.cost)}</span>
+        <span className="hidden min-[1400px]:inline">{t('Cost incl. transport and overhead')}</span>
+        <span className="min-[1400px]:hidden">{t('Cost')}</span> <span className="font-mono">{fmt2(tot?.cost)}</span>
       </span>
       <span className="flex-auto" />
-      <span className="text-muted">{note}</span>
+      <span className="hidden min-[1600px]:inline text-muted">{note}</span>
       <span className="font-semibold" aria-live="polite">
         {t('Price at standard margin')}{' '}
         <span className={isFetching ? 'font-mono cf-pending' : 'font-mono'}>CHF {fmt0(tot?.standard_price)}</span>

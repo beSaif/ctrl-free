@@ -33,7 +33,7 @@ REVIEW_STATUSES = {"review_required", "assumption_applied", "insufficient_inform
 EXCLUDED_STATUSES = {"out_of_scope", "non_priceable"}
 CONFIDENT, WEAK = 0.75, 0.5
 PRICE_SOURCE_WORDS = {"catalog": "catalogue net price", "supplier_package": "supplier package budget price",
-                      "supplier_quote": "supplier quote", "manual": "entered by you"}
+                      "supplier_quote": "supplier quote", "manual": "entered by you", "labour": "hourly work"}
 
 
 # ---------------------------------------------------------------- formatting
@@ -123,6 +123,77 @@ def _unit_word(unit: str | None) -> str:
     return unit or "unit"
 
 
+# ---------------------------------------------------------------- hourly work (labour lines)
+
+HOURLY_UNITS = {"h", "std", "std.", "stunde", "stunden"}
+# a role is picked from the line's words; the installer rate is the default
+ROLE_WORDS = [("commissioning_specialist", ("einregulier", "inbetriebnahme", "inbetriebsetzung", "commissioning", "balancing")),
+              ("project_engineer", ("engineering", "planung", "projektleitung", "dokumentation"))]
+
+
+def is_hourly_work(position: dict) -> bool:
+    """A line counted in hours with no product: the tender asks for labour (Regie, Stundenansatz), not a supply item."""
+    if (position.get("kind") or "item") != "item":
+        return False
+    unit = str(position.get("unit") or position.get("unit_raw") or "").strip().lower()
+    return unit in HOURLY_UNITS and not effective_product_id(position)
+
+
+def labour_role_rate(position: dict) -> tuple[str, float]:
+    """(role, CHF per hour) from the install rules: a role named by the line's words, else the installer."""
+    words = " ".join(str(position.get(k) or "") for k in ("title_de", "title_en", "text_de")).lower()
+    want = next((role for role, kws in ROLE_WORDS if any(k in words for k in kws)), "installer")
+    rates: dict[str, float] = {}
+    for r in ref.load_rules().values():
+        rate = float(r.get("default_hourly_rate_chf") or 0)
+        if rate > 0 and r.get("labour_role"):
+            rates.setdefault(r["labour_role"], rate)
+    if want in rates:
+        return want, rates[want]
+    if "installer" in rates:
+        return "installer", rates["installer"]
+    return (next(iter(rates.items())) if rates else ("installer", 0.0))
+
+
+def _price_hourly_work(position: dict, qty: float, s: dict) -> dict:
+    ov = _ov(position)
+    role, rate = labour_role_rate(position)
+    hours_ov = _num(ov.get("hours"))
+    hours = hours_ov if hours_ov is not None else qty
+    labour = round(hours * rate, 2)
+    q = fmt_qty(qty)
+    page = position.get("page") or (position.get("source") or {}).get("page")
+    role_words = role.replace("_", " ")
+    hours_txt = (f"Set by you: {swiss(hours)} h (the tender asks for {q} h)" if hours_ov is not None
+                 else f"{q} h from the tender (hourly work)")
+    q_src = f"Tender p. {page}" if page else "Tender"
+    if _num(ov.get("quantity")) is not None:
+        q_src = f"Changed by you ({q_src} says {fmt_qty(position.get('quantity'))})"
+    return {
+        "quantity": qty, "unit": "h", "product_id": None, "install_code": None,
+        "net_unit_cost": 0.0, "unit_price_source": "labour",
+        "waste_pct": float(s["material_waste_pct"]), "material": 0.0,
+        "base_hours_per_unit": 1.0, "factors": [], "factor_product": 1.0, "calculated_hours": round(qty, 2),
+        "hours": round(hours, 2), "hours_overridden": hours_ov is not None,
+        "rate": rate, "role": role, "labour": labour, "direct": labour,
+        "category": "Labour",
+        "explain": {
+            "material": "Hourly work: no material",
+            "hours": hours_txt,
+            "labour": f"{swiss(hours)} h × CHF {swiss(rate, 0)}/h ({role_words}, hourly work) = CHF {swiss(labour)}",
+            "direct": f"0.00 + {swiss(labour)} = CHF {swiss(labour)}",
+        },
+        "sources": {
+            "product": "Hourly work, no product",
+            "unit_price": "No material on hourly work",
+            "install_rule": f"productivity.csv hourly rate ({role_words})",
+            "quantity": q_src,
+            "factors": "No site factors on hours the tender sets",
+            **({"hours": "Entered by you"} if hours_ov is not None else {}),
+        },
+    }
+
+
 # ---------------------------------------------------------------- position pricing
 
 def price_position(position: dict, settings: dict, system_profile: str = "school") -> dict | None:
@@ -135,6 +206,8 @@ def price_position(position: dict, settings: dict, system_profile: str = "school
         return None
     quote0 = position.get("supplier_quote") or {}
     if not pid and _num(ov.get("unit_price")) is None and _num(quote0.get("unit_price")) is None:
+        if is_hourly_work(position):
+            return _price_hourly_work(position, qty, s)
         return None
     product = ref.catalog_row(pid) if pid else None
 
@@ -274,6 +347,9 @@ def derive_status(position: dict, price: dict | None) -> tuple[str, str]:
             best = max((_num(c.get("score")) or 0) for c in cands)
             return "review_required", f"No confident match (best {best:.2f})"
         return "review_required", "No product matched yet"
+    if price.get("unit_price_source") == "labour":
+        return "assumption_applied", (f"Hourly work, not a supplier item: priced as labour at the "
+                                      f"{price['role'].replace('_', ' ')} rate, CHF {swiss(price['rate'], 0)}/h")
     if not price.get("product_id"):
         # not in the catalogue, priced from a supplier quote or a price the estimator typed
         if price["unit_price_source"] == "supplier_quote":
@@ -369,6 +445,9 @@ def explain_field(position: dict, price: dict | None, field: str) -> list[dict]:
         return [{"text": f"This line has no price: {reason[0].lower() + reason[1:]}", "value": "", "source": ""}]
     q, u = fmt_qty(price["quantity"]), _unit_word(price["unit"])
     srcs = price["sources"]
+    if field == "material" and price["unit_price_source"] == "labour":
+        return [{"text": "Hourly work: the tender asks for hours, so there is no material", "value": "0.00",
+                 "source": srcs["unit_price"]}]
     if field == "material":
         net = price["quantity"] * price["net_unit_cost"]
         return [
@@ -381,6 +460,9 @@ def explain_field(position: dict, price: dict | None, field: str) -> list[dict]:
     if price.get("hours_overridden"):
         hours_steps.append({"text": f"Hours set by you (the install rule gives {swiss(price['calculated_hours'])} h)",
                             "value": f"{swiss(price['hours'])} h", "source": "Entered by you"})
+    elif price["unit_price_source"] == "labour":
+        hours_steps.append({"text": f"{q} h from the tender (hourly work, no site factors)",
+                            "value": f"{swiss(price['hours'])} h", "source": srcs["quantity"]})
     elif ref.rule_row(price["install_code"]):
         raw = price["quantity"] * price["base_hours_per_unit"]
         hours_steps.append({"text": f"{q} {u} × {swiss(price['base_hours_per_unit'])} h per {u} (install rule {price['install_code']})",
@@ -394,6 +476,8 @@ def explain_field(position: dict, price: dict | None, field: str) -> list[dict]:
         return hours_steps
     if field == "labour":
         role = price["role"] or "no role"
+        if price["unit_price_source"] == "labour":
+            role = f"{role.replace('_', ' ')}, hourly work"
         return hours_steps + [{"text": f"× CHF {swiss(price['rate'], 0)} per hour ({role})",
                                "value": swiss(price["labour"]), "source": srcs["install_rule"]}]
     if field == "direct":

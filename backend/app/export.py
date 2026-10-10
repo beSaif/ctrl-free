@@ -395,6 +395,12 @@ def build_xlsx(tender: dict, totals: dict, settings: dict) -> bytes:
             terms = [(f"1/f_{_name(t['key'])}" if t["op"] == "÷" else f"f_{_name(t['key'])}") for t in pr["factors"]]
             ws_offer[C["Factor product"] + r] = "=" + ("*".join(terms) if terms else "1")
             _comment(ws_offer[C["Factor product"] + r], " ".join(f"{t['op']} {t['value']:.2f} {t['label']}" for t in pr["factors"]) or "No site factors")
+        elif pr["unit_price_source"] == "labour":
+            # hourly work: the tender quantity is the hours, priced at the role's hourly rate
+            ws_offer[C["Base h/unit"] + r] = 1
+            ws_offer[C["Rate"] + r] = pr["rate"]
+            _comment(ws_offer[C["Rate"] + r], f"Hourly work: productivity.csv rate for {pr['role'].replace('_', ' ')}")
+            ws_offer[C["Factor product"] + r] = 1
         else:
             ws_offer[C["Base h/unit"] + r] = 0
             ws_offer[C["Rate"] + r] = 0
@@ -681,6 +687,8 @@ def build_report_pdf(tender: dict, totals: dict, settings: dict, open_points: li
         "Hours = quantity × base hours of the install rule × site factors; site efficiency divides, the other "
         "factors multiply. Sports hall systems use the sports hall ceiling height factor.",
         "Labour = hours × the hourly rate of the install rule's role.",
+        "Lines the tender counts in hours with no product (hourly work, Regie) are our own labour: the tender's "
+        "hours × the hourly rate of the matching role (installer unless the line names commissioning), no material.",
         f"{n_budget} line{'s' if n_budget != 1 else ''} use supplier package budget prices "
         f"(CHF {P.swiss(totals.get('budget_direct', 0), 0)} direct) until a supplier quote is entered.",
         "Small material, when switched on, applies to catalogue material only; supplier package contingency applies "

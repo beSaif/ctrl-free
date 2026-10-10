@@ -7,7 +7,6 @@ import type { Position } from '../api/types'
 import { AssistTag, ErrorBox, FilterTabs, IconChevron, LinkButton, Button, Loading, SearchBox, type TabItem } from '../components/ui'
 import { cx } from '../lib/cx'
 import { FooterTotals } from '../components/FooterTotals'
-import { AssistBarButton } from '../assist/AssistLayer'
 import { fmt2, fmtQty, fmtUnit } from '../lib/format'
 import { isSupplier, lineStatus, matchView, productLabel, quotedPrice, type LineFilter } from '../lib/lines'
 import { linesQuery, useCatalog, useLineFilter, useLineQueue } from './linesShared'
@@ -200,7 +199,6 @@ export function Lines() {
           </section>
         )}
       </main>
-      <AssistBarButton />
       <FooterTotals tenderId={id} />
     </div>
   )

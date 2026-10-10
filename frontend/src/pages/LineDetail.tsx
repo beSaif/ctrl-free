@@ -9,7 +9,6 @@ import { Button, ErrorBox, IconBack, IconCheck, Kbd, LinkButton, Loading } from 
 import { cx } from '../lib/cx'
 import { PdfCrop } from '../components/PdfCrop'
 import { FooterTotals } from '../components/FooterTotals'
-import { AssistBarButton } from '../assist/AssistLayer'
 import { useAssistCtx } from '../assist/context'
 import { DropZone, FilledNote, ProposalCard, ReplyCrop } from '../assist/InlineAssist'
 import { useLineProposal } from '../assist/hooks'
@@ -247,7 +246,6 @@ export function LineDetail() {
           </div>
         </div>
       </main>
-      <AssistBarButton />
       <FooterTotals tenderId={id} />
     </div>
   )
@@ -339,6 +337,7 @@ function PriceSection({
   const qtySet = o.quantity != null
   const hoursSet = o.hours != null
   const priceSet = !sup && o.unit_price != null
+  const hourly = pr?.unit_price_source === 'labour'
 
   const commitQty = (s: string) => {
     const v = parseNum(s)
@@ -402,10 +401,10 @@ function PriceSection({
         <span className="text-muted">{t('Product')}</span>
         <span className="flex flex-col gap-0.5">
           <span>
-            {productLabel(p, cat)} · <Link to={`/t/${tenderId}/lines/${p.lv_id}/product${location.search}`}>{t('Change product')}</Link>
+            {hourly ? t('Hourly work, no product') : productLabel(p, cat)} · <Link to={`/t/${tenderId}/lines/${p.lv_id}/product${location.search}`}>{t('Change product')}</Link>
           </span>
-          <span className="text-[13px]" style={{ color: m.fg }}>
-            {m.line}
+          <span className="text-[13px]" style={{ color: hourly ? C.muted : m.fg }}>
+            {hourly ? t('The tender asks for hours: priced as our own labour, not a supplier item') : m.line}
           </span>
           {p.variant_reason && (
             <span className="text-[13px] text-attn">
@@ -414,6 +413,8 @@ function PriceSection({
           )}
         </span>
 
+        {!hourly && (
+        <>
         <label htmlFor="f-unit" className="text-muted">
           {sup ? t('Quoted unit price') : t('Unit price')}
         </label>
@@ -429,6 +430,8 @@ function PriceSection({
           />
           <Note color={unitFg}>{unitNote}</Note>
         </span>
+        </>
+        )}
 
         <label htmlFor="f-hrs" className="text-muted">
           {t('Hours')}
@@ -441,7 +444,9 @@ function PriceSection({
               ? calcHours !== undefined
                 ? t('Changed by you. Install rule gives {h}', { h: fmt2(calcHours) })
                 : t('Changed by you')
-              : t('From the install rule')}
+              : hourly
+                ? t('From the tender (hourly work)')
+                : t('From the install rule')}
           </Note>
         </span>
       </div>
@@ -449,11 +454,11 @@ function PriceSection({
       {pr ? (
         <div className="flex flex-col">
           <div className="flex justify-between gap-3 pt-1.5 border-t border-ink">
-            <span>{t('Material, incl. {w}% waste', { w: pr.waste_pct })}</span>
+            <span>{hourly ? t('Material') : t('Material, incl. {w}% waste', { w: pr.waste_pct })}</span>
             <span className="flex-none font-mono">{fmt2(pr.material)}</span>
           </div>
           <span className="pb-1.5 border-b border-rowrule text-[12.5px] text-muted">
-            {materialSentence(pr, p.unit, t)}
+            {hourly ? t('Hourly work: no material') : materialSentence(pr, p.unit, t)}
             {(qtySet || priceSet) && (
               <span className="text-accent">
                 {' · '}
@@ -470,10 +475,10 @@ function PriceSection({
             <span className="flex-none font-mono">{fmt2(pr.labour)}</span>
           </div>
           <span className="text-[12.5px] text-muted">
-            {hoursSentence(pr, p.unit, t, hoursSet)}
+            {hourly && !hoursSet ? t('{h} h from the tender (hourly work)', { h: fmtQty(pr.quantity) }) : hoursSentence(pr, p.unit, t, hoursSet)}
             {hoursSet && calcHours !== undefined && <span className="text-accent"> · {t('changed by you (install rule: {h} h)', { h: fmt2(calcHours) })}</span>}
           </span>
-          <span className="pb-1.5 border-b border-rowrule text-[12.5px] text-muted">{labourSentence(pr, t)}</span>
+          <span className="pb-1.5 border-b border-rowrule text-[12.5px] text-muted">{labourSentence(pr, t, hourly)}</span>
           <div className="flex justify-between gap-3 py-2 font-semibold text-[16px]">
             <span>{t('Line total')}</span>
             <span className="flex-none font-mono">CHF {fmt2(pr.direct)}</span>
