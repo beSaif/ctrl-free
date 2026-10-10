@@ -1,6 +1,8 @@
 // German UI strings (Swiss spelling), keyed by the English text. Tender text stays as in the PDF.
 import { DE_TRACE } from './i18n.de.trace'
 import { DE_CHANGES } from './i18n.de.changes'
+import { DE_PICKER } from './i18n.de.picker'
+
 export const DE: Record<string, string> = {
   ' and ': ' und ',
   'match.Strong': 'Sicher',
@@ -769,4 +771,5 @@ export const DE: Record<string, string> = {
   'check them before you submit': 'vor der Eingabe prüfen',
   ...DE_TRACE,
   ...DE_CHANGES,
+  ...DE_PICKER,
 }

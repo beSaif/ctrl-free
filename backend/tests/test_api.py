@@ -185,6 +185,48 @@ def test_instructions_patch(client, tid):
     assert d["state"] == "confirmed" and d["confirmed_by"] == "You"
 
 
+def test_instruction_pick_lines(client, tid):
+    """The line picker: families to pick by type, edits rewrite the labels, the suggestion stays, undo restores."""
+    r = client.get(f"/api/tenders/{tid}/instructions", params={"filter": "all"}).json()
+    fams = {f["key"]: f for f in r["families"]}
+    assert "silencer" in fams and fams["silencer"]["label"] == "Silencers" and fams["silencer"]["label_de"]
+    ins = next((i for i in r["instructions"] if len(i["applies_to"]) > 4), None)
+    if ins is None:
+        pytest.skip("no instruction with a line group")
+    sugg = ins["applies_to"]
+    assert ins["suggested_applies_to"] == sugg
+    sil = fams["silencer"]["lv_ids"][:5]
+    # several edits plus confirm in one call (the detail's "Confirm and next")
+    kind = "scope" if ins["kind"] == "risk" else "risk"
+    d = client.patch(f"/api/tenders/{tid}/instructions/{ins['id']}",
+                     json={"kind": kind, "applies_to": sil + sil[:1], "state": "confirmed"}).json()
+    assert d["applies_to"] == sil and d["kind"] == kind and d["state"] == "confirmed"
+    assert d["suggested_kind"] == ins["kind"] == ins["suggested_kind"]
+    assert d["applies_label"] == "5 silencers" and "All silencers lines (5)" in d["applies_long"]
+    assert d["suggested_applies_to"] == sugg
+    assert [x["lv_id"] for x in d["lines"]] == sil and all("direct" in x for x in d["lines"])
+    d = client.patch(f"/api/tenders/{tid}/instructions/{ins['id']}", json={"applies_to": sil[:2]}).json()
+    assert d["applies_label"].startswith(sil[0]) and d["applies_long"].count("p. ") == 2
+    assert d["suggested_applies_to"] == sugg
+    d = client.patch(f"/api/tenders/{tid}/instructions/{ins['id']}", json={"applies_to": []}).json()
+    assert d["applies_label"] == "Whole installation"
+    assert client.patch(f"/api/tenders/{tid}/instructions/{ins['id']}", json={"applies_to": ["LV9999"]}).status_code == 400
+    # undo every edit: back to the suggestion
+    log = [e for e in client.get(f"/api/tenders/{tid}/log").json()["log"] if e.get("action") == "edit_instruction"]
+    assert len(log) == 3
+    for e in log:  # newest first
+        assert client.post(f"/api/tenders/{tid}/assist/undo/{e['id']}").status_code == 200
+    d = client.get(f"/api/tenders/{tid}/instructions/{ins['id']}").json()
+    assert d["applies_to"] == sugg and d["suggested_applies_to"] == sugg and d["applies_label"] == ins["applies_label"]
+
+
+def test_positions_carry_pdf_order(client, tid):
+    ps = client.get(f"/api/tenders/{tid}/positions", params={"filter": "all"}).json()["positions"]
+    order = [p["pdf_order"] for p in ps]
+    assert len(set(order)) == len(order)
+    assert [p["page"] for p in sorted(ps, key=lambda p: p["pdf_order"])] == sorted(p["page"] for p in ps)
+
+
 def test_pricing_put_changes_offer_and_reset(client, tid):
     g = client.get(f"/api/tenders/{tid}/pricing").json()
     assert g["changed_count"] == 0

@@ -222,6 +222,8 @@ export interface Position {
   section?: string
   section_name?: string
   page: number
+  /** place in the tender's printed order (parser stream index) */
+  pdf_order?: number
   text_de: string
   title_de: string
   title_en?: string
@@ -304,11 +306,25 @@ export interface Instruction {
   state: InstructionState | string
   confirmed_by?: string | null
   confirmed_at?: string | null
+  /** the lines ctrl-free suggested (kept when the estimator changes applies_to) */
+  suggested_applies_to?: string[]
+  suggested_kind?: string
+  /** product family the rule is about, e.g. "silencer" */
+  family?: string | null
+}
+
+/** Product family of the priceable lines, to pick "all silencers" in one click. */
+export interface LineFamily {
+  key: string
+  label: string
+  label_de?: string
+  lv_ids: string[]
 }
 
 export interface InstructionsResponse {
   instructions: Instruction[]
   counts?: Record<string, number>
+  families?: LineFamily[]
 }
 
 export interface InstructionPatch {

@@ -28,7 +28,7 @@ import {
   roleLabel,
   wasChanged,
 } from '../lib/lines'
-import { linesQuery, useCatalog, useLineFilter, useLineQueue } from './linesShared'
+import { groupParam, linesQuery, useCatalog, useLineFilter, useLineQueue } from './linesShared'
 import { HoursSource, QtySource, RateSource, UnitPriceSource, WasteSource, type Trace } from './lineSources'
 import { LineHistory } from './LineHistory'
 
@@ -43,7 +43,7 @@ export function LineDetail() {
   const lang = useLang()
   const nav = useNavigate()
   const ctx = useAssistCtx()
-  const [filter, q] = useLineFilter()
+  const [filter, q, , groupBy] = useLineFilter()
   const { queue, positions, quotes } = useLineQueue(id, filter, q)
   const listP = positions.find((p) => p.lv_id === lv)
   const dq = usePosition(id, lv)
@@ -65,7 +65,7 @@ export function LineDetail() {
   const qi = inQueue >= 0 ? inQueue : docOrder.findIndex((x) => x.lv_id === lv)
   const prev = qi > 0 ? navList[qi - 1] : null
   const next = qi >= 0 && qi < navList.length - 1 ? navList[qi + 1] : null
-  const qs = inQueue >= 0 ? linesQuery(filter, q) : linesQuery('all', '')
+  const qs = inQueue >= 0 ? linesQuery(filter, q, groupParam(groupBy)) : linesQuery('all', '', groupParam(groupBy))
   const goTo = (x: Position | null) => x && nav(`/t/${id}/lines/${x.lv_id}${qs}`)
 
   useEffect(() => {
@@ -145,7 +145,7 @@ export function LineDetail() {
   return (
     <div className="flex-auto flex flex-col">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-6 py-2.5 border-b border-rule">
-        <LinkButton to={`/t/${id}/lines${linesQuery(filter, q, { sel: lv })}`} size="sm" className="pl-2.5">
+        <LinkButton to={`/t/${id}/lines${linesQuery(filter, q, { ...groupParam(groupBy), sel: lv })}`} size="sm" className="pl-2.5">
           <IconBack />
           {t('All lines')}
         </LinkButton>

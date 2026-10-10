@@ -1,5 +1,6 @@
 // N06 Instructions & norms: tender rules quoted verbatim, with suggested impact and lines.
-import { Link, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useT } from '../i18n'
 import { useInstructions } from '../api/hooks'
 import { ErrorBox, FilterTabs, LinkButton, Button, Loading } from '../components/ui'
@@ -12,14 +13,40 @@ const GRID = 'grid grid-cols-[200px_minmax(0,1fr)_56px_170px_110px_110px] gap-x-
 export function Instructions() {
   const { id = '' } = useParams()
   const t = useT()
+  const nav = useNavigate()
+  const [params] = useSearchParams()
   const [tab, setTab] = useInsTab()
   const { data, isLoading, error } = useInstructions(id)
+  // coming back from a detail keeps the place in the list (?sel=); J / K move, Enter opens
+  const [sel, setSel] = useState<string | null>(params.get('sel'))
+  const rowRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
+  const rows = useMemo(() => insQueue(data?.instructions ?? [], tab), [data, tab])
+  useEffect(() => {
+    if (sel) rowRefs.current[sel]?.scrollIntoView({ block: 'nearest' })
+  }, [sel, rows])
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement
+      if (e.metaKey || e.ctrlKey || e.altKey || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable) return
+      if (document.querySelector('[role="dialog"]') || !rows.length) return
+      const i = rows.findIndex((r) => r.id === sel)
+      if (e.key === 'j' || e.key === 'J' || e.key === 'k' || e.key === 'K') {
+        e.preventDefault()
+        const n = rows[e.key.toLowerCase() === 'j' ? Math.min(rows.length - 1, i + 1) : Math.max(0, i - 1)]
+        setSel(n.id)
+        rowRefs.current[n.id]?.focus()
+      } else if (e.key === 'Enter' && !e.repeat && sel && el.tagName !== 'A' && el.tagName !== 'BUTTON') {
+        nav(`/t/${id}/instructions/${sel}?tab=${tab}`)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [rows, sel, nav, id, tab])
   if (isLoading) return <Loading label={t('Loading')} />
   if (error || !data) return <ErrorBox error={error} label={t('Could not load the instructions.')} />
   const all = data.instructions
   const open = all.filter((i) => i.state === 'open')
   const count = (k: InsTab) => (k === 'open' ? open.length : k === 'all' ? all.length : all.filter((i) => i.kind === k).length)
-  const rows = insQueue(all, tab)
   const allDone = tab === 'open' && open.length === 0 && all.length > 0
   const nOk = all.filter((i) => i.state === 'confirmed').length
   const nNr = all.filter((i) => i.state === 'not_relevant').length
@@ -65,8 +92,12 @@ export function Instructions() {
                 return (
                   <Link
                     key={r.id}
+                    ref={(el) => {
+                      rowRefs.current[r.id] = el
+                    }}
                     to={`/t/${id}/instructions/${r.id}?tab=${tab}`}
-                    className={cx(GRID, 'items-center w-full min-h-10 px-6 py-1.5 border-b border-rowrule bg-white text-ink! no-underline hover:bg-panel')}
+                    aria-current={r.id === sel ? 'true' : undefined}
+                    className={cx(GRID, 'items-center w-full min-h-10 px-6 py-1.5 border-b border-rowrule bg-white text-ink! no-underline hover:bg-panel', r.id === sel && 'row-selected')}
                   >
                     <span className="font-medium overflow-hidden text-ellipsis whitespace-nowrap">{r.type}</span>
                     <span className="overflow-hidden text-ellipsis whitespace-nowrap text-body">{r.text_de}</span>
@@ -83,7 +114,10 @@ export function Instructions() {
                 )
               })}
               {rows.length === 0 && <div className="px-6 py-8 text-muted">{t('Nothing in this tab.')}</div>}
-              <div className="px-6 py-2.5 text-[13px] text-muted">{t('The requirement text is copied from the tender and cannot be edited. Click a row to open it.')}</div>
+              <div className="px-6 py-2.5 text-[13px] text-muted">
+                {t('The requirement text is copied from the tender and cannot be edited. Click a row to open it.')}{' '}
+                <span className="hidden lg:inline">{t('Keys: J next, K previous, Enter opens.')}</span>
+              </div>
             </div>
           </section>
         )}

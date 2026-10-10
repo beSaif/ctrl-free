@@ -1456,6 +1456,7 @@ def _make_position(g: _Group, qline: Line, system: dict | None, section, section
         "section": section,
         "section_name": section_name,
         "page": page,
+        "pdf_order": qline.idx,          # running index of the quantity line in the LV stream (printed order)
         "text_de": text_de,
         "title_de": title,
         "variant_de": variant_de,
@@ -1510,6 +1511,7 @@ def _subtotal(lines: list[Line], system: dict | None, section, section_name) -> 
         "system_key": system["key"] if system else None,
         "section": section, "section_name": section_name,
         "page": ln.page,
+        "pdf_order": ln.idx,
         "text_de": "\n".join(l.text for l in lines),
         "title_de": text,
         "variant_de": None,

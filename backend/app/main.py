@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response
 
 from . import assist, config, pipeline, review, store
+from . import instructions as instructions_mod
 from .models import (AssistCommand, InstructionPatch, Outcome, PositionPatch, PricingUpdate, QuoteApply, ReviewBody,
                      ReviewMany, TenderPatch)
 
@@ -850,7 +851,10 @@ def _instruction_view(t: dict, ins: dict, v: dict) -> dict:
             lines.append({"lv_id": x, "title_de": p.get("title_de"), "title_en": p.get("title_en"), "page": p.get("page"),
                           "quantity": p.get("quantity"), "unit": p.get("unit"), "status": p["status"],
                           "needs_review": p["needs_review"], "direct": _direct(p)})
-    return {**ins, "lines": lines,
+    # the pipeline's suggestion stays visible after the estimator changes the lines
+    return {**ins, "lines": lines, "suggested_applies_to": ins.get("suggested_applies_to") if ins.get("suggested_applies_to") is not None
+            else ins.get("applies_to") or [],
+            "suggested_kind": ins.get("suggested_kind") or ins.get("kind"),
             "log": [e for e in reversed(t.get("log") or [])
                     if (e.get("target") or {}).get("kind") == "instruction" and e["target"].get("id") == ins["id"]][:10]}
 
@@ -877,7 +881,8 @@ def list_instructions(tid: str, filter: str = "open"):
     pages = sorted({i.get("page") for i in items if i.get("page")})
     sections = sorted({i.get("section") for i in items if i.get("section")})
     return {"filter": filter, "instructions": [_instruction_view(t, i, v) for i in sel], "counts": counts,
-            "pages": [pages[0], pages[-1]] if pages else None, "sections": sections}
+            "pages": [pages[0], pages[-1]] if pages else None, "sections": sections,
+            "families": instructions_mod.line_families(v["positions"])}
 
 
 @app.get("/api/tenders/{tid}/instructions/{iid}")
@@ -887,12 +892,6 @@ def get_instruction(tid: str, iid: str):
     if ins is None:
         raise HTTPException(404, f"Instruction {iid} not found")
     return _instruction_view(t, ins, pipeline.view(t))
-
-
-def _applies_label(ids: list[str]) -> str:
-    if not ids:
-        return "Whole tender"
-    return ", ".join(ids[:3]) + (f" and {len(ids) - 3} more" if len(ids) > 3 else "")
 
 
 @app.patch("/api/tenders/{tid}/instructions/{iid}")
@@ -905,13 +904,21 @@ def patch_instruction(tid: str, iid: str, body: InstructionPatch):
         upd: dict[str, Any] = {}
         if "kind" in data and data["kind"]:
             upd["kind"] = data["kind"]
+            if ins.get("suggested_kind") is None and data["kind"] != ins.get("kind"):
+                upd["suggested_kind"] = ins.get("kind")
         if "applies_to" in data and data["applies_to"] is not None:
             known = {p["lv_id"] for p in t["positions"]}
             bad = [x for x in data["applies_to"] if x not in known]
             if bad:
                 raise HTTPException(400, f"Unknown lines: {', '.join(bad)}")
-            upd["applies_to"] = data["applies_to"]
-            upd["applies_label"] = _applies_label(data["applies_to"])
+            ids = list(dict.fromkeys(data["applies_to"]))
+            fams = {instructions_mod.matcher.family_of(instructions_mod._position_type(p, None))
+                    for p in t["positions"] if p["lv_id"] in ids}
+            fam = fams.pop() if len(fams) == 1 else None  # "6 silencers" when the lines share one family
+            upd["applies_to"] = ids
+            upd["applies_label"], upd["applies_long"] = instructions_mod.describe_applies(ids, t["positions"], fam)
+            if ins.get("suggested_applies_to") is None:
+                upd["suggested_applies_to"] = list(ins.get("applies_to") or [])
         if upd:
             store.change(t, "You", "edit_instruction", "instruction", iid, upd, text=f"Changed {ins.get('type')}")
         if data.get("state"):
