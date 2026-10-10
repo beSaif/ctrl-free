@@ -9,6 +9,7 @@ import { changedBy } from '../lib/trace'
 import type { Instruction, InstructionPatch, Position } from '../api/types'
 import { Button, ErrorBox, IconBack, Kbd, LinkButton, Loading, SegmentedControl } from '../components/ui'
 import { PdfCrop } from '../components/PdfCrop'
+import { Source } from '../components/Source'
 import { fmt2, fmtShortDate, translationLabel } from '../lib/format'
 import { C, isOpen } from '../lib/lines'
 import { IMPACT, insQueue, useInsTab } from './instructionsShared'
@@ -110,11 +111,11 @@ function InstructionDetailView() {
   })
 
   const me = useMyName()
+  const keys = t('Keys: Enter confirm and next, 1 to 4 impact, L lines, J/K next/previous, Esc back to the list.')
   if (isLoading) return <Loading label={t('Loading')} />
   if (error || !s) return <ErrorBox error={error} label={t('This instruction was not found.')} />
 
   const open = s.state === 'open'
-  const stateText = open ? t('To confirm') : s.state === 'confirmed' ? t('Confirmed by {who}', { who: changedBy(s.confirmed_by, me, t) }) : t('Marked not relevant')
   const lines = applies.map((x) => byLv.get(x)).filter((p): p is Position => !!p)
   const sumDirect = lines.reduce((a, p) => a + (p.pricing?.direct ?? 0), 0)
   const linesChanged = !sameSet(applies, suggested)
@@ -157,10 +158,12 @@ function InstructionDetailView() {
               {s.section ? ` · ${s.section}` : ''}
             </span>
             <h1 className="m-0 text-[26px] leading-[1.25] font-semibold">{s.type}</h1>
-            <span className="flex items-center gap-2" style={{ color: open ? C.attn : C.ink }}>
-              <span className="w-2 h-2" style={{ background: open ? C.attn : C.ink }} aria-hidden="true" />
-              {stateText}
-            </span>
+            {open && (
+              <span className="flex items-center gap-2" style={{ color: C.attn }}>
+                <span className="w-2 h-2" style={{ background: C.attn }} aria-hidden="true" />
+                {t('To confirm')}
+              </span>
+            )}
           </div>
 
           <div className="flex flex-wrap items-start gap-x-10 gap-y-7">
@@ -180,7 +183,6 @@ function InstructionDetailView() {
                     <span className="text-[14px] leading-[1.65] bg-hl px-1 py-0.5">{s.text_de}</span>
                   </div>
                 }
-                caption={t('Copied word for word from p. {page}, margin label "{type}".', { page: s.page, type: s.type })}
               />
               {s.text_en && (
                 <section className="flex flex-col gap-1.5">
@@ -253,18 +255,13 @@ function InstructionDetailView() {
                       <span>{s.why}</span>
                     </div>
                   )}
-
-                  <div className="flex flex-col gap-1 px-3 py-2.5 bg-panel">
-                    <span className="text-[13px] font-semibold">{open ? t('What confirming does') : t('What this decision does')}</span>
-                    <span className="text-[13.5px] leading-[1.55]">{effect(kind, lines, sumDirect, t)}</span>
-                  </div>
                 </div>
               </section>
 
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                 {open ? (
                   <>
-                    <Button variant="primary" onClick={() => decide('confirmed')} disabled={patch.isPending}>
+                    <Button variant="primary" onClick={() => decide('confirmed')} disabled={patch.isPending} title={keys}>
                       {nextOpen ? t('Confirm and next') : t('Confirm')} <Kbd>Enter</Kbd>
                     </Button>
                     <Button onClick={() => decide('not_relevant')} disabled={patch.isPending}>
@@ -296,9 +293,11 @@ function InstructionDetailView() {
                 )}
               </div>
               {patch.error && <span className="text-[13px]" style={{ color: C.attn }}>{t('Could not save.')}</span>}
-              <span className="text-[13px] text-muted">
-                {dirty ? t('Your changes are saved when you confirm.') : t('"Impact" and "Applies to" are suggestions until you confirm them.')}{' '}
-                <span className="hidden lg:inline">{t('Keys: Enter confirm and next, 1 to 4 impact, L lines, J/K next/previous, Esc back to the list.')}</span>
+              <span className="flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-muted">
+                {dirty && open && <span>{t('Your changes are saved when you confirm.')}</span>}
+                <Source label={open ? t('What confirming does') : t('What this decision does')} title={open ? t('What confirming does') : t('What this decision does')} width={400}>
+                  <p className="m-0 leading-[1.55]">{effect(kind, lines, sumDirect, t)}</p>
+                </Source>
               </span>
             </div>
           </div>

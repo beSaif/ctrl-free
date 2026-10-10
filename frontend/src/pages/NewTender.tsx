@@ -80,7 +80,12 @@ export function NewTender() {
             {t('Use the Oberglatt demo tender')}
           </Button>
           <Button onClick={close}>{t('Cancel')}</Button>
-          <Button variant="primary" onClick={submit} disabled={!file || dueBad || create.isPending}>
+          <Button
+            variant="primary"
+            onClick={submit}
+            disabled={!file || dueBad || create.isPending}
+            title={t('The PDF is read in the background. The tender shows in the list right away and opens as soon as it is priced.')}
+          >
             {create.isPending ? t('Creating…') : t('Create tender')}
           </Button>
         </>
@@ -138,7 +143,7 @@ export function NewTender() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
-          <Field label={t('Name')} hint={t('Leave empty: read from the tender')} className="sm:col-span-2">
+          <Field label={t('Name')} className="sm:col-span-2">
             <TextInput value={name} onChange={(e) => setName(e.target.value)} placeholder={t('Read from the tender')} />
           </Field>
           <Field label={t('Client')}>
@@ -162,13 +167,10 @@ export function NewTender() {
           </Field>
         </div>
 
-        <div className="px-3.5 py-3 bg-panel text-[13px] text-body flex flex-col gap-1">
-          <span>
-            {t('Priced with the product catalogue ({p} products) and install rules ({r}) from', { p: ref?.catalog.length ?? 56, r: ref?.rules.length ?? 22 })}{' '}
-            <Link to="/reference">{t('Reference data')}</Link>.
-          </span>
-          <span>{t('The PDF is read in the background. The tender shows in the list right away and opens as soon as it is priced.')}</span>
-        </div>
+        <span className="text-[13px] text-muted">
+          {t('Priced with the product catalogue ({p} products) and install rules ({r}) from', { p: ref?.catalog.length ?? 56, r: ref?.rules.length ?? 22 })}{' '}
+          <Link to="/reference">{t('Reference data')}</Link>.
+        </span>
         {create.error && (
           <span role="alert" className="text-attn">
             {t('Could not create the tender.')} {create.error instanceof Error ? create.error.message : ''}

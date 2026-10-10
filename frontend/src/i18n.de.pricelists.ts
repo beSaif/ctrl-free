@@ -108,4 +108,5 @@ export const DE_PRICELISTS: Record<string, string> = {
   'cost incl. transport and overhead': 'Kosten inkl. Transport und Gemeinkosten',
   'Showing the first 500 rows.': 'Die ersten 500 Zeilen werden angezeigt.',
   '{n} differ because an active price list replaces the catalogue prices the examples use.': '{n} weichen ab, weil eine aktive Preisliste die Katalogpreise der Beispiele ersetzt.',
+  'How the order works': 'Wie die Reihenfolge wirkt',
 }

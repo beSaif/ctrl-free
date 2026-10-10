@@ -6,7 +6,6 @@ import { useImportReference, useReference } from '../api/hooks'
 import type { ReferenceResponse } from '../api/types'
 import { ErrorBox, FilterTabs, Loading, SearchBox, Td, Th } from '../components/ui'
 import { fmt2, fmtShortDate, fmtUnit } from '../lib/format'
-import { C } from '../lib/lines'
 import { cx } from '../lib/cx'
 import { PriceLists } from './PriceLists'
 import { useLearned } from '../api/learned'
@@ -203,10 +202,15 @@ export function Reference() {
                         <Td className="py-[7px] text-right font-mono">{fmt2(c.net_cost_chf)}</Td>
                         <Td className="py-[7px] font-mono text-[13px]">{c.install_code}</Td>
                         <Td className="py-[7px]">
-                          <span className="inline-flex items-center gap-2" style={{ color: sup ? C.attn : C.muted }}>
-                            <span className="w-2 h-2" style={{ background: sup ? C.attn : C.muted }} aria-hidden="true" />
-                            {sup ? t('Supplier package') : t('Catalogue')}
-                          </span>
+                          {/* the catalogue price is the default and stays quiet; a supplier package is information, not an action here */}
+                          {sup ? (
+                            <span className="inline-flex items-center gap-2" title={t('Budget figure: lines using it go to Review until a quote is entered.')}>
+                              <span className="w-2 h-2 bg-ink" aria-hidden="true" />
+                              {t('Supplier package')}
+                            </span>
+                          ) : (
+                            <span className="text-faint">{t('Catalogue')}</span>
+                          )}
                         </Td>
                       </tr>
                     )
@@ -215,7 +219,7 @@ export function Reference() {
               </table>
             </div>
             <p className="mt-2.5 mb-0 text-[13px] text-muted">
-              {t('Showing {a} of {b} products.', { a: cat.length, b: data.catalog.length })}{' '}
+              {q.trim() && t('Showing {a} of {b} products.', { a: cat.length, b: data.catalog.length }) + ' '}
               {t('{n} "Supplier package" prices are budget figures: lines using them go to Review until a quote is entered.', { n: supplierN })}
             </p>
           </>

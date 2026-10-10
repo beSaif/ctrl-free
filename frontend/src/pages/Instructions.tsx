@@ -3,12 +3,14 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useT } from '../i18n'
 import { useInstructions } from '../api/hooks'
-import { ErrorBox, FilterTabs, LinkButton, Button, Loading } from '../components/ui'
+import { ErrorBox, FilterTabs, IconCheck, LinkButton, Button, Loading } from '../components/ui'
 import { cx } from '../lib/cx'
 import { C } from '../lib/lines'
 import { INS_TABS, impactOf, insQueue, sourceHint, useInsTab, type InsTab } from './instructionsShared'
 
 const GRID = 'grid grid-cols-[200px_minmax(0,1fr)_56px_170px_110px_110px] gap-x-3.5'
+// in "To confirm" every row is open, so the Confirmed column would only repeat the tab
+const GRID_OPEN = 'grid grid-cols-[200px_minmax(0,1fr)_56px_170px_110px] gap-x-3.5'
 
 export function Instructions() {
   const { id = '' } = useParams()
@@ -51,6 +53,7 @@ export function Instructions() {
   const nOk = all.filter((i) => i.state === 'confirmed').length
   const nNr = all.filter((i) => i.state === 'not_relevant').length
   const labels: Record<InsTab, string> = { open: 'To confirm', all: 'All', cost: 'Adds cost', risk: 'Risk', scope: 'Scope', covered: 'Covered' }
+  const grid = tab === 'open' ? GRID_OPEN : GRID
 
   return (
     <div className="flex-auto flex flex-col">
@@ -76,19 +79,20 @@ export function Instructions() {
             </div>
           </div>
         ) : (
-          <section aria-label={t('Instructions')} className="overflow-x-auto">
+          <section aria-label={t('Instructions')} title={t('Keys: J next, K previous, Enter opens.')} className="overflow-x-auto">
             <div className="min-w-[900px]">
-              <div className={cx(GRID, 'px-6 py-2 border-b border-rule text-[13px] text-muted font-medium')}>
-                <span>{t("Type (tender's margin label)")}</span>
-                <span>{t('Requirement (tender text)')}</span>
+              <div className={cx(grid, 'px-6 py-2 border-b border-rule text-[13px] text-muted font-medium')}>
+                <span title={t("Type (tender's margin label)")}>{t('Type')}</span>
+                <span title={t('The requirement text is copied from the tender and cannot be edited.')}>{t('Requirement (tender text)')}</span>
                 <span>{t('Page')}</span>
                 <span>{t('Applies to')}</span>
                 <span>{t('Impact')}</span>
-                <span>{t('Confirmed')}</span>
+                {tab !== 'open' && <span>{t('Confirmed')}</span>}
               </div>
               {rows.map((r) => {
                 const [imp, color] = impactOf(r.kind, t)
-                const isOpenRow = r.state === 'open'
+                // only cost and risk draw the eye; scope and covered are information
+                const loud = r.kind === 'cost' || r.kind === 'risk'
                 return (
                   <Link
                     key={r.id}
@@ -97,27 +101,31 @@ export function Instructions() {
                     }}
                     to={`/t/${id}/instructions/${r.id}?tab=${tab}`}
                     aria-current={r.id === sel ? 'true' : undefined}
-                    className={cx(GRID, 'items-center w-full min-h-10 px-6 py-1.5 border-b border-rowrule bg-white text-ink! no-underline hover:bg-panel', r.id === sel && 'row-selected')}
+                    className={cx(grid, 'items-center w-full min-h-10 px-6 py-1.5 border-b border-rowrule bg-white text-ink! no-underline hover:bg-panel', r.id === sel && 'row-selected')}
                   >
                     <span className="font-medium overflow-hidden text-ellipsis whitespace-nowrap">{r.type}</span>
                     <span className="overflow-hidden text-ellipsis whitespace-nowrap text-body">{r.text_de}</span>
                     <span className="font-mono text-[13px] text-muted">{r.page}</span>
                     <span className="text-muted overflow-hidden text-ellipsis whitespace-nowrap">{r.applies_label || (r.applies_to ?? []).join(', ') || '–'}</span>
-                    <span className="flex items-center gap-2">
+                    <span className={cx('flex items-center gap-2', !loud && 'text-muted')}>
                       <span className="flex-none w-2 h-2" style={{ background: color }} aria-hidden="true" />
                       {imp}
                     </span>
-                    <span style={{ color: isOpenRow ? C.attn : C.muted }}>
-                      {r.state === 'confirmed' ? t('Yes · {who}', { who: t(r.confirmed_by ?? 'You') }) : r.state === 'not_relevant' ? t('Not relevant') : t('To confirm')}
-                    </span>
+                    {tab !== 'open' &&
+                      (r.state === 'confirmed' ? (
+                        <span className="text-muted" title={t('Yes · {who}', { who: t(r.confirmed_by ?? 'You') })}>
+                          <IconCheck />
+                          <span className="sr-only">{t('Yes · {who}', { who: t(r.confirmed_by ?? 'You') })}</span>
+                        </span>
+                      ) : r.state === 'not_relevant' ? (
+                        <span className="text-muted">{t('Not relevant')}</span>
+                      ) : (
+                        <span style={{ color: C.attn }}>{t('To confirm')}</span>
+                      ))}
                   </Link>
                 )
               })}
               {rows.length === 0 && <div className="px-6 py-8 text-muted">{t('Nothing in this tab.')}</div>}
-              <div className="px-6 py-2.5 text-[13px] text-muted">
-                {t('The requirement text is copied from the tender and cannot be edited. Click a row to open it.')}{' '}
-                <span className="hidden lg:inline">{t('Keys: J next, K previous, Enter opens.')}</span>
-              </div>
             </div>
           </section>
         )}

@@ -24,6 +24,7 @@ import { Button, Dialog, ErrorBox, Field, FilterTabs, IconFile, IconUpload, Load
 import { cx } from '../lib/cx'
 import { fmt2, fmtDate, fmtSigned, fmtUnit } from '../lib/format'
 import { C } from '../lib/lines'
+import { Source } from '../components/Source'
 
 const SELECT = 'min-h-9 px-2 border border-rule rounded-[2px] bg-white text-[14px] text-ink'
 
@@ -93,7 +94,14 @@ function Precedence({ t }: { t: T }) {
   const steps = [t('Unit price typed on the line'), t('Supplier quote for this tender'), t('Active price lists, top to bottom'), t('Standard catalogue')]
   return (
     <section className="flex flex-col gap-1.5 py-3.5 border-b border-rule">
-      <h2 className="m-0 text-[15px] font-semibold">{t('Which net price a line uses')}</h2>
+      <div className="flex flex-wrap items-baseline gap-x-3">
+        <h2 className="m-0 text-[15px] font-semibold">{t('Which net price a line uses')}</h2>
+        <Source label={t('How the order works')} title={t('Which net price a line uses')} className="text-[13px] text-muted">
+          <p className="m-0 leading-[1.55]">
+            {t('The first that has a price wins. New lists are placed by rule: Equans negotiated prices above supplier lists, the most recent first. Change the order with the arrows; it applies to every tender. Every change re-prices all tenders and logs each line whose unit price moves, with the old and the new price.')}
+          </p>
+        </Source>
+      </div>
       <ol className="m-0 p-0 list-none flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px]">
         {steps.map((s, i) => (
           <li key={s} className="flex items-center gap-2">
@@ -103,9 +111,6 @@ function Precedence({ t }: { t: T }) {
           </li>
         ))}
       </ol>
-      <p className="m-0 text-[13px] text-muted">
-        {t('The first that has a price wins. New lists are placed by rule: Equans negotiated prices above supplier lists, the most recent first. Change the order with the arrows; it applies to every tender. Every change re-prices all tenders and logs each line whose unit price moves, with the old and the new price.')}
-      </p>
     </section>
   )
 }

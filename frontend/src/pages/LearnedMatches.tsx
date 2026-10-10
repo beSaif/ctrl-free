@@ -8,6 +8,7 @@ import { Button, ErrorBox, Loading, Td, Th } from '../components/ui'
 import { cx } from '../lib/cx'
 import { fmtShortDate, fmtUnit } from '../lib/format'
 import { C } from '../lib/lines'
+import { Source } from '../components/Source'
 
 const KIND_WORD: Record<string, string> = { taught: 'Taught', confirmed: 'Confirmed', applied: 'Applied', overridden: 'Overridden' }
 
@@ -38,11 +39,8 @@ function SourceLink({ e }: { e: { tender_id: string; tender_name: string | null;
 
 function Status({ r }: { r: LearnedRule }) {
   const t = useT()
-  const [fg, text] = r.active
-    ? [C.ink, t('Applies to new tenders')]
-    : r.stopped === 'overridden'
-      ? [C.attn, t('Stopped: overridden more often than confirmed')]
-      : [C.faint, t('Disabled')]
+  if (r.active) return <span className="text-muted">{t('Applies to new tenders')}</span>
+  const [fg, text] = r.stopped === 'overridden' ? [C.attn, t('Stopped: overridden more often than confirmed')] : [C.faint, t('Disabled')]
   return (
     <span className="inline-flex items-center gap-2" style={{ color: fg }}>
       <span className="w-2 h-2 flex-none" style={{ background: fg }} aria-hidden="true" />
@@ -93,7 +91,7 @@ function RuleRow({ r, selected }: { r: LearnedRule; selected: boolean }) {
         </Td>
         <Td className="py-2 align-top text-right font-mono">{r.times_applied}</Td>
         <Td className="py-2 align-top text-right font-mono">{r.times_confirmed}</Td>
-        <Td className="py-2 align-top text-right font-mono" style={{ color: r.times_overridden ? C.attn : undefined }}>
+        <Td className={cx('py-2 align-top text-right font-mono', r.times_overridden > 0 && 'font-semibold')}>
           {r.times_overridden}
         </Td>
         <Td className="py-2 align-top">
@@ -174,11 +172,13 @@ export function LearnedMatches() {
   if (error || !data) return <ErrorBox error={error} label={t('Could not load the learned matches.')} />
   return (
     <div className="flex flex-col gap-3 pt-3">
-      <p className="m-0 max-w-[880px] text-muted">
-        {t(
-          'When you change a line’s product, or confirm a match that needed you, ctrl-free remembers it for that tender wording. New tenders use it first and show where it came from; the code’s own pick stays in the list so you can compare. A rule overridden more often than confirmed stops applying.',
-        )}
-      </p>
+      <Source label={t('How learning works')} title={t('Learned matches')} className="self-start text-[13px] text-muted">
+        <p className="m-0 leading-[1.55]">
+          {t(
+            'When you change a line’s product, or confirm a match that needed you, ctrl-free remembers it for that tender wording. New tenders use it first and show where it came from; the code’s own pick stays in the list so you can compare. A rule overridden more often than confirmed stops applying.',
+          )}
+        </p>
+      </Source>
       {data.rules.length === 0 ? (
         <div className="px-4 py-6 border border-rule text-muted">
           {t('Nothing learned yet. Change a product on a line, or confirm a weak match, and it shows up here.')}

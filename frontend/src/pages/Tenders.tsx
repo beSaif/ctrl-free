@@ -64,7 +64,7 @@ export function Tenders() {
         <ErrorBox error={error} label={t('Could not load the tenders.')} />
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1080px] border-collapse">
+          <table className="w-full min-w-[1000px] border-collapse">
             <thead>
               <tr>
                 <Th>{t('Tender')}</Th>
@@ -72,7 +72,9 @@ export function Tenders() {
                 <Th>{t('Trade')}</Th>
                 <Th>{t('Submission due')}</Th>
                 <Th>{t('Open work')}</Th>
-                <Th className="text-right">{t('Offer price (CHF)')}</Th>
+                <Th className="text-right whitespace-nowrap" title={'≈ ' + t('standard margin, not final')}>
+                  {t('Offer price (CHF)')}
+                </Th>
                 <Th>{t('Updated')}</Th>
               </tr>
             </thead>
@@ -106,10 +108,24 @@ function TenderRow({ x }: { x: TenderSummary }) {
   const ow = x.open_work
   const p = x.progress
   const due = daysUntil(x.due_at)
+  // open work after "lines to review", most important first; only the first one is orange
   const sub = [
-    ow && ow.instructions_to_confirm ? t('{n} instructions to confirm', { n: ow.instructions_to_confirm }) : null,
-    ow && !ow.price_chosen ? t('price not chosen') : null,
-  ].filter(Boolean)
+    ow && ow.instructions_to_confirm
+      ? { text: t('{n} instructions', { n: ow.instructions_to_confirm }), title: t('{n} instructions to confirm', { n: ow.instructions_to_confirm }) }
+      : null,
+    ow && !ow.price_chosen ? { text: t('price not chosen'), title: t('Choose the offer price under Pricing') } : null,
+  ].filter((v): v is { text: string; title: string } => !!v)
+  const rest = (xs: typeof sub) =>
+    xs.length > 0 && (
+      <div className="text-[13px] text-muted pl-4 whitespace-nowrap">
+        {xs.map((v, i) => (
+          <span key={v.text} title={v.title}>
+            {i > 0 && ' · '}
+            {v.text}
+          </span>
+        ))}
+      </div>
+    )
   return (
     <tr className="align-top">
       <Td>
@@ -169,13 +185,16 @@ function TenderRow({ x }: { x: TenderSummary }) {
               <span className="w-2 h-2 bg-attn" aria-hidden="true" />
               {ow.lines_to_review === 1 ? t('1 line to review') : t('{n} lines to review', { n: ow.lines_to_review })}
             </span>
-            {sub.length > 0 && <div className="text-[13px] text-muted pl-4">{sub.join(' · ')}</div>}
+            {rest(sub)}
           </>
         ) : sub.length ? (
-          <span className="flex items-center gap-2 text-attn">
-            <span className="w-2 h-2 bg-attn" aria-hidden="true" />
-            {sub.join(' · ')}
-          </span>
+          <>
+            <span className="flex items-center gap-2 text-attn" title={sub[0].title}>
+              <span className="w-2 h-2 bg-attn" aria-hidden="true" />
+              {sub[0].title}
+            </span>
+            {rest(sub.slice(1))}
+          </>
         ) : (
           <span className="flex items-center gap-2">
             <span className="w-2 h-2 bg-ink" aria-hidden="true" />
@@ -187,15 +206,16 @@ function TenderRow({ x }: { x: TenderSummary }) {
         {reading ? (
           <span className="text-muted">{t('after reading')}</span>
         ) : x.offer_price && (x.offer_price_final ?? true) ? (
-          <>
-            <span className="font-mono font-medium">{fmt0(x.offer_price)}</span>
-            <div className="text-[13px] text-muted">{x.status === 'ready' ? t('your offer price') : t('submitted')}</div>
-          </>
+          <span className="font-mono font-medium">{fmt0(x.offer_price)}</span>
         ) : (
-          <>
-            <span className="font-mono font-medium">{fmt0(x.standard_price ?? x.offer_price)}</span>
-            <div className="text-[13px] text-muted">{t('standard margin, not final')}</div>
-          </>
+          // not chosen yet: the standard-margin price, marked as provisional
+          <span className="font-mono text-muted" title={t('standard margin, not final')}>
+            <span className="text-faint mr-1" aria-hidden="true">
+              ≈
+            </span>
+            {fmt0(x.standard_price ?? x.offer_price)}
+            <span className="sr-only"> ({t('standard margin, not final')})</span>
+          </span>
         )}
       </Td>
       <Td className="text-muted">

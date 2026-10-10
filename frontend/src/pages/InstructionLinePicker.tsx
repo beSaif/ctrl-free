@@ -118,9 +118,11 @@ function PickerOpen({
       footer={
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 w-full">
           <span aria-live="polite" className="font-medium">
-            {t('{n} selected', { n: chosen.length })} · <span className="font-mono">CHF {fmt2(total)}</span>
+            {t('{n} selected', { n: chosen.length })} ·{' '}
+            <span className="font-mono" title={t('direct cost today')}>
+              CHF {fmt2(total)}
+            </span>
           </span>
-          <span className="text-[13px] text-muted">{t('direct cost today')}</span>
           <span className="flex-auto" />
           <Button size="sm" onClick={() => setSel(new Set())} disabled={!chosen.length}>
             {t('Clear')}
@@ -210,7 +212,7 @@ function PickerOpen({
                         {lang === 'en' && p.title_en ? p.title_en : p.title_de}
                       </span>
                       {sugg.has(p.lv_id) && (
-                        <span className="flex-none text-[12px] px-1 border rounded-[2px]" style={{ color: C.accent, borderColor: C.accent }}>
+                        <span className="flex-none text-[12px]" style={{ color: C.accent }}>
                           {t('suggested')}
                         </span>
                       )}

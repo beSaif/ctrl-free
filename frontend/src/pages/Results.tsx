@@ -16,9 +16,9 @@ export function Results() {
   const recorded = data.recorded ?? rows.filter((r) => r.winning_price).length
   const stats = data.stats && recorded >= 3 ? data.stats : null
   const cards: [string, string, string][] = [
-    ['competition_calls', 'Competition calls', 'How often "Strong" meant many bidders. Needs 3 recorded awards'],
-    ['gap_by_trade', 'Gap to the winning price', 'Average gap in % by trade. Needs 3 recorded awards'],
-    ['win_rate_by_option', 'Win rate by option', 'Aggressive, Target, Standard, Conservative. Needs 3 recorded awards'],
+    ['competition_calls', 'Competition calls', 'How often "Strong" meant many bidders'],
+    ['gap_by_trade', 'Gap to the winning price', 'Average gap in % by trade'],
+    ['win_rate_by_option', 'Win rate by option', 'Aggressive, Target, Standard, Conservative'],
   ]
   const statLine = (k: string, r: Record<string, unknown>): string => {
     if (k === 'competition_calls') return `${t(String(r.call ?? '?'))}: ${r.avg_bidders ?? '–'} ${t('bidders on average')} (${r.tenders})`
@@ -27,10 +27,7 @@ export function Results() {
   }
   return (
     <main className="p-6 flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="m-0 text-[20px] font-semibold">{t('Results history')}</h1>
-        <span className="text-muted">{t('Every submitted offer next to its award. This is where you see how your calls compared with what happened.')}</span>
-      </div>
+      <h1 className="m-0 text-[20px] font-semibold">{t('Results history')}</h1>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1040px] border-collapse">
           <thead>
@@ -58,9 +55,9 @@ export function Results() {
                   </Td>
                   <Td>{shortTrade(r.trade)}</Td>
                   <Td className="text-right font-mono">{fmt0(r.offer_price)}</Td>
-                  <Td className="text-right font-mono">{r.winning_price ? fmt0(r.winning_price) : <span className="text-muted">{t('open')}</span>}</Td>
-                  <Td className="text-right font-mono">{r.gap_pct != null ? fmtSigned(r.gap_pct, 1) + '%' : <span className="text-muted">{t('open')}</span>}</Td>
-                  <Td className="text-right font-mono">{r.bidders ?? <span className="text-muted">{t('open')}</span>}</Td>
+                  <Td className="text-right font-mono">{r.winning_price ? fmt0(r.winning_price) : <span className="text-faint">–</span>}</Td>
+                  <Td className="text-right font-mono">{r.gap_pct != null ? fmtSigned(r.gap_pct, 1) + '%' : <span className="text-faint">–</span>}</Td>
+                  <Td className="text-right font-mono">{r.bidders ?? <span className="text-faint">–</span>}</Td>
                   <Td>{call ? t(String(call)) : '–'}</Td>
                   <Td>
                     <span className="inline-flex items-center gap-2">
@@ -109,9 +106,9 @@ export function Results() {
             )
           })}
         </div>
-        <span className="text-[13px] text-muted">
-          {recorded === 1 ? t('1 award recorded so far.') : t('{n} awards recorded so far.', { n: recorded })}{' '}
-          {t("The numbers come from the award notice you copy into the tender's Outcome tab.")}
+        <span className="text-[13px] text-muted" title={t("The numbers come from the award notice you copy into the tender's Outcome tab.")}>
+          {recorded === 1 ? t('1 award recorded so far.') : t('{n} awards recorded so far.', { n: recorded })}
+          {!stats && ' ' + t('The cards fill in once 3 are recorded.')}
         </span>
       </section>
     </main>
