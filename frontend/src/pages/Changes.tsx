@@ -521,6 +521,8 @@ function hidden(f: ChangeField, all: ChangeField[]): boolean {
   const p = f.path
   if (/(_at|_by)$/.test(p) && p !== 'sent_at') return true
   if (p === 'applies_label' || p === 'status_reason' || p.startsWith('changed_by.')) return true
+  // an instruction's long "applies to" text and the kept pipeline suggestion follow applies_to: not changes of their own
+  if ((p === 'applies_long' || p === 'suggested_applies_to') && all.some((x) => x.path === 'applies_to')) return true
   // the install rule follows a new product: not a change of its own
   if (p === 'overrides.install_code' && f.after == null && all.some((x) => x.path === 'overrides.product_id')) return true
   return false
