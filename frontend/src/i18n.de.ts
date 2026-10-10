@@ -567,7 +567,7 @@ export const DE: Record<string, string> = {
   Unit: 'Einheit',
   'Unit price': 'Einheitspreis',
   Updated: 'Geändert',
-  'Use CHF {p} and continue to export': 'CHF {p} verwenden und weiter zum Export',
+  'Use CHF {p} and continue to Tender PDF': 'CHF {p} verwenden und weiter zum Ausschreibungs-PDF',
   'Use the Oberglatt demo tender': 'Demo-Ausschreibung Oberglatt verwenden',
   'Use the format 22.09.2026 10:00': 'Format 22.09.2026 10:00 verwenden',
   'Use this product': 'Dieses Produkt verwenden',

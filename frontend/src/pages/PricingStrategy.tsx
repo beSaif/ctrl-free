@@ -40,7 +40,7 @@ export function StrategyStep({ ctx }: { ctx: PricingCtx }) {
     if (!s.chosen && shown) change({ chosen: shown.name }, 0)
     await new Promise((r) => setTimeout(r, 30))
     await ctx.flush()
-    nav(`/t/${id}/export`)
+    nav(`/t/${id}/pdf`)
   }
   const step = 0.05
   const refChanged = Math.abs(s.ref_win - D.ref_win) > 1e-9
@@ -142,7 +142,7 @@ export function StrategyStep({ ctx }: { ctx: PricingCtx }) {
           </div>
           <div className="flex flex-col items-end gap-1.5">
             <Button variant="primary" onClick={useAndContinue}>
-              {t('Use CHF {p} and continue to export', { p: fmt0(shown.bid) })}
+              {t('Use CHF {p} and continue to Tender PDF', { p: fmt0(shown.bid) })}
             </Button>
             {!pcOn && (
               <span className="text-[13px] text-attn">
