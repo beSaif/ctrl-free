@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
-import { useInstructions, useMarkSent, usePatchPosition, usePosition, useTender, useVerification } from '../api/hooks'
+import { useInstructions, useLineLog, useMarkSent, usePatchPosition, usePosition, usePricing, useReference, useTender, useVerification } from '../api/hooks'
 import type { Position, PositionPatch, QuoteGroup } from '../api/types'
 import { Button, ErrorBox, IconBack, IconCheck, Kbd, LinkButton, Loading } from '../components/ui'
 import { cx } from '../lib/cx'
@@ -29,6 +29,8 @@ import {
   wasChanged,
 } from '../lib/lines'
 import { linesQuery, useCatalog, useLineFilter, useLineQueue } from './linesShared'
+import { HoursSource, QtySource, RateSource, UnitPriceSource, WasteSource, type Trace } from './lineSources'
+import { LineHistory } from './LineHistory'
 
 const inEditable = (el: EventTarget | null) => {
   const e = el as HTMLElement | null
@@ -50,6 +52,10 @@ export function LineDetail() {
   const { data: ins } = useInstructions(id)
   const patch = usePatchPosition(id)
   const cat = useCatalog()
+  const lineLog = useLineLog(id, lv)
+  const { data: refData } = useReference()
+  const { data: pricingData } = usePricing(id)
+  const trace: Trace = { tenderId: id, log: lineLog.data ?? [], ref: refData, pricing: pricingData, cat }
 
   // keep a frozen queue for this visit so confirming does not reshuffle Previous/Next
   // a line outside the current queue (e.g. a priced line opened from a link) steps through the tender in order
@@ -172,12 +178,14 @@ export function LineDetail() {
           <div className="flex flex-wrap items-start gap-x-10 gap-y-7">
             <div className="flex-[1_1_480px] min-w-0 flex flex-col gap-6">
               {p.source ? (
-                <PdfCrop
-                  tenderId={id}
-                  source={p.source}
-                  pageCount={tender?.page_count}
-                  caption={t('The marked row is where the quantity {q} {u} was read.', { q: fmtQty(p.quantity), u: fmtUnit(p.unit) })}
-                />
+                <div id="line-tender-crop">
+                  <PdfCrop
+                    tenderId={id}
+                    source={p.source}
+                    pageCount={tender?.page_count}
+                    caption={t('The marked row is where the quantity {q} {u} was read.', { q: fmtQty(p.quantity), u: fmtUnit(p.unit) })}
+                  />
+                </div>
               ) : (
                 <section className="flex flex-col gap-2">
                   <h2 className="m-0 text-[15px] font-semibold">{t('Tender PDF · p. {page}', { page: p.page })}</h2>
@@ -201,7 +209,7 @@ export function LineDetail() {
             </div>
 
             <div className="flex-[1_1_440px] min-w-0 flex flex-col gap-6">
-              <PriceSection key={'price-' + lv} p={p} cat={cat} tenderId={id} onPatch={safePatch} busy={patch.isPending} filledByAssist={filledByAssist} />
+              <PriceSection key={'price-' + lv} p={p} cat={cat} tenderId={id} onPatch={safePatch} busy={patch.isPending} filledByAssist={filledByAssist} trace={trace} group={group} />
 
               {sup && (
                 <SupplierSection
@@ -211,7 +219,7 @@ export function LineDetail() {
                   group={group}
                   positions={positions}
                   tenderName={tender?.name ?? ''}
-                  onSibling={(x) => nav(`/t/${id}/lines/${x}${qs}`)}
+                  lineHref={(x) => `/t/${id}/lines/${x}${qs}`}
                 />
               )}
 
@@ -257,6 +265,8 @@ export function LineDetail() {
               )}
             </div>
           </div>
+
+          <LineHistory key={'history-' + lv} tenderId={id} p={p} log={lineLog.data ?? []} loading={lineLog.isLoading} readAt={tender?.created_at} cat={cat} />
         </div>
       </main>
       <FooterTotals tenderId={id} />
@@ -313,14 +323,6 @@ function NumInput({
   )
 }
 
-function Note({ children, color }: { children: ReactNode; color: string }) {
-  return (
-    <span className="text-[13px]" style={{ color }}>
-      {children}
-    </span>
-  )
-}
-
 function PriceSection({
   p,
   cat,
@@ -328,6 +330,8 @@ function PriceSection({
   onPatch,
   busy,
   filledByAssist,
+  trace,
+  group,
 }: {
   p: Position
   cat: ReturnType<typeof useCatalog>
@@ -335,6 +339,8 @@ function PriceSection({
   onPatch: (b: PositionPatch) => Promise<unknown>
   busy: boolean
   filledByAssist: boolean
+  trace: Trace
+  group?: QuoteGroup
 }) {
   const t = useT()
   const pr = p.pricing
@@ -406,9 +412,12 @@ function PriceSection({
         <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
           <NumInput id="f-qty" value={pr ? String(pr.quantity) : String(p.quantity ?? '')} onCommit={commitQty} width={110} />
           <span>{unit}</span>
-          <Note color={qtySet ? C.accent : C.muted}>
-            {qtySet ? t('Changed by you. Tender says {q}, p. {page}', { q: fmtQty(p.quantity), page: p.page }) : t('Read from p. {page}', { page: p.page })}
-          </Note>
+          <QtySource
+            p={p}
+            trace={trace}
+            color={qtySet ? C.accent : C.muted}
+            label={qtySet ? t('Changed by you. Tender says {q}, p. {page}', { q: fmtQty(p.quantity), page: p.page }) : t('Read from p. {page}', { page: p.page })}
+          />
         </span>
 
         <span className="text-muted">{t('Product')}</span>
@@ -441,7 +450,7 @@ function PriceSection({
             width={130}
             dashed={sup && filledByAssist}
           />
-          <Note color={unitFg}>{unitNote}</Note>
+          <UnitPriceSource p={p} trace={trace} label={unitNote} color={unitFg} group={group} />
         </span>
         </>
         )}
@@ -451,23 +460,29 @@ function PriceSection({
         </label>
         <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
           <NumInput id="f-hrs" value={pr ? pr.hours.toFixed(2) : ''} onCommit={commitHours} width={110} />
-          {pr && <span>{t('h × CHF {rate} ({role})', { rate: pr.rate, role: roleLabel(pr.role, t) })}</span>}
-          <Note color={hoursSet ? C.accent : C.muted}>
-            {hoursSet
-              ? calcHours !== undefined
-                ? t('Changed by you. Install rule gives {h}', { h: fmt2(calcHours) })
-                : t('Changed by you')
-              : hourly
-                ? t('From the tender (hourly work)')
-                : t('From the install rule')}
-          </Note>
+          {pr && <RateSource p={p} trace={trace} hourly={hourly} label={t('h × CHF {rate} ({role})', { rate: pr.rate, role: roleLabel(pr.role, t) })} />}
+          <HoursSource
+            p={p}
+            trace={trace}
+            hourly={hourly}
+            color={hoursSet ? C.accent : C.muted}
+            label={
+              hoursSet
+                ? calcHours !== undefined
+                  ? t('Changed by you. Install rule gives {h}', { h: fmt2(calcHours) })
+                  : t('Changed by you')
+                : hourly
+                  ? t('From the tender (hourly work)')
+                  : t('From the install rule')
+            }
+          />
         </span>
       </div>
 
       {pr ? (
         <div className="flex flex-col">
           <div className="flex justify-between gap-3 pt-1.5 border-t border-ink">
-            <span>{hourly ? t('Material') : t('Material, incl. {w}% waste', { w: pr.waste_pct })}</span>
+            <span>{hourly ? t('Material') : <WasteSource p={p} trace={trace} label={t('Material, incl. {w}% waste', { w: pr.waste_pct })} />}</span>
             <span className="flex-none font-mono">{fmt2(pr.material)}</span>
           </div>
           <span className="pb-1.5 border-b border-rowrule text-[12.5px] text-muted">
@@ -571,14 +586,14 @@ function SupplierSection({
   group,
   positions,
   tenderName,
-  onSibling,
+  lineHref,
 }: {
   tenderId: string
   p: Position
   group?: QuoteGroup
   positions: Position[]
   tenderName: string
-  onSibling: (lv: string) => void
+  lineHref: (lv: string) => string
 }) {
   const t = useT()
   const lang = useLang()
@@ -621,24 +636,7 @@ function SupplierSection({
       {group && (
         <>
           <span className="text-[13px] text-muted">{t('One request covers the same product type across all areas ({g}):', { g: lang === 'de' && group.title_de ? group.title_de : t(group.title) })}</span>
-          <div className="flex flex-wrap gap-1.5">
-            {group.lv_ids.map((x) => {
-              const s = positions.find((y) => y.lv_id === x)
-              const on = x === p.lv_id
-              return (
-                <button
-                  key={x}
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => !on && onSibling(x)}
-                  className={cx('min-h-9 px-2.5 border rounded-[2px] font-mono text-[12.5px] text-ink', on ? 'border-ink bg-panel' : 'border-rule bg-white hover:border-ink')}
-                >
-                  {x}
-                  {s ? ` · p. ${s.page} · ${fmtQty(s.quantity)} ${fmtUnit(s.unit)}` : ''}
-                </button>
-              )
-            })}
-          </div>
+          <GroupLines ids={group.lv_ids} current={p.lv_id} positions={positions} lineHref={lineHref} />
           <div className="flex flex-wrap gap-2">
             <Button size="sm" onClick={() => setMailOpen(!mailOpen)} aria-expanded={mailOpen}>
               {mailOpen ? t('Hide request email') : t('Show request email')}
@@ -672,6 +670,61 @@ function SupplierSection({
         </>
       )}
     </section>
+  )
+}
+
+/** The lines one supplier request covers: a plain list; nothing navigates unless "Open" is clicked. */
+function GroupLines({ ids, current, positions, lineHref }: { ids: string[]; current: string; positions: Position[]; lineHref: (lv: string) => string }) {
+  const t = useT()
+  const status = (s?: Position) => {
+    if (!s) return { label: '–', fg: C.faint }
+    if (s.confirmed) return { label: quotedPrice(s) !== null ? t('Quote confirmed') : t('Confirmed on budget price'), fg: C.ink }
+    if (quotedPrice(s) !== null) return { label: t('Quoted'), fg: C.accent }
+    return { label: t('Budget price'), fg: C.attn }
+  }
+  return (
+    <div className="max-h-[260px] overflow-y-auto border-t border-rowrule">
+      <table className="w-full border-collapse text-[13px]">
+        <thead className="sr-only">
+          <tr>
+            <th>{t('Line')}</th>
+            <th>{t('Page')}</th>
+            <th>{t('Quantity')}</th>
+            <th>{t('Quote')}</th>
+            <th>{t('Open')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ids.map((x) => {
+            const s = positions.find((y) => y.lv_id === x)
+            const on = x === current
+            const st = status(s)
+            return (
+              <tr key={x} className={cx(on && 'bg-sel')} aria-current={on ? 'true' : undefined}>
+                <td className={cx('py-1 pl-2 pr-2 border-b border-rowrule font-mono text-[12.5px]', on && 'shadow-[inset_3px_0_0_#1F4FD8]')}>{x}</td>
+                <td className="py-1 pr-2 border-b border-rowrule font-mono text-[12.5px] text-muted">{s ? t('p. {page}', { page: s.page }) : ''}</td>
+                <td className="py-1 pr-2 border-b border-rowrule font-mono text-[12.5px] text-right whitespace-nowrap">{s ? `${fmtQty(s.quantity)} ${fmtUnit(s.unit)}` : ''}</td>
+                <td className="py-1 pr-2 border-b border-rowrule">
+                  <span className="inline-flex items-center gap-1.5" style={{ color: st.fg }}>
+                    <span className="w-1.5 h-1.5" style={{ background: st.fg }} aria-hidden="true" />
+                    {st.label}
+                  </span>
+                </td>
+                <td className="py-1 pr-2 border-b border-rowrule text-right whitespace-nowrap">
+                  {on ? (
+                    <span className="text-muted">{t('this line')}</span>
+                  ) : (
+                    <Link to={lineHref(x)} aria-label={t('Open line {lv}', { lv: x })}>
+                      {t('Open')}
+                    </Link>
+                  )}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
   )
 }
 

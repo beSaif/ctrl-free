@@ -1415,9 +1415,11 @@ export const mockApi: Api = {
     const p = pricePos(tender(id), lv)
     return { field, steps: [{ text: p.explain?.[field] ?? '' }] }
   },
-  async getLog(id) {
+  async getLog(id, opts) {
     await delay(60)
-    return tender(id).log.map(({ snapshot: _s, ...e }) => e)
+    return tender(id)
+      .log.filter((e) => !opts?.lv_id || e.lv_id === opts.lv_id)
+      .map(({ snapshot: _s, ...e }) => e)
   },
   async getVerification() {
     return null

@@ -92,6 +92,11 @@ export function useVerification(id: string) {
   return useQuery({ queryKey: ['verification', id] as const, queryFn: () => api.getVerification(id), staleTime: 30_000 })
 }
 
+/** One line's audit log (newest first). Keyed under the tender, so every mutation refreshes it. */
+export function useLineLog(id: string, lv: string) {
+  return useQuery({ queryKey: [...qk.log(id), lv] as const, queryFn: () => api.getLog(id, { lv_id: lv }) })
+}
+
 export function useResults() {
   return useQuery({ queryKey: qk.results, queryFn: () => api.getResults() })
 }

@@ -1,5 +1,5 @@
 // N11 Reference data: product catalogue, install rules, default parameters; import a new version.
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useLang, useT, type T } from '../i18n'
 import { useImportReference, useReference } from '../api/hooks'
@@ -7,6 +7,7 @@ import type { ReferenceResponse } from '../api/types'
 import { ErrorBox, FilterTabs, Loading, SearchBox, Td, Th } from '../components/ui'
 import { fmt2, fmtShortDate, fmtUnit } from '../lib/format'
 import { C } from '../lib/lines'
+import { cx } from '../lib/cx'
 
 type Tab = 'cat' | 'rules' | 'params'
 const KIND: Record<Tab, string> = { cat: 'catalog', rules: 'rules', parameters: 'parameters', params: 'parameters' } as Record<Tab, string>
@@ -55,20 +56,20 @@ function paramGroups(p: Record<string, unknown>, t: T) {
     {
       title: t('Allowances'),
       rows: [
-        [t('Material waste'), num(a.material_waste_pct, 1) + '%'],
-        [t('Small material'), num(a.small_material_pct, 1) + '%'],
-        [t('Transport and equipment'), num(a.transport_equipment_pct, 1) + '%'],
-        [t('Supplier package contingency'), num(a.supplier_package_contingency_pct, 1) + '%'],
+        [t('Material waste'), num(a.material_waste_pct, 1) + '%', 'allowances.material_waste_pct'],
+        [t('Small material'), num(a.small_material_pct, 1) + '%', 'allowances.small_material_pct'],
+        [t('Transport and equipment'), num(a.transport_equipment_pct, 1) + '%', 'allowances.transport_equipment_pct'],
+        [t('Supplier package contingency'), num(a.supplier_package_contingency_pct, 1) + '%', 'allowances.supplier_package_contingency_pct'],
       ],
     },
     {
       title: t('Site factors (school)'),
       rows: [
-        [t('Site efficiency'), num(f.site_efficiency)],
-        [t('School logistics'), '× ' + num(f.school_logistics)],
-        [t('Mounting height, school'), '× ' + num(f.mounting_height_school)],
-        [t('Mounting height, sports hall'), '× ' + num(f.mounting_height_sports_hall)],
-        [t('Timber interface'), '× ' + num(f.timber_interface)],
+        [t('Site efficiency'), num(f.site_efficiency), 'productivity_factors.site_efficiency'],
+        [t('School logistics'), '× ' + num(f.school_logistics), 'productivity_factors.school_logistics'],
+        [t('Mounting height, school'), '× ' + num(f.mounting_height_school), 'productivity_factors.mounting_height_school'],
+        [t('Mounting height, sports hall'), '× ' + num(f.mounting_height_sports_hall), 'productivity_factors.mounting_height_sports_hall'],
+        [t('Timber interface'), '× ' + num(f.timber_interface), 'productivity_factors.timber_interface'],
       ],
     },
     {
@@ -104,6 +105,11 @@ export function Reference() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [q, setQ] = useState('')
   const [msg, setMsg] = useState<string | null>(null)
+  // deep link from a line's source popover: ?tab=cat&id=P-AIR-001, ?tab=rules&code=DIFFUSER, ?tab=params&key=allowances.material_waste_pct
+  const hit = params.get('id') ?? params.get('code') ?? params.get('key')
+  useEffect(() => {
+    if (hit && data) document.querySelector('[data-ref-hit]')?.scrollIntoView({ block: 'center' })
+  }, [hit, data, tab])
   if (isLoading) return <Loading label={t('Loading')} />
   if (error || !data) return <ErrorBox error={error} label={t('Could not load the reference data.')} />
 
@@ -178,9 +184,10 @@ export function Reference() {
                 <tbody>
                   {cat.map((c) => {
                     const sup = c.supplier_quote_required || c.source_type === 'supplier_package'
+                    const on = hit === c.product_id
                     return (
-                      <tr key={c.product_id}>
-                        <Td className="py-[7px] font-mono text-[13px]">{c.product_id}</Td>
+                      <tr key={c.product_id} data-ref-hit={on || undefined} className={on ? 'bg-sel' : undefined}>
+                        <Td className={cx('py-[7px] font-mono text-[13px]', on && 'pl-2! shadow-[inset_3px_0_0_#1F4FD8]')}>{c.product_id}</Td>
                         <Td className="py-[7px]">{c.description}</Td>
                         <Td className="py-[7px] text-muted">{c.category}</Td>
                         <Td className="py-[7px] text-muted">{[c.manufacturer, c.model].filter(Boolean).join(' ')}</Td>
@@ -223,9 +230,10 @@ export function Reference() {
               <tbody>
                 {rules.map((r) => {
                   const keys = Array.isArray(r.factor_keys) ? r.factor_keys : String(r.factor_keys || '').split('|').filter(Boolean)
+                  const on = hit === r.install_code
                   return (
-                    <tr key={r.install_code}>
-                      <Td className="py-[7px] font-mono text-[13px]">{r.install_code}</Td>
+                    <tr key={r.install_code} data-ref-hit={on || undefined} className={on ? 'bg-sel' : undefined}>
+                      <Td className={cx('py-[7px] font-mono text-[13px]', on && 'pl-2! shadow-[inset_3px_0_0_#1F4FD8]')}>{r.install_code}</Td>
                       <Td className="py-[7px]">{r.work_type}</Td>
                       <Td className="py-[7px]">{fmtUnit(r.unit)}</Td>
                       <Td className="py-[7px] text-right font-mono">{fmt2(r.base_hours_per_unit)}</Td>
@@ -246,8 +254,12 @@ export function Reference() {
               {paramGroups(data.parameters, t).map((g) => (
                 <section key={g.title} className="flex-[1_1_300px] flex flex-col">
                   <h2 className="m-0 mb-1.5 text-[15px] font-semibold">{g.title}</h2>
-                  {g.rows.map(([k, v]) => (
-                    <div key={k} className="flex justify-between gap-3 py-[7px] border-b border-rowrule">
+                  {g.rows.map(([k, v, key]) => (
+                    <div
+                      key={k}
+                      data-ref-hit={(key && hit === key) || undefined}
+                      className={cx('flex justify-between gap-3 py-[7px] border-b border-rowrule', key && hit === key && 'px-2 bg-sel shadow-[inset_3px_0_0_#1F4FD8]')}
+                    >
                       <span>{k}</span>
                       <span className="font-mono">{v}</span>
                     </div>

@@ -66,7 +66,8 @@ export interface Api {
   applyPlan(id: string, planId: string): Promise<AssistApplyResult>
   undo(id: string, logId: string): Promise<unknown>
   explain(id: string, lv: string, field: string): Promise<Explain>
-  getLog(id: string): Promise<LogEntry[]>
+  /** Audit log, newest first; `lv_id` keeps only the entries of one line. */
+  getLog(id: string, opts?: { lv_id?: string }): Promise<LogEntry[]>
   /** Our lines vs the Equans verified examples (null when not available, e.g. mock or another tender). */
   getVerification(id: string): Promise<Verification | null>
   /** URL of the rendered page image, or null when there is none (mock mode). */
@@ -299,7 +300,7 @@ export const realApi: Api = {
   applyPlan: async (id, planId) => normApply(await req('POST', `/tenders/${id}/assist/plans/${enc(planId)}/apply`)),
   undo: (id, logId) => req('POST', `/tenders/${id}/assist/undo/${enc(logId)}`),
   explain: (id, lv, field) => req('GET', `/tenders/${id}/explain/${enc(lv)}${qs({ field })}`),
-  getLog: async (id) => arr<LogEntry>(await req('GET', `/tenders/${id}/log`), 'log', 'entries'),
+  getLog: async (id, opts) => arr<LogEntry>(await req('GET', `/tenders/${id}/log${qs({ lv_id: opts?.lv_id })}`), 'log', 'entries'),
   getVerification: async (id) => {
     try {
       const r = await req<Verification>('GET', `/tenders/${id}/verification`)

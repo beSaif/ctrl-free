@@ -428,6 +428,12 @@ export interface LogEntry {
   after?: unknown
   undoable?: boolean
   text?: string
+  undone?: boolean
+  /** set on an "undo" entry: the id of the entry it reverted */
+  undoes?: string
+  /** entries applied together are undone together */
+  batch?: string
+  target?: { kind: string; id: string | null }
 }
 
 export interface AssistProposal {
@@ -558,6 +564,18 @@ export interface ReferenceResponse {
   rules: RuleRow[]
   parameters: Record<string, unknown>
   source?: Record<string, { file?: string; imported_at?: string; version?: string } | string>
+  /** imports of new reference files (versions.json); empty while the shipped files are in use */
+  versions?: ReferenceVersion[]
+}
+
+export interface ReferenceVersion {
+  kind: 'catalog' | 'rules' | 'parameters' | string
+  file: string
+  rows?: number
+  version: number
+  saved_at: string
+  by?: string
+  previous?: string | null
 }
 
 export interface ChecklistItem {
