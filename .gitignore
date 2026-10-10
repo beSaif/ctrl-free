@@ -10,3 +10,5 @@ dist/
 .DS_Store
 backend/data/tenders/
 *.log
+
+!frontend/.env.development
