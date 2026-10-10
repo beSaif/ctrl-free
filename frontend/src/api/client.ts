@@ -7,6 +7,7 @@ import type {
   AssistPlan,
   AssistTray,
   Candidate,
+  ChangesResponse,
   ChecklistItem,
   Explain,
   Instruction,
@@ -16,6 +17,7 @@ import type {
   Outcome,
   PositionDetail,
   PositionPatch,
+  Person,
   PositionsResponse,
   PricingPut,
   PricingResponse,
@@ -26,6 +28,7 @@ import type {
   QuoteProposal,
   ReferenceResponse,
   ResultsResponse,
+  ReviewVerdict,
   Snapshot,
   TenderDetail,
   TenderSummary,
@@ -67,6 +70,11 @@ export interface Api {
   undo(id: string, logId: string): Promise<unknown>
   explain(id: string, lv: string, field: string): Promise<Explain>
   getLog(id: string): Promise<LogEntry[]>
+  getPeople(): Promise<Person[]>
+  /** Review trail: every change by people and Assist plus the AI decisions (Changes screen). */
+  getChanges(id: string): Promise<ChangesResponse>
+  /** Senior review of changes: approve, revert (undo) or comment. Returns the updated trail. */
+  reviewChanges(id: string, logIds: string[], verdict: ReviewVerdict, note?: string): Promise<ChangesResponse>
   /** Our lines vs the Equans verified examples (null when not available, e.g. mock or another tender). */
   getVerification(id: string): Promise<Verification | null>
   /** URL of the rendered page image, or null when there is none (mock mode). */
@@ -83,8 +91,50 @@ export class ApiError extends Error {
   }
 }
 
+// ---- who is working (demo identity, no login) ------------------------------------------
+// Sent as X-Actor on every request; the backend stamps the person's name on every change.
+
+export const DEFAULT_PEOPLE: Person[] = [
+  { id: 'lea', name: 'Lea Meier', role: 'junior', role_label: 'Junior estimator' },
+  { id: 'marco', name: 'Marco Keller', role: 'senior', role_label: 'Senior estimator / bid lead' },
+]
+const ACTOR_KEY = 'ctrlfree.actor'
+let actorId: string = (() => {
+  try {
+    return localStorage.getItem(ACTOR_KEY) || DEFAULT_PEOPLE[0].id
+  } catch {
+    return DEFAULT_PEOPLE[0].id
+  }
+})()
+const actorListeners = new Set<() => void>()
+
+export function getActor(): string {
+  return actorId
+}
+
+export function setActor(id: string) {
+  actorId = id
+  try {
+    localStorage.setItem(ACTOR_KEY, id)
+  } catch {
+    /* private mode: keep in memory */
+  }
+  actorListeners.forEach((f) => f())
+}
+
+export function useActor(): string {
+  return useSyncExternalStore(
+    (cb) => {
+      actorListeners.add(cb)
+      return () => actorListeners.delete(cb)
+    },
+    getActor,
+    getActor,
+  )
+}
+
 async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const init: RequestInit = { method, headers: {} }
+  const init: RequestInit = { method, headers: { 'X-Actor': actorId } }
   if (body instanceof FormData) init.body = body
   else if (body !== undefined) {
     init.body = JSON.stringify(body)
@@ -300,6 +350,12 @@ export const realApi: Api = {
   undo: (id, logId) => req('POST', `/tenders/${id}/assist/undo/${enc(logId)}`),
   explain: (id, lv, field) => req('GET', `/tenders/${id}/explain/${enc(lv)}${qs({ field })}`),
   getLog: async (id) => arr<LogEntry>(await req('GET', `/tenders/${id}/log`), 'log', 'entries'),
+  getPeople: async () => arr<Person>(await req('GET', '/people'), 'people'),
+  getChanges: (id) => req('GET', `/tenders/${id}/changes`),
+  reviewChanges: (id, logIds, verdict, note) =>
+    logIds.length === 1
+      ? req('POST', `/tenders/${id}/log/${enc(logIds[0])}/review`, { verdict, note: note || null })
+      : req('POST', `/tenders/${id}/log/review`, { log_ids: logIds, verdict, note: note || null }),
   getVerification: async (id) => {
     try {
       const r = await req<Verification>('GET', `/tenders/${id}/verification`)

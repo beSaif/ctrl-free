@@ -115,5 +115,16 @@ class TenderPatch(BaseModel):
     profile: Literal["school", "sports_hall"] | None = None
 
 
+class ReviewBody(BaseModel):
+    """Senior review of a logged change (Changes screen); "reopened" takes an approval back."""
+
+    verdict: Literal["approved", "reverted", "comment", "reopened"]
+    note: str | None = Field(None, max_length=500)
+
+
+class ReviewMany(ReviewBody):
+    log_ids: list[str] = Field(..., max_length=1000)
+
+
 def unset_dump(model: BaseModel) -> dict[str, Any]:
     return model.model_dump(exclude_unset=True)

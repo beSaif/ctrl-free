@@ -9,6 +9,7 @@ import { PageViewer } from '../components/PdfCrop'
 import { fmt0, fmt2, fmtDateTime, fmtDaysLeft, fmtShare } from '../lib/format'
 import { isOpen, isPriceable, isSupplier, quotedPrice, reviewBreakdown } from '../lib/lines'
 import { allProjectCosts, standardMargin } from '../lib/pricing'
+import type { ReviewTrail } from '../api/types'
 
 interface Step {
   n: number
@@ -151,6 +152,7 @@ export function Overview() {
               ? t('Record the outcome')
               : null
   const rule = tender.submission_rule
+  const rt = tender.review_trail
 
   return (
     <main className="flex-auto flex flex-wrap items-start">
@@ -198,6 +200,7 @@ export function Overview() {
             </li>
           ))}
         </ol>
+        {rt && (rt.changes > 0 || rt.ai_to_review > 0) && <ReviewTrailNote rt={rt} to={`${base}/changes`} />}
       </section>
 
       <aside aria-label={t('Tender facts')} className="flex-[1_1_360px] max-w-[460px] min-w-0 px-6 pt-7 pb-10 border-l border-rule flex flex-col gap-6">
@@ -275,6 +278,36 @@ export function Overview() {
         />
       )}
     </main>
+  )
+}
+
+/** "N changes waiting for senior review": what people and Assist changed, and low-confidence AI picks. */
+function ReviewTrailNote({ rt, to }: { rt: ReviewTrail; to: string }) {
+  const t = useT()
+  const waiting = rt.to_review > 0 || rt.ai_to_review > 0
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+      <span className={cx('flex-none w-2 h-2 self-center', waiting ? 'bg-attn' : 'bg-ink')} aria-hidden="true" />
+      {waiting ? (
+        <span>
+          {rt.to_review > 0 ? (
+            <>
+              <span className="text-attn font-medium">
+                {rt.to_review === 1 ? t('1 change waiting for senior review') : t('{n} changes waiting for senior review', { n: rt.to_review })}
+              </span>
+              {rt.ai_to_review > 0 && ', ' + (rt.ai_to_review === 1 ? t('and 1 low-confidence AI pick') : t('and {n} low-confidence AI picks', { n: rt.ai_to_review }))}.
+            </>
+          ) : (
+            <span className="text-attn font-medium">
+              {rt.ai_to_review === 1 ? t('1 low-confidence AI pick waiting for senior review') : t('{n} low-confidence AI picks waiting for senior review', { n: rt.ai_to_review })}
+            </span>
+          )}
+        </span>
+      ) : (
+        <span className="text-muted">{t('All {n} changes reviewed by a senior.', { n: rt.changes })}</span>
+      )}
+      <Link to={to}>{t('See who did what')}</Link>
+    </div>
   )
 }
 

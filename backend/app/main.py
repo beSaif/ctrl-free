@@ -14,9 +14,9 @@ from fastapi import Body, FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response
 
-from . import assist, config, pipeline, store
-from .models import (AssistCommand, InstructionPatch, Outcome, PositionPatch, PricingUpdate, QuoteApply,
-                     TenderPatch)
+from . import assist, config, pipeline, review, store
+from .models import (AssistCommand, InstructionPatch, Outcome, PositionPatch, PricingUpdate, QuoteApply, ReviewBody,
+                     ReviewMany, TenderPatch)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("ctrlfree.api")
@@ -29,6 +29,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class _ActorMiddleware:
+    """X-Actor header -> store.actor() for the request (demo identity, no login). Plain ASGI, so the
+    context var reaches sync routes in the thread pool."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+        aid = next((v.decode("latin-1") for k, v in scope.get("headers") or [] if k == b"x-actor"), None)
+        token = store.set_actor(aid)
+        try:
+            await self.app(scope, receive, send)
+        finally:
+            store.reset_actor(token)
+
+
+app.add_middleware(_ActorMiddleware)
 
 mod = pipeline.mod
 
@@ -43,6 +64,11 @@ REVIEW_FILTERS = ("review", "all", "flagged", "confirmed", *pipeline.STATUSES)
 @app.exception_handler(store.NotFound)
 async def _not_found(_req, exc):
     return JSONResponse({"detail": f"Not found: {exc.args[0] if exc.args else ''}"}, status_code=404)
+
+
+@app.exception_handler(review.Forbidden)
+async def _forbidden(_req, exc):
+    return JSONResponse({"detail": str(exc)}, status_code=403)
 
 
 @app.exception_handler(ValueError)
@@ -345,6 +371,7 @@ def _tender_detail(t: dict) -> dict:
             "instructions_to_confirm": out["open_work"]["instructions_to_confirm"],
             "price_chosen": out["open_work"]["price_chosen"],
         }
+        out["review_trail"] = {k: x for k, x in review.summary(t).items() if k != "by_actor"}
     else:
         out["overview"] = None
     return out
@@ -725,13 +752,13 @@ def patch_position(tid: str, lv_id: str, body: PositionPatch):
             qp = data.get("quote_unit_price", (pos.get("supplier_quote") or {}).get("unit_price"))
             edits["supplier_quote"] = None if qp is None else {
                 "unit_price": qp, "source": data.get("quote_source") or "Typed by you",
-                "received_at": store.now(), "by": "You"}
+                "received_at": store.now(), "by": store.me()}
             words.append(f"supplier quote → {_fmt_val(qp)}")
         if edits:
             store.change(t, "You", "edit", "position", lv_id, edits, text=f"{lv_id}: " + ", ".join(words))
         if data.get("confirm"):
             store.change(t, "You", "confirm", "position", lv_id,
-                         {"confirmed": {"by": "You", "at": store.now()}, "flagged": False},
+                         {"confirmed": {"by": store.me(), "at": store.now()}, "flagged": False},
                          text=f"Confirmed {lv_id}")
         if data.get("unconfirm"):
             store.change(t, "You", "unconfirm", "position", lv_id, {"confirmed": None}, text=f"Unconfirmed {lv_id}")
@@ -889,7 +916,7 @@ def patch_instruction(tid: str, iid: str, body: InstructionPatch):
             store.change(t, "You", "edit_instruction", "instruction", iid, upd, text=f"Changed {ins.get('type')}")
         if data.get("state"):
             st = data["state"]
-            u2 = {"state": st, "confirmed_by": "You" if st != "open" else None,
+            u2 = {"state": st, "confirmed_by": store.me() if st != "open" else None,
                   "confirmed_at": store.now() if st != "open" else None}
             verb = {"confirmed": "Confirmed", "not_relevant": "Marked not relevant", "open": "Reopened"}[st]
             store.change(t, "You", f"instruction_{st}", "instruction", iid, u2, text=f"{verb}: {ins.get('type')}")
@@ -978,7 +1005,7 @@ def put_pricing(tid: str, body: PricingUpdate = Body(...)):
         upd = {k: val for k, val in upd.items() if eff.get(k) != val or k not in eff}
         if upd:
             names = ", ".join(sorted({k.split(".")[0] for k in upd}))
-            stamp = {"by": "You", "at": store.now()}
+            stamp = {"by": store.me(), "at": store.now()}
             for k in list(upd):
                 if not k.startswith("notes."):
                     upd[f"changed_by.{k}"] = stamp  # nested like the setting: changed_by.factors.site_efficiency
@@ -1024,7 +1051,7 @@ def mark_sent(tid: str, group: str, sent: bool = True):
         if g is None:
             raise HTTPException(404, f"Quote group {group} not found")
         store.change(t, "You", "quote_sent" if sent else "quote_unsent", "quote", group,
-                     {"sent_at": store.now() if sent else None, "sent_by": "You" if sent else None},
+                     {"sent_at": store.now() if sent else None, "sent_by": store.me() if sent else None},
                      text=f"Marked the request for {g.get('title') or group} as {'sent' if sent else 'not sent'}")
     t = store.load(tid)
     return _quote_group_view(t, store.resolve_target(t, "quote", group))
@@ -1133,7 +1160,7 @@ def submit(tid: str, body: dict | None = Body(None)):
     if row is None:
         raise HTTPException(400, f"Unknown option {option}")
     snap = {
-        "at": store.now(), "by": "You", "option": option, "chosen_explicitly": bool(settings.get("chosen")),
+        "at": store.now(), "by": store.me(), "option": option, "chosen_explicitly": bool(settings.get("chosen")),
         "offer_price": row["bid"], "margin_pct": row["margin_pct"], "cost": totals.get("cost"),
         "direct": totals.get("direct"), "win": row["win"], "profit": row["profit"], "expected": row["expected"],
         "standard_price": totals.get("standard_price"),
@@ -1155,7 +1182,7 @@ def put_outcome(tid: str, body: Outcome):
     t = _tender(tid)
     data = body.model_dump()
     data["recorded_at"] = store.now()
-    data["recorded_by"] = "You"
+    data["recorded_by"] = store.me()
     sub = t.get("submission") or {}
     if data.get("winning_price") and sub.get("offer_price"):
         data["gap_pct"] = round((sub["offer_price"] / data["winning_price"] - 1) * 100, 2)
@@ -1254,7 +1281,7 @@ def get_reference():
 @app.post("/api/reference/{kind}")
 async def import_reference(kind: str, file: UploadFile = File(...)):
     ref = mod("reference")
-    entry = ref.import_reference(kind, await file.read())
+    entry = ref.import_reference(kind, await file.read(), by=store.me())
     return {"ok": True, "version": entry, "reference": get_reference()}
 
 
@@ -1310,6 +1337,38 @@ def undo(tid: str, log_id: str):
 def explain(tid: str, lv_id: str, field: str = "labour"):
     t = _tender(tid)
     return assist.explain(t, lv_id, field)
+
+
+@app.get("/api/people")
+def people():
+    """Demo identities for the person switcher; `current` is who this request acts as."""
+    return {"people": config.PEOPLE, "current": store.actor()}
+
+
+@app.get("/api/tenders/{tid}/changes")
+def get_changes(tid: str):
+    """Review trail: every change by people and Assist plus one AI decision per line (Changes screen)."""
+    t = _tender(tid)
+    if not _ready(t):
+        raise HTTPException(409, "The tender is still being read")
+    return review.changes(t)
+
+
+@app.post("/api/tenders/{tid}/log/review")
+def review_many(tid: str, body: ReviewMany):
+    """Approve (or comment on) several changes at once, e.g. "Approve all shown"."""
+    with store.edit(tid) as t:
+        for log_id in body.log_ids:
+            review.review(t, log_id, body.verdict, body.note)
+    return review.changes(store.load(tid))
+
+
+@app.post("/api/tenders/{tid}/log/{log_id}/review")
+def review_one(tid: str, log_id: str, body: ReviewBody):
+    """Senior review of one change: approved | reverted (the existing undo) | comment."""
+    with store.edit(tid) as t:
+        review.review(t, log_id, body.verdict, body.note)
+    return review.changes(store.load(tid))
 
 
 @app.get("/api/tenders/{tid}/log")

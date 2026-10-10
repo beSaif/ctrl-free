@@ -11,6 +11,7 @@ freely add computed fields to what they get back.
 """
 from __future__ import annotations
 
+import contextvars
 import copy
 import json
 import os
@@ -38,6 +39,40 @@ def now() -> str:
 
 def new_id(prefix: str = "t_") -> str:
     return prefix + secrets.token_hex(3)
+
+
+# ---------------------------------------------------------------- who is acting
+# The API middleware sets the current person from the X-Actor header (config.PEOPLE). Code that
+# writes by="You" is attributed to that person automatically; without a known header it stays "You".
+
+_actor: contextvars.ContextVar[dict | None] = contextvars.ContextVar("actor", default=None)
+
+
+def person(actor_id: str | None) -> dict | None:
+    return next((p for p in config.PEOPLE if p["id"] == actor_id), None) if actor_id else None
+
+
+def set_actor(actor_id: str | None) -> contextvars.Token:
+    return _actor.set(person(actor_id))
+
+
+def reset_actor(token: contextvars.Token) -> None:
+    _actor.reset(token)
+
+
+def actor() -> dict | None:
+    """The person behind the current request ({id, name, role, role_label}), None for "You"."""
+    return _actor.get()
+
+
+def me() -> str:
+    """Display name to stamp into data (confirmed.by, sent_by, changed_by ...)."""
+    a = _actor.get()
+    return a["name"] if a else "You"
+
+
+def _who(by: str | None) -> str | None:
+    return me() if by == "You" else by
 
 
 def lock(tid: str) -> threading.RLock:
@@ -111,7 +146,7 @@ def save(t: dict, by: str | None = None, touch: bool = True) -> None:
         if touch:
             t["updated_at"] = now()
             if by:
-                t["updated_by"] = by
+                t["updated_by"] = _who(by)
         raw = json.dumps(t, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         _atomic_write(state_path(tid), raw)
         _cache[tid] = (state_path(tid).stat().st_mtime_ns, copy.deepcopy(t))
@@ -152,7 +187,7 @@ def create(pdf_bytes: bytes, file_name: str, fields: dict[str, Any] | None = Non
         "warnings": [],
         "created_at": ts,
         "updated_at": ts,
-        "updated_by": "You",
+        "updated_by": me(),
         "profile": fields.get("profile") or "school",
         # fields the user typed; the pipeline never overwrites these
         "user_fields": sorted(k for k in ("name", "client", "trade", "due_at", "profile") if k in fields),
@@ -252,6 +287,7 @@ def append_log(
     text: str | None = None,
 ) -> dict:
     kind, ident = target
+    by = _who(by)
     entry = {
         "id": new_id("l_"),
         "at": now(),
@@ -266,6 +302,12 @@ def append_log(
     }
     if batch:
         entry["batch"] = batch
+    a = actor()
+    if a and by == a["name"]:
+        entry["actor"], entry["role"] = a["id"], a["role"]
+    elif a and by == "Assist" and undoable:
+        # an Assist change is applied when a person says OK: record who
+        entry["approved_by"], entry["approved_by_role"] = a["name"], a["role"]
     t.setdefault("log", []).append(entry)
     return entry
 
