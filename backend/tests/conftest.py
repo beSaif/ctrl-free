@@ -1,4 +1,6 @@
 """Shared test setup."""
+import os
+
 import pytest
 
 from app import config
@@ -21,3 +23,14 @@ def _no_local_tenders(tmp_path_factory):
     config.TENDERS_DIR = tmp_path_factory.mktemp("local") / "tenders"
     yield
     config.TENDERS_DIR = old
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _no_paid_llm_calls():
+    """A key in .env must not make the suite call the LLM (cost, and new files in the committed llm_cache).
+    Tests that need the LLM path patch config.LLM_OFFLINE themselves; LLM_LIVE_TESTS=1 runs live."""
+    old = config.LLM_OFFLINE
+    if os.getenv("LLM_LIVE_TESTS") != "1":
+        config.LLM_OFFLINE = True
+    yield
+    config.LLM_OFFLINE = old

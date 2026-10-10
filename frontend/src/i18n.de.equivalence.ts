@@ -114,4 +114,5 @@ export const DE_EQUIVALENCE: Record<string, string> = {
     'Die Ausschreibung nennt {make} ohne «oder gleichwertig». Wir offerieren ein gleichwertiges Produkt eines anderen Herstellers, wie Equans diese Positionen kalkuliert.',
   'The tender names {make}.': 'Die Ausschreibung nennt {make}.',
   'Tender names the make without "or equivalent": offered as equivalent': 'Ausschreibung nennt das Fabrikat ohne «oder gleichwertig»: als gleichwertig offeriert',
+  'Same product family, another subtype: check it fits': 'Gleiche Produktfamilie, anderer Untertyp: Eignung prüfen',
 }

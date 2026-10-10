@@ -70,7 +70,7 @@ export function lineStatus(p: Position, t: T): StatusView {
   if (p.status === 'review_required') return { label: t('Check this'), fg: C.attn, marker: C.attn }
   if (sup && quoted) return { label: t('Quote entered, confirm'), fg: C.accent, marker: C.accent }
   if (sup) return { label: t('Needs supplier quote'), fg: C.attn, marker: C.attn }
-  if (p.flagged) return { label: t('Flagged by you'), fg: C.attn, marker: C.attn }
+  if (p.flagged) return { label: t('Flagged for review'), fg: C.attn, marker: C.attn }
   if (p.status === 'assumption_applied') return { label: t('Priced, with a guess'), fg: C.attn, marker: C.attn }
   return { label: t('Priced'), fg: C.muted, marker: C.stone }
 }
@@ -262,7 +262,7 @@ export function buildRows(
       ['check', 'Check this', (p) => p.status === 'review_required'],
       ['missing', 'Missing info', (p) => p.status === 'insufficient_information'],
       ['guess', 'Priced, with a guess', (p) => p.status === 'assumption_applied' && !p.flagged],
-      ['flag', 'Flagged by you', () => true],
+      ['flag', 'Flagged for review', () => true],
     ]
     const left = new Set(rest.map((p) => p.lv_id))
     for (const [key, name, test] of buckets) {

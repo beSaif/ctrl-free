@@ -15,8 +15,8 @@ export function FooterTotals({ tenderId }: { tenderId: string }) {
   const offer = chosen ? tot?.scenarios.find((s) => s.name === chosen)?.bid : null
   const note = changed
     ? changed === 1
-      ? t('1 line changed by you')
-      : t('{n} lines changed by you', { n: changed })
+      ? t('1 line changed by hand')
+      : t('{n} lines changed by hand', { n: changed })
     : offer
       ? t('offer price CHF {p} ({o})', { p: fmt0(offer), o: t(chosen!) })
       : t('offer price not chosen yet')

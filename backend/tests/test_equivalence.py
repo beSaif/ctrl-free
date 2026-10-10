@@ -106,3 +106,11 @@ def test_candidates_get_comparisons():
     cands = [dict(rows["P-AIR-001"]), dict(rows["P-AIR-002"])]
     E.add_comparisons(_pos(VALVE), cands)
     assert [c["comparison"]["verdict"] for c in cands] == ["equivalent", "differs"]
+
+
+def test_same_family_other_subtype_is_equivalent_not_differs():
+    # "Kontroll- und Putzdeckel 40 x 20 cm" (LV0021) vs the inspection cover 400x200: a check, not a red flag
+    c = E.compare(_pos("Kontroll- und Putzdeckel\nGrösse 40 x 20 cm"), _rows()["P-FIR-004"])
+    by = {r["key"]: r for r in c["rows"]}
+    assert by["type"]["verdict"] == "equivalent" and "Same product family" in by["type"]["note"]
+    assert by["size"]["verdict"] == "same" and c["verdict"] == "equivalent"

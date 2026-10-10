@@ -219,6 +219,12 @@ def compare(position: dict, row: dict | None, rule: dict | None = None, attrs: d
     else:
         tv = "differs"
     note = None
+    pfam = matcher.family_of(f"{row.get('subcategory')} {row.get('description')}".lower())
+    same_family = tv == "differs" and pfam and pfam == matcher.family_of(pa.get("type"))
+    if same_family and not (sc["flow_conflict"] or sc["excl_conflict"] or sc["shape_conflict"]):
+        # e.g. "Kontroll- und Putzdeckel" vs an inspection cover: same family, another subtype
+        tv = "equivalent"
+        note = "Same product family, another subtype: check it fits"
     if sc["flow_conflict"]:
         note = f"Tender says {pa['flow']} air, product is {ca['flow']}"
     elif sc["excl_conflict"]:

@@ -92,7 +92,14 @@ def verify(tender: dict, settings: dict | None = None, benchmark_dir: Path | Non
     """Compare the tender's lines and subset totals with the golden example numbers.
 
     Pricing uses `settings` (default: the project's default settings, which is what the golden
-    numbers assume), never the estimator's current what-if settings."""
+    numbers assume), never the estimator's current what-if settings, and the standard catalogue,
+    never an active supplier or negotiated price list (the golden numbers are catalogue prices)."""
+    from app import price_lists
+    with price_lists.using([]):
+        return _verify(tender, settings, benchmark_dir)
+
+
+def _verify(tender: dict, settings: dict | None, benchmark_dir: Path | None) -> dict:
     data = _load(benchmark_dir)
     if data is None:
         return {"loaded": False, "message": "No benchmark loaded", "rows": [], "summary": None}

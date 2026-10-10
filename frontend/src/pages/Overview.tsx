@@ -92,7 +92,8 @@ export function Overview() {
     {
       n: 3,
       title: t('Choose the offer price'),
-      to: `${base}/pricing`,
+      // project costs still off: start with Costs; otherwise straight to the price decision
+      to: `${base}/pricing/${pcOn ? 'strategy' : 'costs'}`,
       action: t('Open'),
       done: !!chosen,
       urgent: true,

@@ -379,7 +379,7 @@ def build_xlsx(tender: dict, totals: dict, settings: dict) -> bytes:
         if prod:
             _comment(ws_offer[f"{C['Product id']}{i}"], f"catalog.csv {pid}")
         if q is not None and p.get("overrides", {}).get("quantity") is not None:
-            _comment(ws_offer[f"{C['Qty']}{i}"], f"Changed by you; tender p. {page} says {P.fmt_qty(p.get('quantity'))}")
+            _comment(ws_offer[f"{C['Qty']}{i}"], f"Changed by the estimator; tender p. {page} says {P.fmt_qty(p.get('quantity'))}")
         elif q is not None and page:
             _comment(ws_offer[f"{C['Qty']}{i}"], f"Tender p. {page}")
         if p.get("status_reason"):

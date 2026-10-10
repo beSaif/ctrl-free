@@ -203,9 +203,9 @@ def test_repricing_is_one_review_item_not_one_per_line(client, tid, lists_dir):
     assert tender[0]["impact"] == {"value": pytest.approx(eff["direct_delta"], abs=0.01), "basis": "direct"}
     assert ch["summary"]["to_review"] == before + 1
 
-    # the verified examples use catalogue prices: the ones the list re-prices are named as such
+    # the verified examples are catalogue prices: the check prices them without the list, so 22/22 holds
     ver = client.get(f"/api/tenders/{tid}/verification").json()["summary"]
-    assert ver["price_list_rows"] > 0 and ver["direct_ok"] + ver["price_list_rows"] == ver["total"]
+    assert ver["direct_ok"] == ver["total"] and ver["price_list_rows"] == 0 and ver["subset_cost_ok"]
 
     # the offer workbook writes the list's price and names the list as the price source
     import io
