@@ -142,7 +142,7 @@ export const DE: Record<string, string> = {
   'Confirmed on budget price': 'Mit Budgetpreis bestätigt',
   Conservative: 'Vorsichtig',
   'Conservative margin': 'Marge vorsichtig',
-  'Continue to instructions': 'Weiter zu den Vorgaben',
+  'Continue to lines': 'Weiter zu den Positionen',
   'Continue to pricing': 'Weiter zur Preisbildung',
   'Continue: choose the price': 'Weiter: Preis wählen',
   'Continue: confirm {n} instructions': 'Weiter: {n} Vorgaben bestätigen',

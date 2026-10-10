@@ -258,8 +258,8 @@ function TenderShell({ id }: { id: string }) {
   type Tab = { to: string; label: string; end?: boolean; count?: string; attn?: boolean; dot?: string }
   const tabs: Tab[] = [
     { to: base, label: 'Overview', end: true },
-    { to: `${base}/lines`, label: 'Lines', ...work(toReview) },
     { to: `${base}/instructions`, label: 'Instructions & norms', ...work(toConfirm) },
+    { to: `${base}/lines`, label: 'Lines', ...work(toReview) },
     {
       to: `${base}/pricing`,
       label: 'Pricing',

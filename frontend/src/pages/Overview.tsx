@@ -63,20 +63,6 @@ export function Overview() {
   const steps: Step[] = [
     {
       n: 1,
-      title: t('Review lines'),
-      to: `${base}/lines`,
-      action: open.length ? t('Start review') : t('Open'),
-      done: open.length === 0,
-      urgent: true,
-      status: open.length ? <span className="text-attn font-medium">{t('{n} of {total} lines need you', { n: open.length, total: priceable.length })}</span> : null,
-      details: open.length
-        ? reviewBreakdown(open, tot.direct, t).join(' ') +
-          ' ' +
-          (supplierOpen.length ? t('Supplier requests are drafted per product type.') : t('Check the product or the quantity and confirm.'))
-        : null,
-    },
-    {
-      n: 2,
       title: t('Confirm instructions and norms'),
       to: `${base}/instructions`,
       action: t('Open'),
@@ -88,6 +74,20 @@ export function Overview() {
       details: openIns.length
         ? t('{c} add cost and {r} are risks. Each one is quoted from the tender with its page.', { c: costN, r: riskN })
         : t('All {n} handled. They go into the pricing report.', { n: ins.instructions.length }),
+    },
+    {
+      n: 2,
+      title: t('Review lines'),
+      to: `${base}/lines`,
+      action: open.length ? t('Start review') : t('Open'),
+      done: open.length === 0,
+      urgent: true,
+      status: open.length ? <span className="text-attn font-medium">{t('{n} of {total} lines need you', { n: open.length, total: priceable.length })}</span> : null,
+      details: open.length
+        ? reviewBreakdown(open, tot.direct, t).join(' ') +
+          ' ' +
+          (supplierOpen.length ? t('Supplier requests are drafted per product type.') : t('Check the product or the quantity and confirm.'))
+        : null,
     },
     {
       n: 3,
@@ -153,11 +153,11 @@ export function Overview() {
   const next = steps.find((x) => !x.done)
   const cta =
     next?.n === 1
-      ? open.length === 1
-        ? t('Continue: review 1 line')
-        : t('Continue: review {n} lines', { n: open.length })
+      ? t('Continue: confirm {n} instructions', { n: openIns.length })
       : next?.n === 2
-        ? t('Continue: confirm {n} instructions', { n: openIns.length })
+        ? open.length === 1
+          ? t('Continue: review 1 line')
+          : t('Continue: review {n} lines', { n: open.length })
         : next?.n === 3
           ? t('Continue: choose the price')
           : next?.n === 4

@@ -204,8 +204,8 @@ export function Lines() {
               {t('Every line that needed you is confirmed.')} {t('Direct cost is now CHF {d}.', { d: fmt2(pr?.totals.direct) })}
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
-              <LinkButton to={`/t/${id}/instructions`} variant="primary">
-                {t('Continue to instructions')}
+              <LinkButton to={`/t/${id}/pricing`} variant="primary">
+                {t('Continue to pricing')}
               </LinkButton>
               <Button onClick={() => setFilter('all', '')}>{t('See all {n} lines', { n: positions.length })}</Button>
             </div>

@@ -72,8 +72,8 @@ export function Instructions() {
                 : t('{a} confirmed. They go into the pricing report.', { a: nOk })}
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
-              <LinkButton to={`/t/${id}/pricing`} variant="primary">
-                {t('Continue to pricing')}
+              <LinkButton to={`/t/${id}/lines`} variant="primary">
+                {t('Continue to lines')}
               </LinkButton>
               <Button onClick={() => setTab('all')}>{t('See all {n}', { n: all.length })}</Button>
             </div>
