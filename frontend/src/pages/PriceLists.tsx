@@ -67,6 +67,11 @@ function Delta({ v }: { v: number }) {
   )
 }
 
+/** The tender's name, with its id when several open tenders share the name (the same tender uploaded twice). */
+function effectName(e: TenderEffect, all: TenderEffect[]) {
+  return all.filter((x) => x.name === e.name).length > 1 ? `${e.tender_id} · ${e.name}` : e.name
+}
+
 /** "Oberglatt: 52 lines, direct cost −10'230.97" per open tender. */
 function EffectLines({ effect, t }: { effect: TenderEffect[]; t: T }) {
   if (!effect.length) return <span className="text-muted">{t('No open tender')}</span>
@@ -75,8 +80,8 @@ function EffectLines({ effect, t }: { effect: TenderEffect[]; t: T }) {
       {effect.map((e) => (
         <span key={e.tender_id} className="flex flex-col">
           <Delta v={e.direct_delta} />
-          <span className="text-[13px] text-muted max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap" title={e.name}>
-            {plural(t, e.lines_changed, '1 line', '{n} lines')} · {e.name}
+          <span className="text-[13px] text-muted max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap" title={effectName(e, effect)}>
+            {plural(t, e.lines_changed, '1 line', '{n} lines')} · {effectName(e, effect)}
           </span>
         </span>
       ))}
@@ -655,11 +660,11 @@ function ImportDialog({
                 <p key={e.tender_id} className="m-0 px-3 py-2 border border-rule bg-panel text-[14px]">
                   {e.lines_changed ? (
                     <>
-                      {t('Activating it re-prices {n} on {t}: direct cost', { n: plural(t, e.lines_changed, '1 line', '{n} lines'), t: e.name })} <Delta v={e.direct_delta} />,{' '}
+                      {t('Activating it re-prices {n} on {t}: direct cost', { n: plural(t, e.lines_changed, '1 line', '{n} lines'), t: effectName(e, prev.effect) })} <Delta v={e.direct_delta} />,{' '}
                       {t('cost incl. transport and overhead')} <Delta v={e.cost_delta} />.
                     </>
                   ) : (
-                    t('Activating it changes no price on {t}: lists above it already price these products, or the tender does not use them.', { t: e.name })
+                    t('Activating it changes no price on {t}: lists above it already price these products, or the tender does not use them.', { t: effectName(e, prev.effect) })
                   )}
                 </p>
               ))}
