@@ -148,10 +148,18 @@ export function Export() {
           )}
           {rt && (rt.to_review > 0 || rt.ai_to_review > 0) ? (
             <Check color={C.attn} link={lnk(`/t/${id}/changes`, t('Changes'))}>
-              <strong className="font-semibold text-attn">
-                {rt.to_review === 1 ? t('1 change not reviewed by a senior') : t('{n} changes not reviewed by a senior', { n: rt.to_review })}
-              </strong>
-              {rt.ai_to_review > 0 && <> · {t('{n} low-confidence AI picks not reviewed', { n: rt.ai_to_review })}</>}
+              {rt.to_review > 0 && (
+                <strong className="font-semibold text-attn">
+                  {rt.to_review === 1 ? t('1 change not reviewed by a senior') : t('{n} changes not reviewed by a senior', { n: rt.to_review })}
+                </strong>
+              )}
+              {rt.to_review > 0 && rt.ai_to_review > 0 && ' · '}
+              {rt.ai_to_review > 0 &&
+                (rt.to_review > 0 ? (
+                  t('{n} low-confidence AI picks not reviewed', { n: rt.ai_to_review })
+                ) : (
+                  <strong className="font-semibold text-attn">{t('{n} low-confidence AI picks not reviewed', { n: rt.ai_to_review })}</strong>
+                ))}
             </Check>
           ) : rt && rt.changes > 0 ? (
             <Check color={C.ink} link={lnk(`/t/${id}/changes?tab=all`, t('Changes'))}>

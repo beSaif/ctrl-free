@@ -122,7 +122,7 @@ export function StrategyStep({ ctx }: { ctx: PricingCtx }) {
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-[18px] py-3.5 border border-ink" aria-live="polite">
           <div className="flex-[1_1_360px] flex flex-col gap-0.5 min-w-0">
             <span className="text-[13px] text-muted">
-              {s.chosen ? t('Offer price') : t('Offer price · not chosen yet, showing {name}', { name: t(shown.name) })} · {t(shown.name)} · {t('{m} margin', { m: shown.margin_pct.toFixed(1) + '%' })}
+              {s.chosen ? `${t('Offer price')} · ${t(shown.name)}` : t('Offer price · not chosen yet, showing {name}', { name: t(shown.name) })} · {t('{m} margin', { m: shown.margin_pct.toFixed(1) + '%' })}
             </span>
             <span className="flex flex-wrap items-baseline gap-x-3">
               <span className={cx('font-mono text-[30px] leading-[1.15] font-medium', ctx.busy && 'cf-pending')}>CHF {fmt0(shown.bid)}</span>
