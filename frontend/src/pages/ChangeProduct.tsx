@@ -8,6 +8,8 @@ import type { Candidate } from '../api/types'
 import { Button, ErrorBox, IconBack, LinkButton, Loading, SearchBox, TextInput } from '../components/ui'
 import { cx } from '../lib/cx'
 import { PdfCrop } from '../components/PdfCrop'
+import { CompareChecks, ComparisonPanel } from '../components/Equivalence'
+import { candidateComparison, candidateTag, isVariantOf, lineExtras } from '../api/learned'
 import { fmt0, fmt2, fmtQty, fmtSigned, fmtUnit } from '../lib/format'
 import { standardPriceFor } from '../lib/pricing'
 
@@ -53,11 +55,29 @@ export function ChangeProduct() {
   const delta = lineTotal - curTotal
   const priceNow = pr?.totals.standard_price ?? null
   const priceNew = chosen?.standard_price ?? standardPriceFor(pr, delta)
-  const isVariant = !!sel && sel !== suggestedId
+  // a variant under the tender's rule: the product differs from what the tender specifies (an attribute, or a
+  // prescribed make). Another make's equivalent product is no variant. Without comparisons: any other product.
+  const ex = lineExtras(p)
+  const chosenCmp = chosen ? candidateComparison(chosen) : null
+  const compared = all.some((c) => candidateComparison(c))
+  const isVariant = !!sel && (compared ? isVariantOf(chosenCmp) : sel !== suggestedId)
   const unchanged = sel === (current?.product_id ?? p.overrides?.product_id ?? suggestedId)
   const variantRule = ins?.instructions.find((i) => /variant/i.test(i.type))
   const needReason = isVariant && !reason.trim()
+  const reasonOnly = unchanged && isVariant && reason.trim() !== (p.variant_reason ?? '')
+  const differs = (chosenCmp?.rows ?? []).filter((r) => r.verdict === 'differs')
   const sysName = p.system.replace(/^\d+(\.\d+)*\s+/, '')
+  const makeCaption =
+    ex.makeRule && ex.makeRule.kind !== 'none'
+      ? ex.makeRule.kind === 'example'
+        ? t('The tender names {make} as an example ("{w}"). An equivalent product from another make is fine.', {
+            make: [ex.makeRule.make, ex.makeRule.model].filter(Boolean).join(' '),
+            w: ex.makeRule.wording ?? 'z.B.',
+          })
+        : ex.makeRule.kind === 'prescribed'
+          ? t('The tender prescribes {make}. Another make is a variant and needs a reason.', { make: [ex.makeRule.make, ex.makeRule.model].filter(Boolean).join(' ') })
+          : t('The tender leaves the make for you to fill in: any product that meets the description.')
+      : null
 
   const use = async () => {
     if (!sel) return
@@ -100,9 +120,10 @@ export function ChangeProduct() {
                   source={p.source}
                   pageCount={tender?.page_count}
                   caption={
-                    p.make_hint
+                    makeCaption ??
+                    (p.make_hint
                       ? t('The tender names a make as an example ("z.B"). Another make is allowed as a variant with a reason.')
-                      : t('The tender names no make. Pick the product that fits the text.')
+                      : t('The tender names no make. Pick the product that fits the text.'))
                   }
                 />
               )}
@@ -129,6 +150,8 @@ export function ChangeProduct() {
                     {(cq.isLoading ? [] : list).map((c) => {
                       const on = c.product_id === sel
                       const d = (c.line_total ?? 0) - curTotal
+                      const cmp = candidateComparison(c)
+                      const tag = candidateTag(c)
                       return (
                         <button
                           key={c.product_id}
@@ -144,7 +167,8 @@ export function ChangeProduct() {
                           <span className="flex flex-col min-w-0">
                             <span className="font-medium">
                               {c.description ?? c.product_id}
-                              {c.product_id === suggestedId && <span className="text-accent text-[12.5px] font-normal">{'  · ' + t('suggested match')}</span>}
+                              {c.product_id === suggestedId && <span className="text-accent text-[12.5px] font-normal">{'  · ' + t(tag === 'learned' ? 'learned from you' : 'suggested match')}</span>}
+                              {tag === 'rules_pick' && <span className="text-muted text-[12.5px] font-normal">{'  · ' + t('code’s own pick')}</span>}
                               {c.supplier_quote_required && <span className="text-attn text-[12.5px] font-normal">{'  · ' + t('budget price')}</span>}
                             </span>
                             <span className="font-mono text-[12.5px] text-muted">
@@ -153,7 +177,10 @@ export function ChangeProduct() {
                             </span>
                           </span>
                           <span className="font-mono text-right">{fmt2(c.unit_price ?? c.net_cost_chf)}</span>
-                          <span className={c.product_id === suggestedId ? 'text-ink' : 'text-muted'}>{c.why}</span>
+                          <span className="flex flex-col gap-0.5 min-w-0">
+                            <span className={c.product_id === suggestedId ? 'text-ink' : 'text-muted'}>{c.why}</span>
+                            {cmp && <CompareChecks cmp={cmp} className="text-[12.5px] text-muted" />}
+                          </span>
                           <span className="font-mono text-right">{fmt2(c.line_total)}</span>
                           <span className="font-mono text-right text-muted">{c.current ? t('current') : fmtSigned(c.diff ?? d)}</span>
                         </button>
@@ -179,9 +206,27 @@ export function ChangeProduct() {
                 <Link to={back} className="inline-flex items-center min-h-8 underline underline-offset-2">{t('None fits: ask a supplier from the line')}</Link>
               </div>
 
+              {chosenCmp && chosen && (
+                <ComparisonPanel
+                  key={chosen.product_id}
+                  cmp={chosenCmp}
+                  rule={ex.makeRule ? { ...ex.makeRule, product_manufacturer: chosen.manufacturer ?? null, manufacturer_differs: chosenCmp.rows.some((r) => r.key === 'make' && r.verdict !== 'same'), variant_needed: chosenCmp.rows.some((r) => r.key === 'make' && r.verdict === 'differs') } : null}
+                  defaultOpen
+                  title={t('Tender asks · We offer with {p}', { p: chosen.product_id })}
+                />
+              )}
+              {compared && !isVariant && sel && sel !== suggestedId && chosenCmp && (
+                <span className="text-[13px] text-muted">{t('Equivalent to what the tender asks: no variant needed.')}</span>
+              )}
+
               {isVariant && (
                 <section className="flex flex-col gap-2 px-3.5 py-3 border border-attn">
                   <span className="font-semibold text-attn">{t('This differs from what the tender specifies')}</span>
+                  {differs.length > 0 && (
+                    <span className="text-[13px]">
+                      {differs.map((r) => `${t(r.attribute)}: ${r.tender ?? '–'} → ${r.product ?? '–'}`).join(' · ')}
+                    </span>
+                  )}
                   {variantRule ? (
                     <>
                       <span className="text-[13px] text-muted">
@@ -222,8 +267,8 @@ export function ChangeProduct() {
                 </div>
                 <div className="flex gap-2">
                   <LinkButton to={back}>{t('Cancel')}</LinkButton>
-                  <Button variant="primary" onClick={use} disabled={!sel || unchanged || patch.isPending} title={needReason ? t('Add a reason for the variant') : undefined}>
-                    {t('Use this product')}
+                  <Button variant="primary" onClick={use} disabled={!sel || (unchanged && !reasonOnly) || patch.isPending} title={needReason ? t('Add a reason for the variant') : undefined}>
+                    {reasonOnly ? t('Save the reason') : t('Use this product')}
                   </Button>
                 </div>
               </div>

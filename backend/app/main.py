@@ -669,6 +669,7 @@ def position_detail(t: dict, lv_id: str) -> dict:
         "differs": bool(make and prod and make.split()[0] not in str(prod.get("manufacturer") or "").lower()),
         "reason": raw.get("variant_reason"),
     }
+    _line_extras(t, v, raw, pid, out)
     out["quote_group"] = _quote_group_for(t, lv_id)
     out["log"] = [e for e in reversed(t.get("log") or []) if e.get("lv_id") == lv_id]
     sq = cur.get("supplier_quote")
@@ -698,6 +699,44 @@ def position_detail(t: dict, lv_id: str) -> dict:
     return out
 
 
+def _parent_of(t: dict, raw: dict) -> dict | None:
+    pid = raw.get("parent_lv_id")
+    return next((p for p in t["positions"] if p["lv_id"] == pid), None) if pid else None
+
+
+def _line_extras(t: dict, v: dict, raw: dict, pid: str | None, out: dict) -> None:
+    """Line detail: tender asks vs we offer (equivalence.py) for the product in use, the matcher's pick and
+    every candidate; similar lines and the learned rule for this wording (learned.py)."""
+    eq, ln = mod("equivalence"), mod("learned")
+    cat = pipeline.catalog()
+    if eq is not None:
+        try:
+            parent = _parent_of(t, raw)
+            lv = eq.line_view(raw, raw.get("match"), cat.get(pid or ""), cat, t.get("instructions"), parent)
+            out["make_rule"], out["comparison"] = lv["make_rule"], lv["comparison"]
+            if out.get("match"):
+                out["match"] = {**out["match"], "comparison": lv["match_comparison"]}
+            eq.add_comparisons(raw, out.get("candidates") or [], parent)
+        except Exception as e:  # a comparison must never break the line
+            log.warning("comparison failed for %s: %s", raw.get("lv_id"), e)
+    if ln is not None:
+        try:
+            out["similar"] = ln.similar(t, raw["lv_id"], {p["lv_id"]: p["needs_review"] for p in v["positions"]})
+            out["learned_rule"] = ln.rule_for(raw)
+        except Exception as e:
+            log.warning("learned view failed for %s: %s", raw.get("lv_id"), e)
+
+
+def _learn(t: dict, lv_id: str, n_log: int) -> None:
+    """Teach learned.py from the log entries one change added (their `by` is who taught it)."""
+    ln = mod("learned")
+    if ln is not None:
+        try:
+            ln.record_patch(t, lv_id, (t.get("log") or [])[n_log:])
+        except Exception as e:
+            log.warning("learning from %s failed: %s", lv_id, e)
+
+
 def _nav(ids: list[str], lv_id: str) -> dict:
     if lv_id not in ids:
         return {"index": None, "total": len(ids), "prev": None, "next": ids[0] if ids else None}
@@ -723,6 +762,7 @@ def _fmt_val(v: Any) -> str:
 def patch_position(tid: str, lv_id: str, body: PositionPatch):
     data = body.model_dump(exclude_unset=True)
     with store.edit(tid) as t:
+        n_log = len(t.get("log") or [])  # the entries this request adds teach learned matches (_learn)
         pos = store.resolve_target(t, "position", lv_id)
         if pos is None:
             raise HTTPException(404, f"Line {lv_id} not found")
@@ -770,6 +810,7 @@ def patch_position(tid: str, lv_id: str, body: PositionPatch):
         if "flag" in data and data["flag"] is not None:
             store.change(t, "You", "flag" if data["flag"] else "unflag", "position", lv_id, {"flagged": data["flag"]},
                          text=("Flagged " if data["flag"] else "Unflagged ") + lv_id)
+    _learn(t, lv_id, n_log)
     return position_detail(store.load(tid), lv_id)
 
 
@@ -781,13 +822,49 @@ def candidates(tid: str, lv_id: str, q: str | None = None, limit: int = 20):
     if cur is None:
         raise HTTPException(404, f"Line {lv_id} not found")
     raw = next(p for p in t["positions"] if p["lv_id"] == lv_id)
+    eq = mod("equivalence")
     if q and q.strip():
         known = dict(_shortlist_ids(raw))
         ids = _search_catalog(q, limit)
         items = [_candidate(t, raw, cur, pid, known.get(pid)) for pid in ids]
+        if eq is not None:
+            eq.add_comparisons(raw, items, _parent_of(t, raw))
         return {"q": q, "candidates": items, "total": len(pipeline.catalog()), "search": True}
     items = [_candidate(t, raw, cur, pid, extra) for pid, extra in _shortlist_ids(raw)]
+    if eq is not None:
+        eq.add_comparisons(raw, items, _parent_of(t, raw))
     return {"q": None, "candidates": items, "total": len(pipeline.catalog()), "search": False}
+
+
+# ================================================================== learned matches
+
+
+@app.get("/api/learned")
+def get_learned():
+    """Reference -> Learned matches: every rule estimators taught, with where, who, when and its record."""
+    return mod("learned").rules_view()
+
+
+@app.patch("/api/learned/{rid}")
+def patch_learned(rid: str, enabled: bool = Body(..., embed=True)):
+    return mod("learned").set_enabled(rid, enabled)
+
+
+@app.delete("/api/learned/{rid}")
+def delete_learned(rid: str):
+    mod("learned").delete(rid)
+    return {"ok": True}
+
+
+@app.post("/api/tenders/{tid}/positions/{lv_id}/apply-similar")
+def apply_similar(tid: str, lv_id: str):
+    """This line's product (and confirmation) on the lines with the same tender wording: one undoable batch."""
+    t = _tender(tid)
+    v = pipeline.view(t)
+    if lv_id not in v["by_lv"]:
+        raise HTTPException(404, f"Line {lv_id} not found")
+    res = mod("learned").apply_similar(tid, lv_id, "You", {p["lv_id"]: p["needs_review"] for p in v["positions"]})
+    return {**res, "position": position_detail(store.load(tid), lv_id)}
 
 
 # ================================================================== pages / pdf
@@ -1524,6 +1601,9 @@ def assist_undo(tid: str, log_id: str):
         except ValueError as e:
             raise HTTPException(409, str(e))
         assist.reopen_after_undo(t, entries)
+    ln = mod("learned")
+    if ln is not None:  # forget what the undone changes taught
+        ln.retract([e.get("undoes") for e in entries])
     t = store.load(tid)
     v = pipeline.view(t)
     return {"undone": entries, "totals": _footer(v["totals"])}

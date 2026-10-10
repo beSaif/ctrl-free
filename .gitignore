@@ -10,6 +10,7 @@ dist/
 .DS_Store
 backend/data/tenders/
 backend/data/price_lists/
+backend/data/learned.json
 *.log
 
 !frontend/.env.development

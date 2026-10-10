@@ -9,9 +9,11 @@ import { fmt2, fmtShortDate, fmtUnit } from '../lib/format'
 import { C } from '../lib/lines'
 import { cx } from '../lib/cx'
 import { PriceLists } from './PriceLists'
+import { useLearned } from '../api/learned'
+import { LearnedMatches } from './LearnedMatches'
 
-type Tab = 'cat' | 'rules' | 'params' | 'lists'
-const KIND: Record<Tab, string> = { cat: 'catalog', rules: 'rules', parameters: 'parameters', params: 'parameters', lists: 'price-lists' } as Record<Tab, string>
+type Tab = 'cat' | 'rules' | 'params' | 'lists' | 'learned'
+const KIND: Record<Tab, string> = { cat: 'catalog', rules: 'rules', parameters: 'parameters', params: 'parameters', lists: 'price-lists', learned: 'learned' } as Record<Tab, string>
 
 const FACTOR_SHORT: Record<string, string> = {
   site_efficiency: '÷ site efficiency',
@@ -100,8 +102,9 @@ export function Reference() {
   const lang = useLang()
   const [params, setParams] = useSearchParams()
   const raw = params.get('tab')
-  const tab: Tab = raw === 'rules' || raw === 'params' || raw === 'lists' ? raw : 'cat'
+  const tab: Tab = raw === 'rules' || raw === 'params' || raw === 'lists' || raw === 'learned' ? raw : 'cat'
   const { data, isLoading, error } = useReference()
+  const learned = useLearned()
   const imp = useImportReference()
   const fileRef = useRef<HTMLInputElement>(null)
   const [q, setQ] = useState('')
@@ -131,11 +134,12 @@ export function Reference() {
             { key: 'rules', label: t('Install rules'), count: rules.length },
             { key: 'params', label: t('Default parameters') },
             { key: 'lists', label: t('Price lists') },
+            { key: 'learned', label: t('Learned matches'), count: learned.data?.counts.total },
           ]}
         />
         <span className="flex-auto" />
-        {tab !== 'lists' && <span className="text-[13px] text-muted">{sourceText(data, tab, lang, t)}</span>}
-        <label hidden={tab === 'lists'} className="inline-flex items-center min-h-[34px] px-3.5 border border-ink rounded-[2px] bg-white cursor-pointer hover:bg-panel focus-within:outline-2 focus-within:outline-accent">
+        {tab !== 'lists' && tab !== 'learned' && <span className="text-[13px] text-muted">{sourceText(data, tab, lang, t)}</span>}
+        <label className={cx('inline-flex items-center min-h-[34px] px-3.5 border border-ink rounded-[2px] bg-white cursor-pointer hover:bg-panel focus-within:outline-2 focus-within:outline-accent', (tab === 'lists' || tab === 'learned') && 'hidden!')}>
           {imp.isPending ? t('Importing…') : t('Import new version')}
           <input
             ref={fileRef}
@@ -165,6 +169,7 @@ export function Reference() {
 
       <main className="px-6 pb-8">
         {tab === 'lists' && <PriceLists />}
+        {tab === 'learned' && <LearnedMatches />}
         {tab === 'cat' && (
           <>
             <div className="py-3">
