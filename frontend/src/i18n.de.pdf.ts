@@ -25,7 +25,6 @@ export const DE_PDF: Record<string, string> = {
   'The page image is not available here (demo data).': 'Das Seitenbild ist hier nicht verfügbar (Demodaten).',
   'Loading the page': 'Seite wird geladen',
   'Loading the filled page': 'Ausgefüllte Seite wird geladen',
-  'Open in Tender PDF': 'Im Ausschreibungs-PDF öffnen',
   'Back to Tender PDF': 'Zurück zum Ausschreibungs-PDF',
   'Show on p. {page} in the Tender PDF': 'Auf S. {page} im Ausschreibungs-PDF zeigen',
   '{lv} on p. {page} in the Tender PDF': '{lv} auf S. {page} im Ausschreibungs-PDF',

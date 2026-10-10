@@ -11,7 +11,7 @@ import { api, filledLvPageUrl, pageImageUrl, useApiMode } from '../api/client'
 import { usePatchPosition, usePosition, usePositions, useTender, useUndo } from '../api/hooks'
 import { lineExtras } from '../api/learned'
 import type { Position } from '../api/types'
-import { Button, ErrorBox, IconCheck, IconClose, Kbd, Loading, Spinner } from '../components/ui'
+import { Button, ErrorBox, IconCheck, IconClose, Kbd, Loading, Spinner, Toggle2 } from '../components/ui'
 import { ComparisonPanel } from '../components/Equivalence'
 import { useAssistCtx } from '../assist/context'
 import { cx } from '../lib/cx'
@@ -443,28 +443,6 @@ function PageInput({ page, pageCount, onPage }: { page: number; pageCount: numbe
       />
       <span className="font-mono">{t('of {n}', { n: pageCount })}</span>
     </label>
-  )
-}
-
-function Toggle2<V extends string>({ label, value, options, onChange }: { label: string; value: V; options: [V, string][]; onChange: (v: V) => void }) {
-  return (
-    <div role="group" aria-label={label} className="inline-flex border border-rule rounded-[2px]">
-      {options.map(([v, l], i) => (
-        <button
-          key={v}
-          type="button"
-          aria-pressed={value === v}
-          onClick={() => onChange(v)}
-          className={cx(
-            'min-h-8 px-2.5 border-0 text-[13px]',
-            i > 0 && 'border-l border-rule',
-            value === v ? 'bg-ink text-white font-medium' : 'bg-white text-ink hover:bg-panel',
-          )}
-        >
-          {l}
-        </button>
-      ))}
-    </div>
   )
 }
 

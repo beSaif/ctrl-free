@@ -1,11 +1,11 @@
 // Tender PDF traceability: a crop of the rendered page around the position's block, with the
-// description lines tinted and the quantity line highlighted. "Open full page" shows the page.
+// description lines tinted and the quantity line highlighted. "Open full page" shows the whole page,
+// fitted, in a popup over the current screen, so closing it is the way back.
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
 import { useT } from '../i18n'
 import { pageImageUrl, useApiMode } from '../api/client'
 import type { SourceLine } from '../api/types'
-import { Button, Dialog } from './ui'
+import { Button, Dialog, Toggle2 } from './ui'
 
 export interface CropSource {
   page: number
@@ -22,18 +22,19 @@ const PAD = 10
 type Box = [number, number, number, number]
 const isBox = (b: unknown): b is Box => Array.isArray(b) && b.length === 4 && b.every((x) => typeof x === 'number')
 
-function useWidth<T extends HTMLElement>() {
+function useSize<T extends HTMLElement>() {
   const ref = useRef<T>(null)
-  const [w, setW] = useState(0)
+  const [size, setSize] = useState({ w: 0, h: 0 })
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    setW(el.clientWidth)
-    const ro = new ResizeObserver(() => setW(el.clientWidth))
+    const read = () => setSize({ w: el.clientWidth, h: el.clientHeight })
+    read()
+    const ro = new ResizeObserver(read)
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
-  return [ref, w] as const
+  return [ref, size] as const
 }
 
 function highlights(src: CropSource): { box: Box; bg: string }[] {
@@ -90,6 +91,7 @@ function PageImage({
   marks,
   onError,
   maxHeight,
+  fixedWidth,
 }: {
   url: string
   pageSize: number[]
@@ -97,8 +99,11 @@ function PageImage({
   marks: { box: Box; bg: string }[]
   onError: () => void
   maxHeight?: number
+  /** the width when the caller already knows it, so the height is right in the same render */
+  fixedWidth?: number
 }) {
-  const [ref, width] = useWidth<HTMLDivElement>()
+  const [ref, { w: measured }] = useSize<HTMLDivElement>()
+  const width = fixedWidth ?? measured
   const [pw, ph] = pageSize
   const c: Box = crop
     ? [Math.max(0, crop[0] - PAD), Math.max(0, crop[1] - PAD), Math.min(pw, crop[2] + PAD), Math.min(ph, crop[3] + PAD)]
@@ -144,7 +149,6 @@ export function PdfCrop({
   heading,
   fallback,
   caption,
-  pdfLink,
 }: {
   tenderId: string
   source: CropSource
@@ -152,8 +156,6 @@ export function PdfCrop({
   heading?: ReactNode
   fallback?: ReactNode
   caption?: ReactNode
-  /** Tender PDF page for this source: replaces the "Open full page" popup with a link to it. */
-  pdfLink?: string
 }) {
   const t = useT()
   useApiMode()
@@ -167,15 +169,9 @@ export function PdfCrop({
     <section className="flex flex-col gap-2">
       <div className="flex justify-between items-baseline gap-3">
         <h2 className="m-0 text-[15px] font-semibold">{heading ?? t('Tender PDF · p. {page}', { page: source.page })}</h2>
-        {pdfLink ? (
-          <Link to={pdfLink} className="inline-flex items-center min-h-8 text-[13px] underline underline-offset-2">
-            {t('Open in Tender PDF')}
-          </Link>
-        ) : (
-          <button type="button" onClick={() => setOpen(true)} className="min-h-8 border-0 bg-transparent p-0 text-[13px] text-accent underline underline-offset-2 hover:text-accent-hover">
-            {t('Open full page')}
-          </button>
-        )}
+        <button type="button" onClick={() => setOpen(true)} className="min-h-8 border-0 bg-transparent p-0 text-[13px] text-accent underline underline-offset-2 hover:text-accent-hover">
+          {t('Open full page')}
+        </button>
       </div>
       <div className="border border-stone bg-panel p-4">
         <div className="bg-white border border-rule px-[18px] py-4 flex flex-col">
@@ -215,8 +211,22 @@ function PageViewerOpen({ open, onClose, tenderId, source, pageCount, fallback }
   const onSource = page === source.page
   const size = source.page_size && source.page_size.length === 2 ? source.page_size : [595, 842]
   const go = (d: number) => setPage((p) => Math.min(max, Math.max(1, p + d)))
+  const [zoom, setZoom] = useState<'page' | 'width'>('page')
+  // the free space less its 16px padding, and 2px for the page border; Fit page also keeps the page inside its height
+  const [areaRef, area] = useSize<HTMLDivElement>()
+  const widthW = Math.max(0, area.w - 32)
+  const fitW = zoom === 'width' ? widthW : Math.min(widthW, Math.max(0, ((area.h - 34) * size[0]) / size[1] + 2))
+  const marks = onSource ? highlights(source) : []
+  // Fit width: start with the line in the middle of the view (or the top of another page)
+  const firstMark = marks[0]?.box[1]
+  useLayoutEffect(() => {
+    const el = areaRef.current
+    if (!el || zoom !== 'width' || !fitW) return
+    el.scrollTop = firstMark === undefined ? 0 : 16 + (firstMark * (fitW - 2)) / size[0] - el.clientHeight / 2
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zoom, page, fitW > 0])
   return (
-    <Dialog open={open} onClose={onClose} title={t('Tender PDF · p. {page}', { page })} width={900} closeLabel={t('Close')}>
+    <Dialog open={open} onClose={onClose} title={t('Tender PDF · p. {page}', { page })} width={820} closeLabel={t('Close')} fill>
       <div
         className="flex flex-wrap items-center gap-2 px-6 py-2.5 border-b border-rule"
         onKeyDown={(e) => {
@@ -237,18 +247,30 @@ function PageViewerOpen({ open, onClose, tenderId, source, pageCount, fallback }
             {t('Back to p. {page}', { page: source.page })}
           </Button>
         )}
+        <Toggle2
+          label={t('Zoom')}
+          value={zoom}
+          onChange={setZoom}
+          options={[
+            ['page', t('Fit page')],
+            ['width', t('Fit width')],
+          ]}
+        />
       </div>
-      <div className="p-6 bg-panel max-h-[75vh] overflow-auto">
+      <div ref={areaRef} className="flex-auto min-h-0 p-4 bg-panel overflow-auto">
         {url && !failed[page] ? (
-          <div className="border border-rule bg-white">
-            <PageImage
-              url={url}
-              pageSize={size}
-              crop={null}
-              marks={onSource ? highlights(source) : []}
-              onError={() => setFailed((f) => ({ ...f, [page]: true }))}
-            />
-          </div>
+          fitW > 0 && (
+            <div className="mx-auto border border-rule bg-white" style={{ width: fitW }}>
+              <PageImage
+                url={url}
+                pageSize={size}
+                crop={null}
+                marks={marks}
+                fixedWidth={fitW - 2}
+                onError={() => setFailed((f) => ({ ...f, [page]: true }))}
+              />
+            </div>
+          )
         ) : (
           <div className="bg-white border border-rule p-6 flex flex-col gap-4">
             <span className="text-muted">{t('The page image is not available here (demo data). This is the text read from the page:')}</span>

@@ -161,6 +161,29 @@ export interface SegOption<V> {
   hint?: ReactNode
 }
 
+/** Two or three small pressed/unpressed buttons in one box, for a view setting (Original · Filled, Fit page · Fit width). */
+export function Toggle2<V extends string>({ label, value, options, onChange }: { label: string; value: V; options: [V, string][]; onChange: (v: V) => void }) {
+  return (
+    <div role="group" aria-label={label} className="inline-flex border border-rule rounded-[2px]">
+      {options.map(([v, l], i) => (
+        <button
+          key={v}
+          type="button"
+          aria-pressed={value === v}
+          onClick={() => onChange(v)}
+          className={cx(
+            'min-h-8 px-2.5 border-0 text-[13px]',
+            i > 0 && 'border-l border-rule',
+            value === v ? 'bg-ink text-white font-medium' : 'bg-white text-ink hover:bg-panel',
+          )}
+        >
+          {l}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 /** Radio group of option buttons with an effect line (N07). */
 export function SegmentedControl<V extends string | number>({
   options,
@@ -351,6 +374,7 @@ export function Dialog({
   width = 680,
   closeLabel = 'Close',
   hideTitle,
+  fill,
 }: {
   open: boolean
   onClose: () => void
@@ -360,6 +384,8 @@ export function Dialog({
   width?: number
   closeLabel?: string
   hideTitle?: boolean
+  /** take the full viewport height (the body scrolls inside, e.g. a tender page) */
+  fill?: boolean
 }) {
   const id = useId()
   const ref = useRef<HTMLElement>(null)
@@ -406,7 +432,7 @@ export function Dialog({
   if (!open) return null
   return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-[rgba(18,18,18,0.45)] flex justify-center items-start px-4 py-16 overflow-y-auto"
+      className={cx('fixed inset-0 z-50 bg-[rgba(18,18,18,0.45)] flex justify-center items-start px-4 overflow-y-auto', fill ? 'py-4' : 'py-16')}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
@@ -417,7 +443,7 @@ export function Dialog({
         aria-modal="true"
         aria-labelledby={id}
         tabIndex={-1}
-        className="w-full bg-white border border-ink flex flex-col outline-none"
+        className={cx('w-full bg-white border border-ink flex flex-col outline-none', fill && 'h-[calc(100vh-2rem)]')}
         style={{ maxWidth: width }}
       >
         <div className={cx('flex justify-between items-center gap-3 px-6 py-4 border-b border-rule', hideTitle && 'sr-only')}>

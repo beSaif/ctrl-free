@@ -201,12 +201,7 @@ export function LineDetail() {
             <div className="flex-[1_1_480px] min-w-0 flex flex-col gap-6">
               {p.source ? (
                 <div id="line-tender-crop">
-                  <PdfCrop
-                    tenderId={id}
-                    source={p.source}
-                    pageCount={tender?.page_count}
-                    pdfLink={`/t/${id}/pdf/${p.source.page}?lv=${p.lv_id}`}
-                  />
+                  <PdfCrop tenderId={id} source={p.source} pageCount={tender?.page_count} />
                 </div>
               ) : (
                 <section className="flex flex-col gap-2">
