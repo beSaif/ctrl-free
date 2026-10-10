@@ -865,6 +865,13 @@ def get_pricing(tid: str):
     return pricing_payload(_tender(tid))
 
 
+@app.get("/api/tenders/{tid}/verification")
+def get_verification(tid: str):
+    """Verified against Equans examples: our lines and subset totals vs the golden numbers (default settings)."""
+    from . import verification
+    return verification.verify(_tender(tid))
+
+
 @app.put("/api/tenders/{tid}/pricing")
 def put_pricing(tid: str, body: PricingUpdate = Body(...)):
     data = body.model_dump(exclude_unset=True)
