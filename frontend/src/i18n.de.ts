@@ -1,5 +1,6 @@
 // German UI strings (Swiss spelling), keyed by the English text. Tender text stays as in the PDF.
 import { DE_TRACE } from './i18n.de.trace'
+import { DE_CHANGES } from './i18n.de.changes'
 export const DE: Record<string, string> = {
   ' and ': ' und ',
   'match.Strong': 'Sicher',
@@ -767,4 +768,5 @@ export const DE: Record<string, string> = {
   '{n} lines priced with an assumption': '{n} Positionen mit Annahme kalkuliert',
   'check them before you submit': 'vor der Eingabe prüfen',
   ...DE_TRACE,
+  ...DE_CHANGES,
 }

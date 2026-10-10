@@ -1,8 +1,8 @@
 import { NavLink, Outlet, useLocation, useParams, Link } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { setLang, useLang, useT } from '../i18n'
-import { useApiMode } from '../api/client'
-import { usePositions, useTender } from '../api/hooks'
+import { setActor, useActor, useApiMode } from '../api/client'
+import { usePeople, usePositions, useTender } from '../api/hooks'
 import { ErrorBox, Loading, ProgressBar } from './ui'
 import { cx } from '../lib/cx'
 import { fmt0, fmtDateTime, fmtDaysLeft, shortTrade } from '../lib/format'
@@ -33,6 +33,36 @@ export function LangToggle() {
         </span>
       ))}
     </div>
+  )
+}
+
+/** Who is working (demo identity, no login): every change is stamped with this person's name. */
+export function PersonSwitcher() {
+  const t = useT()
+  const qc = useQueryClient()
+  const actor = useActor()
+  const { data: people } = usePeople()
+  if (!people?.length) return null
+  const change = (id: string) => {
+    setActor(id)
+    void qc.invalidateQueries()
+  }
+  return (
+    <label className="inline-flex items-center gap-2 text-[13px] text-muted">
+      <span>{t('Working as')}</span>
+      <select
+        value={people.some((p) => p.id === actor) ? actor : ''}
+        onChange={(e) => change(e.target.value)}
+        className="min-h-8 px-1.5 border border-rule rounded-[2px] bg-white text-ink text-[13px] hover:border-ink"
+      >
+        {!people.some((p) => p.id === actor) && <option value="">{t('Choose a person')}</option>}
+        {people.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name} · {t(p.role_label)}
+          </option>
+        ))}
+      </select>
+    </label>
   )
 }
 
@@ -90,6 +120,7 @@ export function AppLayout() {
           })}
         </nav>
         <DemoBadge />
+        <PersonSwitcher />
         <LangToggle />
       </header>
       <Outlet />
@@ -117,6 +148,8 @@ function TenderShell({ id }: { id: string }) {
   const toReview = pq.data ? pq.data.positions.filter(isOpen).length : (tender?.open_work?.lines_to_review ?? 0)
   const toConfirm = tender?.open_work?.instructions_to_confirm ?? 0
   const chosen = tender?.open_work?.price_chosen
+  const rt = tender?.review_trail
+  const toApprove = rt ? rt.to_review + rt.ai_to_review : 0
   const base = `/t/${id}`
   const tabs = [
     { to: base, label: 'Overview', end: true },
@@ -137,6 +170,12 @@ function TenderShell({ id }: { id: string }) {
       label: 'Pricing',
       count: ready ? (chosen ? 'CHF ' + fmt0(tender?.offer_price ?? null) : t('price not chosen')) : null,
       attn: !chosen,
+    },
+    {
+      to: `${base}/changes`,
+      label: 'Changes',
+      count: ready && rt ? (toApprove ? t('{n} to review', { n: toApprove }) : t('reviewed')) : null,
+      attn: toApprove > 0,
     },
     { to: `${base}/export`, label: 'Export' },
     { to: `${base}/outcome`, label: 'Outcome' },
@@ -169,6 +208,7 @@ function TenderShell({ id }: { id: string }) {
               </span>
             )}
             <DemoBadge />
+            <PersonSwitcher />
             <LangToggle />
           </div>
         </div>

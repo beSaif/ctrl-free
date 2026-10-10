@@ -9,6 +9,7 @@ import type {
   PricingPut,
   PricingResponse,
   QuoteProposal,
+  ReviewVerdict,
   TenderSummary,
 } from './types'
 
@@ -214,4 +215,24 @@ export function useImportReference() {
     // new catalogue prices or install rules re-price every tender: refresh everything, not only this screen
     onSuccess: () => qc.invalidateQueries(),
   })
+}
+
+// ---- who did what (Changes screen) ------------------------------------------------
+
+export function usePeople() {
+  return useQuery({ queryKey: ['people'] as const, queryFn: () => api.getPeople(), staleTime: Infinity })
+}
+
+export function useChanges(id: string, enabled = true) {
+  return useQuery({ queryKey: ['changes', id] as const, queryFn: () => api.getChanges(id), enabled })
+}
+
+export function useReviewChanges(id: string) {
+  return useTenderMutation(
+    id,
+    ({ logIds, verdict, note }: { logIds: string[]; verdict: ReviewVerdict; note?: string }) => api.reviewChanges(id, logIds, verdict, note),
+    (qc, r) => {
+      if (r?.entries) qc.setQueryData(['changes', id], r)
+    },
+  )
 }

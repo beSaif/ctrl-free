@@ -85,6 +85,8 @@ export interface TenderDetail extends TenderSummary {
     facts?: Record<string, unknown>
   }
   systems?: System[]
+  /** Changes waiting for a senior (Changes screen); absent while the tender is being read. */
+  review_trail?: ReviewTrail
 }
 
 export interface System {
@@ -616,4 +618,92 @@ export interface Verification {
     subset_direct_ok?: boolean
     scenarios_ok?: boolean
   }
+}
+
+// ---- who did what (Changes screen) ---------------------------------------------------
+
+export interface Person {
+  id: string
+  name: string
+  role: 'junior' | 'senior' | string
+  role_label: string
+}
+
+export interface ReviewTrail {
+  changes: number
+  to_review: number
+  approved: number
+  reverted: number
+  ai: number
+  ai_to_review: number
+  ai_approved: number
+}
+
+export type ChangeState = 'to_review' | 'approved' | 'reverted' | 'auto'
+export type ChangeType = 'product' | 'price' | 'quantity' | 'hours' | 'instruction' | 'pricing' | 'quotes' | 'confirm' | 'line' | 'tender'
+export type ReviewVerdict = 'approved' | 'reverted' | 'comment' | 'reopened'
+
+export interface ChangeField {
+  path: string
+  before: string | number | boolean | null
+  after: string | number | boolean | null
+  before_label?: string | null
+  after_label?: string | null
+  /** the empty override stands for the calculated value, which is given here */
+  before_calculated?: boolean
+  after_calculated?: boolean
+  /** an empty pricing setting stands for the project-parameter default, which is given here */
+  before_default?: boolean
+  after_default?: boolean
+  unit?: string | null
+}
+
+export interface ChangeReview {
+  verdict: ReviewVerdict
+  note: string | null
+  by: string
+  role: string | null
+  at: string
+}
+
+export interface ChangeEntry {
+  id: string
+  at: string
+  /** a person's name, "Assist", "AI" or "You" */
+  by: string
+  role?: string | null
+  approved_by?: string | null
+  action: string
+  lv_id?: string | null
+  target?: { kind: string; id: string | null }
+  text?: string | null
+  batch?: string | null
+  types: ChangeType[]
+  undoable: boolean
+  fields: ChangeField[]
+  impact: { value: number; basis: 'line' | 'price' | 'line_total' } | null
+  instruction?: { id: string; type: string; page: number } | null
+  reverted?: { by: string; at: string } | null
+  reviews: ChangeReview[]
+  state: ChangeState
+  state_why?: 'made_by_senior' | 'ok_by_senior' | null
+  ai?: { method: string; confidence: number | null; label: string | null; low: boolean; page: number; unit: string | null; assumptions: string[] }
+}
+
+export interface ChangeLine {
+  lv_id: string
+  title_en?: string | null
+  title_de?: string | null
+  page?: number | null
+  system?: string | null
+  status?: string
+  unit?: string | null
+  direct: number
+}
+
+export interface ChangesResponse {
+  entries: ChangeEntry[]
+  lines: Record<string, ChangeLine>
+  summary: ReviewTrail & { by_actor: { by: string; total: number; to_review: number; approved: number; reverted: number }[] }
+  me: { name: string; role: string | null; can_review: boolean }
 }

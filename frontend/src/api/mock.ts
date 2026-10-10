@@ -13,7 +13,7 @@ import {
   TENDER_META,
   type RawLine,
 } from './mockdata/oberglatt'
-import type { Api, ExportKind } from './client'
+import { DEFAULT_PEOPLE, type Api, type ExportKind } from './client'
 import type {
   AssistApplyResult,
   AssistDone,
@@ -24,6 +24,7 @@ import type {
   AssistWork,
   Candidate,
   CatalogRow,
+  ChangesResponse,
   ChecklistItem,
   Instruction,
   InstructionPatch,
@@ -1011,6 +1012,11 @@ function detailOf(t: MockTender, lv: string): PositionDetail {
   }
 }
 
+function emptyChanges(): ChangesResponse {
+  const zero = { changes: 0, to_review: 0, approved: 0, reverted: 0, ai: 0, ai_to_review: 0, ai_approved: 0 }
+  return { entries: [], lines: {}, summary: { ...zero, by_actor: [] }, me: { name: 'You', role: null, can_review: true } }
+}
+
 export const mockApi: Api = {
   async listTenders() {
     await delay(80)
@@ -1420,6 +1426,16 @@ export const mockApi: Api = {
     return tender(id)
       .log.filter((e) => !opts?.lv_id || e.lv_id === opts.lv_id)
       .map(({ snapshot: _s, ...e }) => e)
+  },
+  async getPeople() {
+    return DEFAULT_PEOPLE
+  },
+  // the review trail needs the real backend; offline the Changes screen shows an empty trail
+  async getChanges() {
+    return emptyChanges()
+  },
+  async reviewChanges() {
+    return emptyChanges()
   },
   async getVerification() {
     return null

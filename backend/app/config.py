@@ -24,5 +24,13 @@ AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2025-04-01-pre
 # Set LLM_OFFLINE=1 to run without any API calls (rules-only matching, cache hits still used).
 LLM_OFFLINE = os.getenv("LLM_OFFLINE") == "1"
 
+# Demo identities (no login): the frontend sends the chosen person's id in the X-Actor header.
+# role "senior" may approve and revert changes on the Changes screen; a request without a known
+# X-Actor header acts as "You" (scripts, tests).
+PEOPLE = [
+    {"id": "lea", "name": "Lea Meier", "role": "junior", "role_label": "Junior estimator"},
+    {"id": "marco", "name": "Marco Keller", "role": "senior", "role_label": "Senior estimator / bid lead"},
+]
+
 for d in (TENDERS_DIR, LLM_CACHE_DIR):
     d.mkdir(parents=True, exist_ok=True)

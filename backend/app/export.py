@@ -150,6 +150,22 @@ def open_points(tender: dict, totals: dict) -> list[dict]:
                     "detail": ("Not included: " + ", ".join(d["label"] for d in off)) if off else "All project costs included",
                     "link": "pricing"})
 
+    try:  # changes by people and Assist (and low-confidence AI picks) a senior has not approved yet
+        from . import review
+        rs = review.summary(tender)
+    except Exception:
+        rs = None
+    if rs and (rs["changes"] or rs["ai_to_review"]):
+        n, ai = rs["to_review"], rs["ai_to_review"]
+        bits = [f"{rs['approved']} approved", f"{rs['reverted']} reverted"]
+        if ai:
+            bits.append(f"{ai} low-confidence AI pick{'s' if ai != 1 else ''} not reviewed")
+        pts.append({"key": "reviews", "ok": not n and not ai,
+                    "title": (f"{n} change{'s' if n != 1 else ''} not reviewed by a senior" if n
+                              else f"All {rs['changes']} changes reviewed by a senior" if rs["changes"]
+                              else "No changes by people yet"),
+                    "detail": ", ".join(bits), "link": "changes"})
+
     if totals.get("offer"):
         o = totals["offer"]
         pts.append({"key": "offer", "ok": True, "title": f"Offer price CHF {P.swiss(o['bid'], 0)}",

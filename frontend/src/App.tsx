@@ -11,6 +11,7 @@ import { Instructions } from './pages/Instructions'
 import { InstructionDetail } from './pages/InstructionDetail'
 import { Pricing } from './pages/Pricing'
 import { Export } from './pages/Export'
+import { Changes } from './pages/Changes'
 import { OutcomePage } from './pages/Outcome'
 import { Results } from './pages/Results'
 import { Reference } from './pages/Reference'
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="instructions" element={<Instructions />} />
         <Route path="instructions/:iid" element={<InstructionDetail />} />
         <Route path="pricing" element={<Pricing />} />
+        <Route path="changes" element={<Changes />} />
         <Route path="export" element={<Export />} />
         <Route path="outcome" element={<OutcomePage />} />
         <Route path="*" element={<NotFound />} />
