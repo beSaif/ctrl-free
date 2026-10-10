@@ -1139,6 +1139,11 @@ function LinePopover({
           </button>
           {howOpen && (
             <div className="pb-3 flex flex-col gap-2 text-[12.5px]">
+              {p.intro_de && (
+                <p className="m-0 leading-[1.45] text-body">
+                  <span className="text-muted">{t('Section text that applies to this line')}: </span>«{p.intro_de.split('\n')[0]}…»
+                </p>
+              )}
               {pr ? (
                 <div className="grid grid-cols-[minmax(96px,auto)_minmax(0,1fr)] gap-x-3 gap-y-1.5 leading-[1.45]">
                   {!hourly && (

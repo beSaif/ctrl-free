@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:36",
+ "api": "responses",
+ "input_tokens": 6604,
+ "output_tokens": 525,
+ "response": {
+  "LV0243": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "Actuator 24V, 20 Nm matches the tender exactly.",
+   "assumptions": []
+  },
+  "LV0244": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "Actuator 24V, 5 Nm continuous matches the tender exactly.",
+   "assumptions": []
+  },
+  "LV0245": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Smoke detector, no matching candidate product.",
+   "assumptions": []
+  },
+  "LV0246": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter matches the tender exactly.",
+   "assumptions": []
+  },
+  "LV0247": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Frost protection thermostat, no matching candidate product.",
+   "assumptions": []
+  },
+  "LV0248": {
+   "product_id": "P-CTL-002",
+   "confidence": "high",
+   "reason": "Temperature sensor matches the tender exactly.",
+   "assumptions": []
+  },
+  "LV0249": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter matches the tender exactly.",
+   "assumptions": []
+  },
+  "LV0250": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour is a service, not one of the candidate products.",
+   "assumptions": []
+  },
+  "LV0251": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour is a service, not one of the candidate products.",
+   "assumptions": []
+  },
+  "LV0252": {
+   "product_id": "P-INS-003",
+   "confidence": "high",
+   "reason": "Weatherproof external insulation with cladding, 100 mm, matches the tender exactly.",
+   "assumptions": []
+  }
+ }
+}

@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:27",
+ "api": "responses",
+ "input_tokens": 6628,
+ "output_tokens": 414,
+ "response": {
+  "LV0051": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Flexible connector, but no connector product candidate is offered",
+   "assumptions": []
+  },
+  "LV0052": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Wall sleeve seal, but no matching seal candidate is offered",
+   "assumptions": []
+  },
+  "LV0053": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Wall sleeve seal, but no matching seal candidate is offered",
+   "assumptions": []
+  },
+  "LV0054": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Installation labour, not a product",
+   "assumptions": []
+  },
+  "LV0055": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Transport and handling, not a catalog product",
+   "assumptions": []
+  },
+  "LV0056": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Duct leakage test, not a product",
+   "assumptions": []
+  },
+  "LV0057": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Air terminal piece, but only valve candidates with different size are offered",
+   "assumptions": []
+  },
+  "LV0058": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Decorative perforated cover, not a valve product",
+   "assumptions": []
+  },
+  "LV0059": {
+   "product_id": "P-AIR-001",
+   "confidence": "high",
+   "reason": "Supply air valve, circular, DN100 = Ø 10 cm",
+   "assumptions": []
+  },
+  "LV0060": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Supply air valve, but no DN160 candidate is offered",
+   "assumptions": []
+  }
+ }
+}

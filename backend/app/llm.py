@@ -190,7 +190,7 @@ def _rejected_param(e: Exception) -> str | None:
     return None
 
 
-def _responses_call(client, model, system, user, schema, name, temperature):
+def _responses_call(client, model, system, user, schema, name, temperature, reasoning=None):
     kwargs: dict[str, Any] = {
         "model": model,
         "input": [{"role": "system", "content": system}, {"role": "user", "content": user}],
@@ -199,8 +199,8 @@ def _responses_call(client, model, system, user, schema, name, temperature):
     bad = _unsupported.get(model, set())
     if temperature is not None and "temperature" not in bad:
         kwargs["temperature"] = temperature
-    if "reasoning" not in bad and config_reasoning():
-        kwargs["reasoning"] = {"effort": config_reasoning()}
+    if "reasoning" not in bad and (reasoning or config_reasoning()):
+        kwargs["reasoning"] = {"effort": reasoning or config_reasoning()}
     r = client.responses.create(**kwargs)
     text = getattr(r, "output_text", None)
     if not text:
@@ -214,7 +214,7 @@ def _responses_call(client, model, system, user, schema, name, temperature):
     return text, (getattr(u, "input_tokens", 0) or 0), (getattr(u, "output_tokens", 0) or 0)
 
 
-def _chat_call(client, model, system, user, schema, name, temperature):
+def _chat_call(client, model, system, user, schema, name, temperature, reasoning=None):
     kwargs: dict[str, Any] = {
         "model": model,
         "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
@@ -223,8 +223,8 @@ def _chat_call(client, model, system, user, schema, name, temperature):
     bad = _unsupported.get(model, set())
     if temperature is not None and "temperature" not in bad:
         kwargs["temperature"] = temperature
-    if "reasoning" not in bad and config_reasoning():
-        kwargs["reasoning_effort"] = config_reasoning()
+    if "reasoning" not in bad and (reasoning or config_reasoning()):
+        kwargs["reasoning_effort"] = reasoning or config_reasoning()
     r = client.chat.completions.create(**kwargs)
     msg = r.choices[0].message
     if getattr(msg, "refusal", None):
@@ -244,15 +244,18 @@ def config_reasoning() -> str | None:
 
 
 def call_json(system: str, user: str, schema: dict, model: str | None = None, name: str = "result",
-              temperature: float | None = None, use_cache: bool = True, timeout: float | None = None) -> dict:
+              temperature: float | None = None, use_cache: bool = True, timeout: float | None = None,
+              reasoning: str | None = None) -> dict:
     """One Structured-Outputs call (strict json_schema). Returns the parsed dict.
+
+    reasoning overrides LLM_REASONING for this call (and is part of the cache key when given).
 
     Raises LLMUnavailable when no live call is possible and the cache has no answer,
     LLMError when the model's answer is unusable after retries.
     """
     global _disabled_reason
     model = model or config.LLM_MODEL
-    key = cache_key(model, system, user, schema)
+    key = cache_key(model + (f"|reasoning={reasoning}" if reasoning else ""), system, user, schema)
     _local.cached = False
     if use_cache:
         hit = cache_get(key)
@@ -286,7 +289,7 @@ def call_json(system: str, user: str, schema: dict, model: str | None = None, na
             client = base_client
         try:
             fn = _responses_call if mode == "responses" else _chat_call
-            text, tin, tout = fn(client, model, system, user, schema, name, temperature)
+            text, tin, tout = fn(client, model, system, user, schema, name, temperature, reasoning)
             data = json.loads(text)
             _api_mode[model] = mode
             with _lock:

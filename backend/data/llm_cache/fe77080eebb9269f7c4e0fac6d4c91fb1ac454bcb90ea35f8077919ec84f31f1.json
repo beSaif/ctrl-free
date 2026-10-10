@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:29",
+ "api": "responses",
+ "input_tokens": 7531,
+ "output_tokens": 767,
+ "response": {
+  "LV0001": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Air-handling unit, but airflow 700 m3/h does not match any AHU candidate size",
+   "assumptions": []
+  },
+  "LV0002": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Casing section only; no matching component product in candidates",
+   "assumptions": []
+  },
+  "LV0003": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Exhaust unit / casing section, but no candidate matches that product kind",
+   "assumptions": []
+  },
+  "LV0004": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct leakage test is a service, not a catalog product here",
+   "assumptions": []
+  },
+  "LV0005": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rain cap, but no rain-cap product is offered",
+   "assumptions": []
+  },
+  "LV0006": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour coating only; no coating product in candidates",
+   "assumptions": []
+  },
+  "LV0007": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Exhaust air valve size Ø 1155 does not match any valve candidate",
+   "assumptions": []
+  },
+  "LV0008": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Exhaust air valve size Ø 1155 mm does not match any valve candidate",
+   "assumptions": []
+  },
+  "LV0009": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour coating only; no coating product in candidates",
+   "assumptions": []
+  },
+  "LV0010": {
+   "product_id": "P-AIR-001",
+   "confidence": "high",
+   "reason": "Supply air valve, Ø 10 cm = DN100",
+   "assumptions": []
+  }
+ }
+}

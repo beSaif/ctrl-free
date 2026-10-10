@@ -18,6 +18,7 @@ backend/              Python 3.12, uv, FastAPI (run: cd backend && uv run uvicor
   app/
     config.py         paths, env (.env at repo root), model names
     parser.py         PDF -> Tender meta skeleton + systems + positions (+ bboxes)          [parser agent]
+    grouping.py       LLM: which text lines belong to which quantity line (ids only, validated) [parser agent]
     pricing.py        generalized pricing_engine: position pricing, totals, scenarios      [pricing agent]
     export.py         xlsx with live formulas, pricing report PDF, SIA-like file            [pricing agent]
     llm.py            OpenAI / Azure OpenAI client, JSON-schema calls, disk cache          [llm agent]
@@ -27,7 +28,7 @@ backend/              Python 3.12, uv, FastAPI (run: cd backend && uv run uvicor
     quotes.py         supplier request drafts, reading supplier replies                     [llm agent]
     translate.py      DE -> EN for position titles/descriptions (batched, cached)          [llm agent]
     store.py          JSON-file persistence per tender, audit log                           [api agent]
-    pipeline.py       background job: parse -> meta -> translate -> match -> price -> instr [api agent]
+    pipeline.py       background job: parse (+ grouping) -> meta -> translate -> match -> price -> instr [api agent]
     assist.py         Assist tray/command planning (proposals only; never applies silently) [api agent]
     main.py           FastAPI routes (below)                                                [api agent]
   data/reference/     catalog.csv, productivity.csv, project_parameters.json (defaults)
@@ -61,6 +62,9 @@ Reference engine: `research/pricing_engine.py` (reproduces all golden numbers; k
   "created_at": "...", "updated_at": "...", "updated_by": "You",
   "profile": "school" | "sports_hall",
   "systems": [System], "positions": [Position], "instructions": [Instruction],
+  "text_blocks": [TextBlock],            // text outside any line: section intros (with applies_to) and notes
+  "grouping": {"mode": "llm", "model": "gpt-5.4", "prompt": "g4", "chunks": 42, "failed": 0,
+               "systems": 6, "systems_by_llm": 6, "failed_chunks": []} | {"mode": "rules"},
   "pricing": PricingSettings, "submission": Snapshot | null, "outcome": Outcome | null,
   "quote_requests": [QuoteRequest], "assist": AssistState, "log": [LogEntry]
 }
@@ -76,6 +80,7 @@ Reference engine: `research/pricing_engine.py` (reproduces all golden numbers; k
   "section": "C", "section_name": "Armaturen und Instrumente",
   "page": 78,
   "text_de": "Zuluft - Tellerventil\naus Kunststoff, mit Luftmengeneinstellung\n...\nGrösse Ø 10 cm",   // full block, verbatim
+  "intro_de": "Rohreinlagen unter Bodenplatte\n...\nOfferte: V241182" | null,   // section intro that applies to this line (not its own text)
   "title_de": "Zuluft-Tellerventil aus Kunststoff, Ø 10 cm",   // short line shown in tables (built by parser, may be refined by LLM)
   "title_en": "Supply air valve, plastic, DN100",              // translate.py
   "variant_de": "Ø 10 cm",                  // the size line when a block has several sizes, else null
@@ -104,6 +109,22 @@ Reference engine: `research/pricing_engine.py` (reproduces all golden numbers; k
   "needs_review": true,                    // computed: true when the estimator must look (see rules)
   "pricing": PositionPrice | null          // computed by pricing.py, never stored stale (recompute on every read/change)
 }
+
+// TextBlock: text that belongs to no single line
+{"kind": "text_only", "system": "...", "section": "B", "page": 103, "text_de": "...",
+ "applies_to": ["LV0046", "LV0047"],     // section intro: the lines it applies to (absent for plain notes)
+ "source": {"page": 103, "block_bbox": [...], "lines": [...]}}
+
+// Grouping (grouping.py). Which text belongs to which quantity line needs reading: planners write
+// "bold title + quantity, description below" or "description, quantity on its last line", sometimes
+// both in one section. The parser finds lines, columns, quantities and boxes (exact work); the LLM
+// gets numbered lines with layout cues (bold, larger font, indent, gap) per section and answers with
+// line ids only: items (quantity ids + text ids, parent for device components), intros (text ids +
+// the quantity ids they apply to) and other. Each answer is validated (every quantity line in exactly
+// one item, every text line used once, only known ids), retried once, cached. A system whose answer
+// fails twice, or a run without LLM, uses the parser's rules. Intros give each line intro_de and the
+// Fabrikat / Typ / Offerte hints it lacks. Reprocessing carries reviewer work (overrides, confirmed,
+// flagged, quotes) to the new lines by the position of their quantity line and renames lv_id references.
 
 // PositionPrice (pricing.py output)
 {"quantity": 5.0, "net_unit_cost": 74.8, "unit_price_source": "catalog|supplier_package|supplier_quote|manual",

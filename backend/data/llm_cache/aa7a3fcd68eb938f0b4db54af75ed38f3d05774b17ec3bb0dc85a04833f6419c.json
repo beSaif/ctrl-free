@@ -1,0 +1,124 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "tender_instructions",
+ "created": "2026-10-11T00:55:46",
+ "api": "responses",
+ "input_tokens": 5730,
+ "output_tokens": 1550,
+ "response": {
+  "instructions": [
+   {
+    "rule_id": "r006",
+    "quote_de": "Je 1 Satz Ersatzfilterzellen gleicher Qualität ist mitzuliefern.",
+    "text_en": "One set of replacement filter cells of the same quality must be supplied for each set.",
+    "kind": "cost",
+    "why": "Include spare filter cells for every filter stage; this is a direct supply cost."
+   },
+   {
+    "rule_id": "r026",
+    "quote_de": "Der Unternehmer hat die notwendigen Einrichtungen und Hilfeleistungen zu erbringen.",
+    "text_en": "The contractor must provide the necessary equipment and assistance.",
+    "kind": "risk",
+    "why": "Duct leakage testing support, equipment, and any retest follow-up cost are on us."
+   },
+   {
+    "rule_id": "r026",
+    "quote_de": "Nachprüfungen und allfällige Folgekosten hat der Unternehmer zu tragen.",
+    "text_en": "The contractor must bear re-tests and any resulting follow-up costs.",
+    "kind": "risk",
+    "why": "Failed leakage compliance creates direct re-test and remediation exposure."
+   },
+   {
+    "rule_id": "r055",
+    "quote_de": "Sämtliches Aufhängematerial muss in verzinkter Ausführung eingerechnet werden (Dübel und Schrauben promatverzinkt).",
+    "text_en": "All suspension material must be included in galvanized execution (dowels and screws fire-protected galvanized).",
+    "kind": "cost",
+    "why": "Include all galvanized fixing and suspension materials in the price."
+   },
+   {
+    "rule_id": "r001",
+    "quote_de": "Sofern mit der Submission andere als vorgeschriebene Materialien offeriert werden, hat dies als Variante mit einer entsprechenden Begründung - z.B. technisch besser oder gleichwertig, preisgünstiger oder ähnliches - zu geschehen.",
+    "text_en": "If materials other than the specified ones are offered with the tender, this must be done as a variant with an appropriate justification, e.g. technically better or equivalent, cheaper or similar.",
+    "kind": "scope",
+    "why": "Alternative materials must be submitted as a justified variant, not silently substituted."
+   },
+   {
+    "rule_id": "r021",
+    "quote_de": "Sämtliche Kanäle und Formstücke sind mit Flanschverbindungen auszuführen.",
+    "text_en": "All ducts and fittings must be executed with flange connections.",
+    "kind": "scope",
+    "why": "Affects fabrication method and accessories for all ductwork and fittings."
+   },
+   {
+    "rule_id": "r021",
+    "quote_de": "Zwischen die Verbindungen ist eine alterungsbeständige Dichtung einzulegen.",
+    "text_en": "An ageing-resistant gasket must be inserted between the connections.",
+    "kind": "cost",
+    "why": "Add gaskets to every flanged connection in ductwork."
+   },
+   {
+    "rule_id": "r028",
+    "quote_de": "Jede Klappe (auch Einstellklappe) muss mit einem luftdichten Revisionsdeckel zugänglich gemacht werden.",
+    "text_en": "Every damper, including balancing dampers, must be made accessible with an airtight inspection cover.",
+    "kind": "cost",
+    "why": "Inspection covers are required for each damper position and increase material and labor."
+   },
+   {
+    "rule_id": "r029",
+    "quote_de": "Jede Brandschutzklappe muss mit Motorantrieb inkl. elektrischem Endschalter mit Öffnungs- und Schliesskontakt und Thermostat ausgerüstet sein.",
+    "text_en": "Every fire damper must be equipped with a motor actuator including an electric limit switch with opening and closing contacts and a thermostat.",
+    "kind": "cost",
+    "why": "The fire damper line must include actuator, switch contacts, and thermostat."
+   },
+   {
+    "rule_id": "r031",
+    "quote_de": "Kulissen sind aus nicht brennbarem und nicht hygroskopischem Material, abriebfest bis 25 m/s, mit beidseitiger Lochblechabdeckung sowie mit nicht hygrostatischen Folien (ausgenommen trockene Luft) auszuführen.",
+    "text_en": "Baffles must be made of non-combustible and non-hygroscopic material, abrasion-resistant up to 25 m/s, with perforated sheet metal covers on both sides and with non-hygroscopic films (except dry air).",
+    "kind": "scope",
+    "why": "Sets the silencer construction and material standard for the matched silencers."
+   },
+   {
+    "rule_id": "r034",
+    "quote_de": "Alle Anlageteile wie Monobloc-Apparate, Ventilatoren, Pumpen, Schalt-, Regel- und Kontrollinstrumente usw. sind mit Bezeichnungsschildern, mit Apparatebezeichnung und Apparatenummer entsprechend den Schemaunterlagen zu bezeichnen.",
+    "text_en": "All plant components such as monobloc units, fans, pumps, switchgear, control and monitoring instruments, etc. must be labelled with nameplates, device designation and device number according to the schematic documents.",
+    "kind": "cost",
+    "why": "Budget nameplates/labels for all equipment and control components."
+   },
+   {
+    "rule_id": "r042",
+    "quote_de": "In Zuluftapparaten sind generell durchschnittsbildende Temperaturfühler zu verwenden.",
+    "text_en": "In supply air units, average-responding temperature sensors must generally be used.",
+    "kind": "scope",
+    "why": "Defines the sensor type for the air-handling units and related supply air equipment."
+   },
+   {
+    "rule_id": "r045",
+    "quote_de": "Sobald die Motorklappen (AUL, FOL, BSK etc.) geöffnet sind, werden die Ventilatoren durch ein einstellbares Verzögerungsrelais freigegeben.",
+    "text_en": "As soon as the motorized dampers (outside air, extract air, fire dampers, etc.) are open, the fans are enabled by an adjustable delay relay.",
+    "kind": "cost",
+    "why": "Control logic and delay relays must be included for the AHU automation."
+   },
+   {
+    "rule_id": "r059",
+    "quote_de": "Ergeben sich bei der Inbetriebnahme Überschreitungen der geforderten Geräuschpegel, werden dem Unternehmer sämtliche im Zusammenhang mit der Änderung entstehenden Kosten belastet.",
+    "text_en": "If the required noise levels are exceeded during commissioning, all costs arising in connection with the modification will be charged to the contractor.",
+    "kind": "risk",
+    "why": "Noise compliance failure creates open-ended corrective cost risk."
+   },
+   {
+    "rule_id": "r101",
+    "quote_de": "Der Unternehmer verpflichtet sind, alle Arbeiten, die für eine einwandfreie Ausführung notwendig sind, einzuschliessen und alle erforderlichen Zubehörteile für den normalen Betrieb der Anlagen im Angebot einzurechnen, auch wenn die Materialien z.T. nicht einzeln im Ausmass aufgeführt sind.",
+    "text_en": "The contractor is obliged to include all work necessary for proper execution and to include in the offer all accessories required for normal operation of the systems, even if some materials are not listed individually in the quantities.",
+    "kind": "cost",
+    "why": "Covers missing small materials, accessories, and incidental work not separately listed."
+   },
+   {
+    "rule_id": "r060",
+    "quote_de": "Für die Ausführung der Dämmungen gelten die Bestimmungen des SIA und die Richtlinien der IsolSuisse und der örtlichen Vorschriften der Feuerpolizei und Kantonaler Energiefachstellen.",
+    "text_en": "The execution of the insulation is governed by SIA requirements, IsolSuisse guidelines, and the local regulations of the fire police and cantonal energy authorities.",
+    "kind": "scope",
+    "why": "Insulation must comply with these standards and local authority rules."
+   }
+  ]
+ }
+}

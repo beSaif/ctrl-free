@@ -56,5 +56,6 @@ export const DE_PDF: Record<string, string> = {
   'The product needs a check.': 'Das Produkt muss geprüft werden.',
   'Nothing left to review in this tender.': 'In dieser Ausschreibung ist nichts mehr zu prüfen.',
   'How was this worked out?': 'Wie wurde das berechnet?',
+  'Section text that applies to this line': 'Abschnittstext, der für diese Position gilt',
   'Typed by hand': 'Von Hand eingetragen',
 }

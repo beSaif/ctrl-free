@@ -1,0 +1,49 @@
+{
+ "model": "gpt-5.4",
+ "name": "lv_grouping",
+ "created": "2026-10-11T00:52:30",
+ "api": "responses",
+ "input_tokens": 1365,
+ "output_tokens": 183,
+ "response": {
+  "items": [
+   {
+    "qty": [
+     3272
+    ],
+    "text": [
+     3273,
+     3274
+    ],
+    "parent": null
+   },
+   {
+    "qty": [
+     3275
+    ],
+    "text": [
+     3276,
+     3277,
+     3278,
+     3279,
+     3280,
+     3281,
+     3282
+    ],
+    "parent": null
+   }
+  ],
+  "intros": [
+   {
+    "text": [
+     3271
+    ],
+    "applies_to": [
+     3272,
+     3275
+    ]
+   }
+  ],
+  "other": []
+ }
+}

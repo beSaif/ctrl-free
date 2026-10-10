@@ -20,6 +20,9 @@ Works on the PDF's own layout, not on hardcoded page numbers or names:
   sub-positions.
 * Pages without the column header inside the LV (Ingenieurliste / Bauteilliste,
   Planliste) never produce positions.
+* Which text belongs to which quantity line: with a grouper (app.grouping, LLM) the plan
+  decides (_segment_plan); without one, or for a system the LLM could not group, the
+  rules in _segment decide.
 """
 from __future__ import annotations
 
@@ -79,6 +82,8 @@ class Line:
     kind: str = "text"           # text | qty | section | recap | total | heading | dots
     gap: str = "tight"           # tight | blank | strong | page | break  (distance to previous line)
     system_idx: int = -1
+    bold: bool = False           # most words of the description text are set in a bold font
+    size: float | None = None    # largest font size of the description words
 
     @property
     def has_qty_col(self) -> bool:
@@ -201,6 +206,29 @@ class PageInfo:
     is_engineer_list: bool = False
 
 
+_BOLD_FONT_RE = re.compile(r"Bold|Bd\b|Black|Semibold|Heavy", re.I)
+
+
+def _font_spans(page) -> list:
+    """(bbox, bold, size) of every non-empty text span on the page."""
+    out = []
+    for b in page.get_text("dict")["blocks"]:
+        for l in b.get("lines", []):
+            for s in l["spans"]:
+                if s["text"].strip():
+                    bold = bool(s["flags"] & 16) or bool(_BOLD_FONT_RE.search(s["font"]))
+                    out.append((s["bbox"], bold, s["size"]))
+    return out
+
+
+def _word_font(w, spans):
+    cx, cy = (w[0] + w[2]) / 2, (w[1] + w[3]) / 2
+    for bb, bold, size in spans:
+        if bb[0] - 0.5 <= cx <= bb[2] + 0.5 and bb[1] - 0.5 <= cy <= bb[3] + 0.5:
+            return bold, size
+    return False, None
+
+
 def _analyze_page(page, no: int) -> PageInfo:
     words = page.get_text("words")
     rect = page.rect
@@ -235,10 +263,26 @@ def _analyze_page(page, no: int) -> PageInfo:
             info.footer_text += (" " if info.footer_text else "") + txt
             continue
         info.lines.append(_make_line(r, no, cols))
+    if info.lines:
+        _set_fonts(info.lines, words, _font_spans(page))
     m = _SEITE_RE.search(info.header_text)
     if m:
         info.seite = (int(m.group(1)), int(m.group(2)))
     return info
+
+
+def _set_fonts(lines: list, words, spans) -> None:
+    """Bold / size of each line's description words (layout cues for grouping)."""
+    for ln in lines:
+        db = ln.desc_bbox
+        if not db:
+            continue
+        ws = sorted((w for w in words if w[0] >= db[0] - 0.2 and w[2] <= db[2] + 0.2
+                     and abs((w[1] + w[3]) / 2 - ln.yc) < 4), key=lambda w: w[0])
+        fonts = [_word_font(w, spans) for w in ws]
+        if fonts:
+            ln.bold = sum(1 for f in fonts if f[0]) / len(fonts) >= 0.5
+            ln.size = max((f[1] or 0) for f in fonts) or None
 
 
 def _make_line(r, page_no: int, cols: Columns) -> Line:
@@ -582,12 +626,16 @@ class _Group:
     inherited: bool = False
 
 
-def parse_tender(pdf_path: str | Path, progress: Callable[[int, int], None] | None = None) -> dict:
+def parse_tender(pdf_path: str | Path, progress: Callable[[int, int], None] | None = None,
+                 grouper: Callable | None = None) -> dict:
     """Parse a tender (Leistungsverzeichnis) PDF.
 
     Returns {"page_count", "systems", "positions", "pages_text", "conditions_pages",
-             "engineer_list_pages", "appendix_pages", "text_blocks", "lots"}.
+             "engineer_list_pages", "appendix_pages", "text_blocks", "lots", "grouping"}.
     Positions carry no match/pricing (added later by the pipeline).
+
+    grouper(stream) -> grouping.Plan | None decides which text belongs to which quantity line
+    (app.grouping, LLM). Systems it could not group cleanly keep the rules in _segment.
     """
     doc = pymupdf.open(str(pdf_path))
     n = doc.page_count
@@ -597,10 +645,10 @@ def parse_tender(pdf_path: str | Path, progress: Callable[[int, int], None] | No
         if progress:
             progress(i + 1, n)
     doc.close()
-    return _build(pages)
+    return _build(pages, grouper)
 
 
-def _build(pages: list[PageInfo]) -> dict:
+def _build(pages: list[PageInfo], grouper: Callable | None = None) -> dict:
     n = len(pages)
     pages_text = {p.no: p.text for p in pages}
     real = [p.no for p in pages if p.cols is not None and not p.cols.inferred and p.lines]
@@ -610,7 +658,7 @@ def _build(pages: list[PageInfo]) -> dict:
     if not lv_pages:
         return {"page_count": n, "systems": [], "positions": [], "pages_text": pages_text,
                 "conditions_pages": list(range(1, n + 1)), "engineer_list_pages": [],
-                "appendix_pages": [], "text_blocks": [], "lots": {}}
+                "appendix_pages": [], "text_blocks": [], "lots": {}, "grouping": None}
     first_lv = lv_pages[0].no
     last_lv = lv_pages[-1].no
     conditions_pages = list(range(1, first_lv))
@@ -639,7 +687,31 @@ def _build(pages: list[PageInfo]) -> dict:
         prev_page = p.no
     _classify(stream)
 
-    positions, text_blocks, section_names = _segment(stream, systems)
+    plan = grouper(stream) if grouper is not None else None
+    if plan is None:
+        positions, text_blocks, section_names = _segment(stream, systems)
+        grouping_info = None
+    else:
+        positions, text_blocks, section_names = [], [], {}
+        failed = plan.failed_chunks
+        runs: list[list[Line]] = []
+        for ln in stream:
+            if not runs or runs[-1][0].system_idx != ln.system_idx:
+                runs.append([])
+            runs[-1].append(ln)
+        by_llm = 0
+        for run in runs:
+            lo, hi = run[0].idx, run[-1].idx
+            if any(a <= hi and b >= lo for a, b, _ in failed):
+                pos_, tb_, sn_ = _segment(run, systems)
+            else:
+                pos_, tb_, sn_ = _segment_plan(run, systems, plan)
+                by_llm += 1
+            positions += pos_
+            text_blocks += tb_
+            section_names.update(sn_)
+        grouping_info = {**plan.stats, "systems": len(runs), "systems_by_llm": by_llm,
+                         "failed_chunks": [list(f) for f in failed]}
     sizes = {p.no: p.size for p in pages}
     for item in positions + text_blocks:
         item["source"]["page_size"] = sizes.get(item["source"]["page"])
@@ -658,6 +730,11 @@ def _build(pages: list[PageInfo]) -> dict:
         else:
             n_lv += 1
             pos["lv_id"] = f"LV{n_lv:04d}"
+    # intros: the quantity lines they apply to -> lv ids
+    by_order = {p["pdf_order"]: p["lv_id"] for p in positions if p["kind"] != "subtotal"}
+    for tb in text_blocks:
+        if "applies_to" in tb:
+            tb["applies_to"] = [by_order[q] for q in tb["applies_to"] if q in by_order]
     # fix up component links to lv ids
     by_obj = {id(p): p["lv_id"] for p in positions}
     for p in positions:
@@ -676,6 +753,7 @@ def _build(pages: list[PageInfo]) -> dict:
         "appendix_pages": appendix,
         "text_blocks": text_blocks,
         "lots": lots,
+        "grouping": grouping_info,
     }
 
 
@@ -1047,36 +1125,173 @@ def _segment(stream: list[Line], systems: list[dict]):
     return positions, text_blocks, section_names
 
 
-def _implicit_device_head(pending: list[Line]) -> int | None:
-    """Index of a heading line followed (within 4 lines) by Fabrikat/Offert -> device heading."""
-    for k, l in enumerate(pending):
-        t = l.text.strip()
-        if not t or _is_kv(t) or _COUNT_RE.match(t) or _is_bullet(t):
+def _segment_plan(stream: list[Line], systems: list[dict], plan):
+    """Positions from an LLM grouping plan (app.grouping.Plan) for one system's line stream.
+
+    Same output as _segment. The plan says which text lines each quantity line owns: text above
+    the first quantity line of an item is its block (titles are derived from it as usual), text
+    below is appended to every quantity line of the item. Intros become text blocks with
+    `applies_to`, and their Fabrikat / Typ / Offerte fill hints the positions lack."""
+    positions: list[dict] = []
+    text_blocks: list[dict] = []
+    section_names: dict = {}
+    line = {l.idx: l for l in stream}
+    item_of_q = {q: it for it in plan.items for q in it["qty"] if q in line}
+    head_of = {min(it["text"]): it for it in plan.items if not it["qty"] and it["text"]}
+    intro_of = {t: k for k, intro in enumerate(plan.intros) for t in intro["text"] if t in line}
+    owned = {t for it in plan.items for t in it["text"]}
+
+    def new_group(shared):
+        return _Group(shared=shared, heading=None, qualifier=None, section=st["section"])
+
+    loose: list[Line] = []           # consecutive text lines outside any item or intro
+
+    def flush_loose():
+        if loose:
+            text_block(list(loose))
+            loose.clear()
+
+    pos_of_q: dict = {}
+    done_intros: set = set()
+    st = {"section": None, "section_name": None}
+    groups_in_section: list[_Group] = []
+
+    def sys_of(ln):
+        return systems[ln.system_idx] if ln.system_idx >= 0 else None
+
+    def text_block(lines, applies_to=None):
+        lines = [l for l in lines if l.kind == "text"]
+        if lines:
+            tb = _text_block(lines, systems, st["section"], st["section_name"])
+            if applies_to is not None:
+                tb["applies_to"] = list(applies_to)
+            text_blocks.append(tb)
+
+    i, N = 0, len(stream)
+    while i < N:
+        ln = stream[i]
+        kind = ln.kind
+        if kind != "text":
+            flush_loose()
+        if kind in ("section", "heading", "recap"):
+            if kind == "section":
+                st["section"] = ln.pos_text
+                st["section_name"] = _title_case_de(ln.text)
+                groups_in_section = []
+            elif kind == "recap":
+                s = sys_of(ln)
+                nm = re.sub(r"\s*[.…]{3,}.*$", "", ln.text).strip()
+                if s and nm:
+                    section_names[(s["key"], ln.pos_text)] = nm
+            i += 1
             continue
-        for l2 in pending[k + 1:k + 5]:
-            if re.match(r"^(Offert|Offerte)\b", l2.text, re.I):
-                return k
-        return None
-    return None
+        if kind == "total":
+            lines = [ln]
+            j = i + 1
+            while j < N and stream[j].gap == "tight" and stream[j].kind == "text" and stream[j].text[:1].islower():
+                lines.append(stream[j])
+                j += 1
+            positions.append(_subtotal(lines, sys_of(ln), st["section"], st["section_name"]))
+            i = j
+            continue
+        if kind == "text":
+            k = intro_of.get(ln.idx)
+            if ln.idx in head_of and ln.idx not in pos_of_q:
+                # device whose heading carries no quantity: a position without quantity, its
+                # description, and the components below it link to it
+                it = head_of[ln.idx]
+                g = new_group([])
+                dev = _make_position(g, ln, sys_of(ln), st["section"], st["section_name"], variant=False)
+                dev["source"]["qty_bbox"] = None
+                for sl in dev["source"]["lines"]:
+                    sl["role"] = "desc"
+                dev["attributes"]["device"] = True
+                _append_lines(dev, [line[t] for t in it["text"] if t != ln.idx and t in line], role="desc")
+                positions.append(dev)
+                g.positions.append(dev)
+                groups_in_section.append(g)
+                pos_of_q[ln.idx] = dev
+            elif k is not None and k not in done_intros:
+                done_intros.add(k)
+                flush_loose()
+                intro_lines = [line[t] for t in plan.intros[k]["text"] if t in line]
+                text_block(intro_lines, plan.intros[k]["applies_to"])
+                # items below an intro without a heading of their own take the intro's heading
+                ig = new_group(intro_lines)
+                _derive_heading(ig, intro_lines[-1], [])
+                if ig.heading:
+                    groups_in_section.append(ig)
+            elif k is None and ln.idx not in owned:
+                loose.append(ln)
+                i += 1
+                continue
+            flush_loose()
+            i += 1
+            continue
+        if kind != "qty":
+            i += 1
+            continue
+        it = item_of_q.get(ln.idx)
+        if it is None:
+            it = {"qty": [ln.idx], "text": [], "parent": None}
+        if ln.idx != it["qty"][0]:
+            i += 1
+            continue                                   # emitted with the item's first quantity line
+        first = it["qty"][0]
+        lead = [line[t] for t in it["text"] if t < first and t in line]
+        trail = [line[t] for t in it["text"] if t > first and t in line]
+        g = _Group(shared=lead, heading=None, qualifier=None, section=st["section"])
+        parent = pos_of_q.get(it["parent"]) if it["parent"] is not None else None
+        if parent is not None:
+            # the component's name: its count line ("1 Leerteil"), the quantity line or the last
+            # count line above it, else its first line
+            counts = [l for l in lead if _COUNT_RE.match(l.text)]
+            first_txt = ln.text if (_COUNT_RE.match(ln.text) or not lead) else \
+                (counts[-1].text if counts else lead[0].text)
+            comp_txt = _collapse(_COUNT_RE.sub("", first_txt).strip())
+            g.heading = f"{parent['_heading']}: {comp_txt}" if comp_txt else parent["_heading"]
+            parent["attributes"]["device"] = True
+        else:
+            _derive_heading(g, ln, groups_in_section)
+        for n, q in enumerate(it["qty"]):
+            if q not in line:
+                continue
+            pos = _make_position(g, line[q], sys_of(line[q]), st["section"], st["section_name"],
+                                 variant=n > 0, component_of=parent)
+            positions.append(pos)
+            g.positions.append(pos)
+            g.qty_lines.append(line[q])
+            pos_of_q[q] = pos
+        if len(g.qty_lines) > 1:
+            _refresh_variant_roles(g)
+        if trail:
+            trail_text = "\n".join(l.text for l in trail)
+            for pos in g.positions:
+                _append_lines(pos, trail, role="desc")
+                # attributes read from the description below a title-first quantity line
+                extra = _attrs_for(g, line[pos["pdf_order"]], trail_text, "")
+                extra.pop("_table_row", None)
+                for k_, v in extra.items():
+                    if v is not None and k_ not in pos["attributes"]:
+                        pos["attributes"][k_] = v
+        groups_in_section.append(g)
+        i += 1
 
-
-def _spec_follows(stream: list[Line], i: int, strict: bool = False) -> bool:
-    """True if the line right below line i starts a maker/offer spec (Fabrikat / Offert-Nr.) -> the
-    quantity at line i heads a device description (e.g. an air handling unit). strict: an offer
-    reference must follow within the next lines too."""
-    j = i + 1
-    if j >= len(stream) or stream[j].kind != "text" or stream[j].system_idx != stream[i].system_idx:
-        return False
-    if not re.match(r"^(Fabrikat|Offert|Hersteller)\b", stream[j].text, re.I):
-        return False
-    if not strict:
-        return True
-    for l2 in stream[j:j + 5]:
-        if l2.kind != "text":
-            return False
-        if re.match(r"^(Offert|Offerte)\b", l2.text, re.I):
-            return True
-    return False
+    flush_loose()
+    # intros are context of the lines they apply to: their text (intro_de) and their
+    # Fabrikat / Typ / Offerte hints where the line has none of its own
+    for intro in plan.intros:
+        texts = [line[t].text for t in intro["text"] if t in line]
+        for q in intro["applies_to"]:
+            pos = pos_of_q.get(q)
+            if pos is None or not texts:
+                continue
+            pos["intro_de"] = "\n\n".join(x for x in (pos.get("intro_de"), "\n".join(texts)) if x)
+            _fill_hints(pos, texts)
+    for p in positions:
+        p.pop("_heading", None)
+        p.pop("_lines_obj", None)
+    return positions, text_blocks, section_names
 
 
 def _implicit_device_head(pending: list[Line]) -> int | None:
@@ -1464,6 +1679,7 @@ def _make_position(g: _Group, qline: Line, system: dict | None, section, section
         "page": page,
         "pdf_order": qline.idx,          # running index of the quantity line in the LV stream (printed order)
         "text_de": text_de,
+        "intro_de": None,                # section intro text that applies to this line (LLM grouping)
         "title_de": title,
         "variant_de": variant_de,
         "quantity": float(qty) if qty is not None else None,

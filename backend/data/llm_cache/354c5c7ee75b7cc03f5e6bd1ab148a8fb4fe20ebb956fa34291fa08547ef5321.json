@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:35",
+ "api": "responses",
+ "input_tokens": 6303,
+ "output_tokens": 502,
+ "response": {
+  "LV0193": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Smoke detector, but no smoke-detector candidate is offered",
+   "assumptions": []
+  },
+  "LV0194": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter matches the pressure switch/sensor line",
+   "assumptions": []
+  },
+  "LV0195": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Frost protection thermostat, but no matching thermostat candidate is offered",
+   "assumptions": []
+  },
+  "LV0196": {
+   "product_id": "P-CTL-002",
+   "confidence": "high",
+   "reason": "Temperature sensor matches the duct temperature and humidity sensor line",
+   "assumptions": []
+  },
+  "LV0197": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter matches the pressure differential sensor line",
+   "assumptions": []
+  },
+  "LV0198": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour is a service, not a product candidate",
+   "assumptions": []
+  },
+  "LV0199": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour is a service, not a product candidate",
+   "assumptions": []
+  },
+  "LV0200": {
+   "product_id": "P-INS-001",
+   "confidence": "high",
+   "reason": "Thermal duct insulation, 30 mm mineral wool matches the tender",
+   "assumptions": []
+  },
+  "LV0201": {
+   "product_id": "P-INS-002",
+   "confidence": "high",
+   "reason": "Thermal duct insulation, 60 mm mineral wool matches the tender",
+   "assumptions": []
+  },
+  "LV0202": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender needs 100 mm thermal insulation, but only weatherproof insulation is offered",
+   "assumptions": []
+  }
+ }
+}

@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:27",
+ "api": "responses",
+ "input_tokens": 6154,
+ "output_tokens": 480,
+ "response": {
+  "LV0071": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Mounting frame, but no candidate is a mounting frame",
+   "assumptions": []
+  },
+  "LV0072": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Equipment labels, but no candidate is a label",
+   "assumptions": []
+  },
+  "LV0073": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour arrows, but no candidate is a labelling item",
+   "assumptions": []
+  },
+  "LV0074": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Equipotential bonding, but no candidate matches bonding hardware",
+   "assumptions": []
+  },
+  "LV0075": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "Actuator 24V, matching the 24 V damper actuator",
+   "assumptions": []
+  },
+  "LV0076": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "Actuator 24V, matching the 24 V damper actuator",
+   "assumptions": []
+  },
+  "LV0077": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Smoke detector, but no candidate is a smoke detector",
+   "assumptions": []
+  },
+  "LV0078": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter, matching the pressure switch/transmitter type",
+   "assumptions": []
+  },
+  "LV0079": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Frost protection thermostat, but no candidate matches that sensor type",
+   "assumptions": []
+  },
+  "LV0080": {
+   "product_id": "P-CTL-002",
+   "confidence": "high",
+   "reason": "Temperature sensor, matching the duct temperature and humidity sensor line",
+   "assumptions": []
+  }
+ }
+}

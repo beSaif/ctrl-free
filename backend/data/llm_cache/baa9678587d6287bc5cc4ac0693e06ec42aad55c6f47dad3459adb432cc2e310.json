@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:31",
+ "api": "responses",
+ "input_tokens": 6833,
+ "output_tokens": 560,
+ "response": {
+  "LV0112": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour only, no duct product matches",
+   "assumptions": []
+  },
+  "LV0114": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rain cap, but no candidate is a roof cowl of the stated size",
+   "assumptions": []
+  },
+  "LV0115": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour coating service, no matching product candidate",
+   "assumptions": []
+  },
+  "LV0116": {
+   "product_id": "P-AIR-001",
+   "confidence": "high",
+   "reason": "Supply air valve DN100, circular plastic valve",
+   "assumptions": []
+  },
+  "LV0117": {
+   "product_id": "P-AIR-003",
+   "confidence": "high",
+   "reason": "Exhaust air valve DN100, circular plastic valve",
+   "assumptions": []
+  },
+  "LV0118": {
+   "product_id": "P-CAV-001",
+   "confidence": "high",
+   "reason": "CAV circular flow controller DN250",
+   "assumptions": []
+  },
+  "LV0119": {
+   "product_id": "P-SIL-002",
+   "confidence": "high",
+   "reason": "Compact silencer DN100, length 900 mm matches the tender",
+   "assumptions": []
+  },
+  "LV0120": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer size 90 x 60 x 125 cm does not match any candidate",
+   "assumptions": []
+  },
+  "LV0121": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer size 60 x 70 x 125 cm does not match any candidate",
+   "assumptions": []
+  },
+  "LV0122": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct access door, but no candidate is a duct access door",
+   "assumptions": []
+  }
+ }
+}

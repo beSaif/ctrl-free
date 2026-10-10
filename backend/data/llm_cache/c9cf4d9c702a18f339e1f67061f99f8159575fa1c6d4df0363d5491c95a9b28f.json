@@ -1,0 +1,110 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-11T00:55:24",
+ "api": "responses",
+ "input_tokens": 4468,
+ "output_tokens": 882,
+ "response": {
+  "LV0234": {
+   "title_en": "Rectangular silencer, 650x600x1500 mm",
+   "description_en": "Silencer with 2 baffles, 2900 m3/h airflow, 24 Pa pressure loss, and octave-band attenuation as specified."
+  },
+  "LV0235": {
+   "title_en": "Rectangular silencer, 600x400x1750 mm",
+   "description_en": "Silencer with 2 baffles, 2300 m3/h airflow, 28 Pa pressure loss, and octave-band attenuation as specified."
+  },
+  "LV0236": {
+   "title_en": "Rectangular silencer, 300x300x1750 mm",
+   "description_en": "Silencer with 1 baffle, 600 m3/h airflow, 17 Pa pressure loss, and octave-band attenuation as specified."
+  },
+  "LV0237": {
+   "title_en": "Duct access door, galvanized steel, 400x200 mm",
+   "description_en": "Airtight access and cleaning door in galvanized steel with rubber gasket for ducts."
+  },
+  "LV0238": {
+   "title_en": "Duct access door, galvanized steel, 400x200 mm",
+   "description_en": "Access and cleaning door for insulated ducts, as previously specified, size 400x200 mm."
+  },
+  "LV0239": {
+   "title_en": "Duct thermometer",
+   "description_en": "Dial thermometer for installation in ducts."
+  },
+  "LV0240": {
+   "title_en": "Mounting frame for insulated ducts",
+   "description_en": "Mounting frame for insulated ducts."
+  },
+  "LV0241": {
+   "title_en": "Equipment labels, 100x50 mm",
+   "description_en": "Labels for equipment identification, size 100x50 mm."
+  },
+  "LV0242": {
+   "title_en": "Colour arrows",
+   "description_en": "Colour arrows for identification marking."
+  },
+  "ST043": {
+   "title_en": "Total fittings and instruments C",
+   "description_en": "Total fittings and instruments for section C."
+  },
+  "LV0243": {
+   "title_en": "Actuator, 20 Nm",
+   "description_en": "24 V AC/DC damper actuator, on/off or 3-point control, IP54, 150 s travel time, 20 Nm torque."
+  },
+  "LV0244": {
+   "title_en": "Actuator, 5 Nm",
+   "description_en": "24 V AC/DC modulating damper actuator, 2-10 V control, IP54, 150 s travel time, 5 Nm torque."
+  },
+  "LV0245": {
+   "title_en": "Duct smoke detector",
+   "description_en": "VdS-approved duct smoke detector with contamination indication, electronic airflow monitoring, and external reset options."
+  },
+  "LV0246": {
+   "title_en": "Pressure switch",
+   "description_en": "Pressure switch."
+  },
+  "LV0247": {
+   "title_en": "Frost protection thermostat, 2-point",
+   "description_en": "Two-point frost protection thermostat."
+  },
+  "LV0248": {
+   "title_en": "Duct temperature and humidity sensor",
+   "description_en": "Sensor for duct temperature and humidity measurement."
+  },
+  "LV0249": {
+   "title_en": "Differential pressure transmitter",
+   "description_en": "Differential pressure transmitter."
+  },
+  "ST044": {
+   "title_en": "Total control D",
+   "description_en": "Total control section D."
+  },
+  "LV0250": {
+   "title_en": "Installation and transport",
+   "description_en": "Install, test, commission, transport, instruct staff, and provide lifting equipment for the system during the full installation period."
+  },
+  "LV0251": {
+   "title_en": "Installation of client-supplied field devices",
+   "description_en": "Install client-supplied field devices, including hygiene verification, laboratory analyses, openings, documentation, and handover support."
+  },
+  "ST045": {
+   "title_en": "Total installation and transport",
+   "description_en": "Total installation and transport."
+  },
+  "ST046": {
+   "title_en": "Total services",
+   "description_en": "Total services."
+  },
+  "ST047": {
+   "title_en": "Total installation, services E",
+   "description_en": "Total installation and services for section E."
+  },
+  "LV0252": {
+   "title_en": "Double-wall duct cladding, stainless steel, 100 mm",
+   "description_en": "Double-wall duct insulation with 100 mm mineral wool and weatherproof stainless steel cladding including sealing."
+  },
+  "LV0253": {
+   "title_en": "Thermal duct insulation, mineral wool 15 mm",
+   "description_en": "Abrasion-resistant 15 mm mineral wool duct insulation for wall and ceiling penetrations."
+  }
+ }
+}

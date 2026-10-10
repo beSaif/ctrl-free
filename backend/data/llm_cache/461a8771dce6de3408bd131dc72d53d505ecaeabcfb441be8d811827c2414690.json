@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:33",
+ "api": "responses",
+ "input_tokens": 7003,
+ "output_tokens": 554,
+ "response": {
+  "LV0173": {
+   "product_id": "P-SIL-002",
+   "confidence": "high",
+   "reason": "Compact silencer, circular DN100 and 900 mm length match",
+   "assumptions": []
+  },
+  "LV0174": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Compact silencer size is Ø 12.5 cm, but only silencer candidate is DN100",
+   "assumptions": []
+  },
+  "LV0175": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Compact silencer size is Ø 16 cm, but only silencer candidate is DN100",
+   "assumptions": []
+  },
+  "LV0176": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Compact silencer size is Ø 20 cm, but only silencer candidate is DN100",
+   "assumptions": []
+  },
+  "LV0177": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer size 120 x 90 x 175 cm does not match any candidate",
+   "assumptions": []
+  },
+  "LV0178": {
+   "product_id": "P-SIL-004",
+   "confidence": "high",
+   "reason": "Rectangular silencer 54 x 40 x 125 cm matches 540x400x1250 mm",
+   "assumptions": []
+  },
+  "LV0179": {
+   "product_id": "P-VAV-002",
+   "confidence": "high",
+   "reason": "Rectangular VAV controller 30x20 cm matches 300x200 mm",
+   "assumptions": []
+  },
+  "LV0180": {
+   "product_id": "P-VAV-003",
+   "confidence": "high",
+   "reason": "Circular VAV controller Ø 12.5 cm matches DN125",
+   "assumptions": []
+  },
+  "LV0181": {
+   "product_id": "P-VAV-004",
+   "confidence": "high",
+   "reason": "Circular VAV controller Ø 16 cm matches DN160",
+   "assumptions": []
+  },
+  "LV0182": {
+   "product_id": "P-VAV-005",
+   "confidence": "high",
+   "reason": "Circular VAV controller Ø 20 cm matches DN200",
+   "assumptions": []
+  }
+ }
+}

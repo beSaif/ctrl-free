@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:28",
+ "api": "responses",
+ "input_tokens": 6884,
+ "output_tokens": 637,
+ "response": {
+  "LV0081": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter, exact sensor type match",
+   "assumptions": []
+  },
+  "LV0082": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour/service, no matching product category",
+   "assumptions": []
+  },
+  "LV0083": {
+   "product_id": "P-INS-001",
+   "confidence": "high",
+   "reason": "Thermal duct insulation, 30 mm thickness matches",
+   "assumptions": []
+  },
+  "LV0084": {
+   "product_id": "P-INS-002",
+   "confidence": "high",
+   "reason": "Thermal duct insulation, 60 mm thickness matches",
+   "assumptions": []
+  },
+  "LV0085": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Thermal insulation 100 mm, but only weatherproof 100 mm candidate is not the same product type",
+   "assumptions": []
+  },
+  "LV0086": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Thermal duct insulation, but no 15 mm candidate available",
+   "assumptions": []
+  },
+  "LV0087": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Fire protection cladding EI30, no fire-cladding candidate available",
+   "assumptions": []
+  },
+  "LV0088": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular EI30 fire seal, but size 500 x 350 does not match any candidate",
+   "assumptions": []
+  },
+  "LV0089": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular EI30 fire seal, but size 400 x 400 does not match any candidate",
+   "assumptions": []
+  },
+  "LV0090": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular EI30 fire seal, but size 400 x 350 does not match any candidate",
+   "assumptions": []
+  }
+ }
+}

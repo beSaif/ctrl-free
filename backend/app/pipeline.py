@@ -15,6 +15,7 @@ from __future__ import annotations
 import copy
 import importlib
 import logging
+import os
 import threading
 import time
 import traceback
@@ -247,15 +248,34 @@ def _run(tid: str, timings: dict) -> None:
     llm = mod("llm")
     if llm is None or not hasattr(llm, "time_budget"):
         return _run_stages(tid, timings)
+    # grouping the lines (inside parsing) has its own budget, twice the pipeline's unless set
+    # (LLM_GROUPING_BUDGET); when it runs out the parser's rules group the rest
+    grouping_budget = float(os.getenv("LLM_GROUPING_BUDGET") or 2 * llm.PIPELINE_BUDGET)
+    with llm.time_budget(grouping_budget):
+        parsed = _parse(tid, timings)
     # bound the total time spent waiting on a live LLM; after the budget every stage runs on rules
     with llm.time_budget():
-        return _run_stages(tid, timings)
+        return _run_stages(tid, timings, parsed)
 
 
-def _run_stages(tid: str, timings: dict) -> None:
+def _grouper(tid: str) -> Callable | None:
+    """LLM grouping of the LV lines (app.grouping) for the parser; None = the parser's rules only."""
+    grouping, llm = mod("grouping"), mod("llm")
+    if grouping is None or llm is None or os.getenv("LLM_GROUPING", "1") == "0":
+        return None
+
+    def run(stream):
+        _set_progress(tid, stage="parsing", message="Grouping the lines into items")
+        try:
+            return grouping.plan_groups(stream)
+        except Exception as e:  # noqa: BLE001
+            _warn(tid, "grouping", e)
+            return None
+    return run
+
+
+def _parse(tid: str, timings: dict) -> dict:
     pdf = str(store.pdf_path(tid))
-
-    # 1. parse ---------------------------------------------------------
     _set_progress(tid, stage="parsing", message="Reading the tender")
     with _stage(timings, "parse"):
         def on_page(page: int, pages: int):
@@ -264,7 +284,77 @@ def _run_stages(tid: str, timings: dict) -> None:
         parser = mod("parser")
         if parser is None:
             raise RuntimeError("The PDF parser (app/parser.py) is not available")
-        parsed = parser.parse_tender(pdf, progress=_throttled(on_page))
+        parsed = parser.parse_tender(pdf, progress=_throttled(on_page), grouper=_grouper(tid))
+    info = parsed.get("grouping")
+    if info and info.get("systems_by_llm", 0) < info.get("systems", 0):
+        _warn(tid, "grouping", f"{info['systems'] - info['systems_by_llm']} of {info['systems']} systems were "
+                               "grouped by the parser's rules (the LLM answer was unusable): check their lines")
+    return parsed
+
+
+REVIEW_FIELDS = ("overrides", "supplier_quote", "variant_reason", "confirmed", "flagged")
+
+
+def _qty_key(p: dict):
+    """Where a line's quantity sits in the PDF: the same however its text is grouped."""
+    src = p.get("source") or {}
+    bb = src.get("qty_bbox") or src.get("line_bbox")
+    if p.get("kind") == "subtotal" or not bb:
+        return None
+    return src.get("page"), round(bb[1]), round(bb[3]), p.get("unit_raw"), p.get("quantity")
+
+
+def _carry_review(t: dict, positions: list[dict]) -> list[str]:
+    """Reprocessing: carry reviewer work (overrides, confirmations, flags, quotes) from the old lines
+    to the new ones with the same quantity line, and rename lv_id references when ids moved.
+    Returns the old lv_ids with reviewer work that have no counterpart any more."""
+    old = t.get("positions") or []
+    if not old:
+        return []
+    by_key: dict = {}
+    for p in old:
+        k = _qty_key(p)
+        if k is not None:
+            by_key.setdefault(k, p)
+    rename: dict[str, str] = {}
+    matched: set[str] = set()
+    for p in positions:
+        o = by_key.get(_qty_key(p))
+        if o is None:
+            continue
+        matched.add(o["lv_id"])
+        for f in REVIEW_FIELDS:
+            if o.get(f) not in (None, {}, False):
+                p[f] = copy.deepcopy(o[f])
+        if o["lv_id"] != p["lv_id"]:
+            rename[o["lv_id"]] = p["lv_id"]
+    lost = [p["lv_id"] for p in old if p["lv_id"] not in matched
+            and any(p.get(f) not in (None, {}, False) for f in REVIEW_FIELDS)]
+    if rename:
+        ren = lambda ids: [rename.get(x, x) for x in ids or []]    # noqa: E731
+        for ins in t.get("instructions") or []:
+            for k in ("applies_to", "suggested_applies_to"):
+                if ins.get(k) is not None:
+                    ins[k] = ren(ins[k])
+        for g in t.get("quote_requests") or []:
+            g["lv_ids"] = ren(g.get("lv_ids"))
+        if t.get("ai_reviews"):
+            t["ai_reviews"] = {rename.get(k, k): v for k, v in t["ai_reviews"].items()}
+        for e in t.get("log") or []:
+            if e.get("lv_id") in rename:
+                e["lv_id"] = rename[e["lv_id"]]
+            tg = e.get("target") or {}
+            if tg.get("kind") == "position" and tg.get("id") in rename:
+                tg["id"] = rename[tg["id"]]
+    return lost
+
+
+def _run_stages(tid: str, timings: dict, parsed: dict | None = None) -> None:
+    pdf = str(store.pdf_path(tid))
+
+    # 1. parse ---------------------------------------------------------
+    if parsed is None:
+        parsed = _parse(tid, timings)
     pages_text = parsed.get("pages_text") or {}
     store.save_pages_text(tid, pages_text)
     positions = parsed.get("positions") or []
@@ -281,10 +371,17 @@ def _run_stages(tid: str, timings: dict) -> None:
         p.setdefault("flagged", False)
         p.setdefault("match", None)
     with store.edit(tid, by=None, touch=False) as t:
+        lost = _carry_review(t, positions)
+        if lost:
+            _warn(tid, "parse", f"Reviewer changes on {len(lost)} line(s) could not be carried over to the "
+                                f"new reading of the PDF: {', '.join(lost[:10])}")
         t["page_count"] = parsed.get("page_count") or len(pages_text) or t.get("page_count")
         t["systems"] = parsed.get("systems") or []
         t["positions"] = positions
         t["conditions_pages"] = parsed.get("conditions_pages") or []
+        # section intros and other text outside the items (intros list the lines they apply to)
+        t["text_blocks"] = parsed.get("text_blocks") or []
+        t["grouping"] = parsed.get("grouping") or {"mode": "rules"}
         if t.get("pricing") is None:
             t["pricing"] = {}
         # the dominant system profile becomes the tender profile unless the user chose one

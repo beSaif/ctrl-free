@@ -1,0 +1,46 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-11T00:55:22",
+ "api": "responses",
+ "input_tokens": 1126,
+ "output_tokens": 391,
+ "response": {
+  "ST048": {
+   "title_en": "Total thermal duct insulation, mineral wool",
+   "description_en": "Total for thermal duct insulation in mineral wool, category F."
+  },
+  "ST049": {
+   "title_en": "Total ventilation system, gymnasium",
+   "description_en": "Total for ventilation system 244.01 for the gymnasium."
+  },
+  "LV0254": {
+   "title_en": "Mounting feet, 335x335x100x20 mm",
+   "description_en": "Mounting feet, as example, size 335 x 335 x 100 x 20 mm."
+  },
+  "LV0255": {
+   "title_en": "Mounting rail, 41x41x22x22 mm",
+   "description_en": "Mounting rail, as example, with accessories, joint set, 90° connector, insulation profile, end caps and fixing parts."
+  },
+  "ST050": {
+   "title_en": "Total fittings and instruments, category C",
+   "description_en": "Total for fittings and instruments, category C."
+  },
+  "ST051": {
+   "title_en": "Total installation labour and transport",
+   "description_en": "Total for installation labour and transport."
+  },
+  "ST052": {
+   "title_en": "Total services",
+   "description_en": "Total for services."
+  },
+  "ST053": {
+   "title_en": "Total installation and services, category E",
+   "description_en": "Total for installation and services, category E."
+  },
+  "ST054": {
+   "title_en": "Total flat-roof mounting system",
+   "description_en": "Total for flat-roof mounting system 244.06."
+  }
+ }
+}

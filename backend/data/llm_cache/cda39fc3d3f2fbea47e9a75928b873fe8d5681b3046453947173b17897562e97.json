@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:27",
+ "api": "responses",
+ "input_tokens": 6515,
+ "output_tokens": 539,
+ "response": {
+  "LV0031": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter matches the Druckwächter/Druckdifferenzfühler sensor.",
+   "assumptions": []
+  },
+  "LV0032": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Frost protection thermostat is a different sensor type than any candidate.",
+   "assumptions": []
+  },
+  "LV0033": {
+   "product_id": "P-CTL-002",
+   "confidence": "high",
+   "reason": "Temperature sensor matches the Kanaltemperaturfühler.",
+   "assumptions": []
+  },
+  "LV0034": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter matches the Druckdifferenzfühler.",
+   "assumptions": []
+  },
+  "LV0035": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "This is installation labour/service, not a product match.",
+   "assumptions": []
+  },
+  "LV0036": {
+   "product_id": "P-INS-002",
+   "confidence": "high",
+   "reason": "Thermal duct insulation matches the 60 mm mineral wool specification.",
+   "assumptions": []
+  },
+  "LV0037": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Thermal duct insulation is 100 mm, but no candidate matches that type and thickness.",
+   "assumptions": []
+  },
+  "LV0038": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Thermal duct insulation is 15 mm, but the insulation candidates are 30 mm or 60 mm.",
+   "assumptions": []
+  },
+  "LV0039": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "EI30 fire insulation is not represented by any candidate product type.",
+   "assumptions": []
+  },
+  "LV0040": {
+   "product_id": "P-FIR-003",
+   "confidence": "high",
+   "reason": "EI30 circular fire seal matches DN160 / Ø 16 cm.",
+   "assumptions": []
+  }
+ }
+}

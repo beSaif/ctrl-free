@@ -1,0 +1,95 @@
+{
+ "model": "gpt-5.4",
+ "name": "lv_grouping",
+ "created": "2026-10-11T00:51:43",
+ "api": "responses",
+ "input_tokens": 1691,
+ "output_tokens": 389,
+ "response": {
+  "items": [
+   {
+    "qty": [
+     529
+    ],
+    "text": [
+     527,
+     528
+    ],
+    "parent": null
+   },
+   {
+    "qty": [
+     532
+    ],
+    "text": [
+     530,
+     531
+    ],
+    "parent": null
+   },
+   {
+    "qty": [
+     535
+    ],
+    "text": [
+     533,
+     534
+    ],
+    "parent": null
+   },
+   {
+    "qty": [
+     542
+    ],
+    "text": [
+     541
+    ],
+    "parent": null
+   },
+   {
+    "qty": [
+     549
+    ],
+    "text": [
+     543,
+     544,
+     545,
+     546,
+     547,
+     548
+    ],
+    "parent": null
+   },
+   {
+    "qty": [
+     553
+    ],
+    "text": [
+     550,
+     551,
+     552
+    ],
+    "parent": null
+   }
+  ],
+  "intros": [
+   {
+    "text": [
+     536,
+     537,
+     538,
+     539,
+     540
+    ],
+    "applies_to": [
+     542,
+     549,
+     553
+    ]
+   }
+  ],
+  "other": [
+   554
+  ]
+ }
+}

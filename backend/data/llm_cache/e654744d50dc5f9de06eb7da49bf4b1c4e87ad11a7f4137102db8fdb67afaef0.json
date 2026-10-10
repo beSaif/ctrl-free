@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:29",
+ "api": "responses",
+ "input_tokens": 6382,
+ "output_tokens": 384,
+ "response": {
+  "LV0101": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Ceiling cassette panel, not an AHU or control device",
+   "assumptions": []
+  },
+  "LV0102": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour/support work, not circular ductwork",
+   "assumptions": []
+  },
+  "LV0103": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Support/angle set, not rectangular ductwork",
+   "assumptions": []
+  },
+  "LV0104": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Kitchen exhaust hood, not an AHU or control device",
+   "assumptions": []
+  },
+  "LV0105": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Supply air valve 1500x500mm, no matching candidate size/type",
+   "assumptions": []
+  },
+  "LV0106": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Ceiling cassette panel 1000x500mm, not an AHU or control device",
+   "assumptions": []
+  },
+  "LV0107": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Ceiling cassette panel, not an AHU or control device",
+   "assumptions": []
+  },
+  "LV0108": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Ceiling cassette panel, not an AHU or control device",
+   "assumptions": []
+  },
+  "LV0109": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour/support work, not circular ductwork",
+   "assumptions": []
+  },
+  "LV0110": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Support/angle set, not rectangular ductwork",
+   "assumptions": []
+  }
+ }
+}

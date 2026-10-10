@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:34",
+ "api": "responses",
+ "input_tokens": 6561,
+ "output_tokens": 446,
+ "response": {
+  "LV0213": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rain cap, but no candidate is a roof cowl/rain cap",
+   "assumptions": []
+  },
+  "LV0214": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour coating only, but no candidate is a coated finish item",
+   "assumptions": []
+  },
+  "LV0215": {
+   "product_id": "P-AIR-001",
+   "confidence": "high",
+   "reason": "Supply air valve, circular, DN100 = Ø 10 cm",
+   "assumptions": []
+  },
+  "LV0216": {
+   "product_id": "P-AIR-003",
+   "confidence": "high",
+   "reason": "Exhaust air valve, circular, DN100 = Ø 10 cm",
+   "assumptions": []
+  },
+  "LV0217": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Supply air grille, but no grille candidate is offered",
+   "assumptions": []
+  },
+  "LV0218": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Exhaust air grille, but no grille candidate is offered",
+   "assumptions": []
+  },
+  "LV0219": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Air diffuser/jet nozzle with 315x9000 size, but no matching candidate",
+   "assumptions": []
+  },
+  "LV0220": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour finish only, but no candidate is a finish item",
+   "assumptions": []
+  },
+  "LV0221": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Air diffuser/jet nozzle with 315x9000 size, but no matching candidate",
+   "assumptions": []
+  },
+  "LV0222": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour finish only, but no candidate is a finish item",
+   "assumptions": []
+  }
+ }
+}

@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:27",
+ "api": "responses",
+ "input_tokens": 6370,
+ "output_tokens": 432,
+ "response": {
+  "LV0021": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct access door, but no candidate is an inspection cover",
+   "assumptions": []
+  },
+  "LV0022": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular duct access door DN100, but no candidate is an inspection cover",
+   "assumptions": []
+  },
+  "LV0023": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Thermometer for duct installation, but no candidate is a thermometer",
+   "assumptions": []
+  },
+  "LV0024": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Mounting frame for insulated ducts, but no candidate is a mounting frame",
+   "assumptions": []
+  },
+  "LV0025": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Equipment label 100 x 50 mm, but all candidates are fans",
+   "assumptions": []
+  },
+  "LV0026": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour arrows 150 x 30 mm, but no candidate matches this labelling item",
+   "assumptions": []
+  },
+  "LV0027": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Equipotential bonding item, but no candidate is bonding equipment",
+   "assumptions": []
+  },
+  "LV0028": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "24V actuator, matches the tendered damper actuator",
+   "assumptions": []
+  },
+  "LV0029": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "24V actuator, matches the tendered modulating damper actuator",
+   "assumptions": []
+  },
+  "LV0030": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Smoke detector, but no candidate is a smoke detector",
+   "assumptions": []
+  }
+ }
+}

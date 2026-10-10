@@ -1,0 +1,58 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "normalize_types",
+ "created": "2026-10-11T00:55:23",
+ "api": "responses",
+ "input_tokens": 1501,
+ "output_tokens": 733,
+ "response": {
+  "LV0007": {
+   "type_en": "Air terminal / Exhaust valve"
+  },
+  "LV0008": {
+   "type_en": "Air terminal / Exhaust valve"
+  },
+  "LV0054": {
+   "type_en": "installation labour"
+  },
+  "LV0055": {
+   "type_en": "transport and handling"
+  },
+  "LV0057": {
+   "type_en": "Air terminal / Supply valve"
+  },
+  "LV0058": {
+   "type_en": "Air terminal / Supply valve"
+  },
+  "LV0087": {
+   "type_en": "fire protection cladding"
+  },
+  "LV0098": {
+   "type_en": "Air terminal / Supply valve"
+  },
+  "LV0103": {
+   "type_en": "Support / Angle set"
+  },
+  "LV0105": {
+   "type_en": "Air terminal / Supply valve"
+  },
+  "LV0110": {
+   "type_en": "Support / Angle set"
+  },
+  "LV0112": {
+   "type_en": "installation labour"
+  },
+  "LV0219": {
+   "type_en": "Air terminal / Supply valve"
+  },
+  "LV0220": {
+   "type_en": "colour finish"
+  },
+  "LV0221": {
+   "type_en": "Air terminal / Supply valve"
+  },
+  "LV0222": {
+   "type_en": "colour finish"
+  }
+ }
+}

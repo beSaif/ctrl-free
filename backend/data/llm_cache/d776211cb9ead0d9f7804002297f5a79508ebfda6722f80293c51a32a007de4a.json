@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:32",
+ "api": "responses",
+ "input_tokens": 7650,
+ "output_tokens": 643,
+ "response": {
+  "LV0143": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Fire insulation EI60 for exhaust, but all candidates are non-fire or wrong insulation type/size",
+   "assumptions": []
+  },
+  "LV0144": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular EI30 fire seal 350 x 200, but candidate seal is 300 x 200",
+   "assumptions": []
+  },
+  "LV0145": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular EI30 fire seal 350 x 200, but candidate seal is 300 x 200",
+   "assumptions": []
+  },
+  "LV0146": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular EI30 fire seal 500 x 350, but candidate seal is 300 x 200",
+   "assumptions": []
+  },
+  "LV0147": {
+   "product_id": "P-SUP-001",
+   "confidence": "high",
+   "reason": "Connection-angle support set matches the tender item",
+   "assumptions": []
+  },
+  "LV0148": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Inspection cover 400 x 300, but the only matching candidate is 400 x 200",
+   "assumptions": []
+  },
+  "LV0149": {
+   "product_id": "P-AHU-10500",
+   "confidence": "high",
+   "reason": "Supply air unit with 10'500 m3/h matches airflow and device type",
+   "assumptions": []
+  },
+  "LV0150": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Casing section of ventilation unit, but no candidate is that component type",
+   "assumptions": []
+  },
+  "LV0151": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Casing section of ventilation unit, but no candidate is that component type",
+   "assumptions": []
+  },
+  "LV0152": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "WRG casing section, but no candidate matches a heat-recovery unit component",
+   "assumptions": []
+  }
+ }
+}

@@ -322,6 +322,8 @@ export interface Position {
   /** place in the tender's printed order (parser stream index) */
   pdf_order?: number
   text_de: string
+  /** section intro text that applies to this line (LLM grouping), not part of its own description */
+  intro_de?: string | null
   title_de: string
   title_en?: string
   variant_de?: string | null

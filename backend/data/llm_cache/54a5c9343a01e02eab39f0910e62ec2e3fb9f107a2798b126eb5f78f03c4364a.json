@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:31",
+ "api": "responses",
+ "input_tokens": 6494,
+ "output_tokens": 528,
+ "response": {
+  "LV0133": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Frost protection thermostat, no matching sensor product in candidates",
+   "assumptions": []
+  },
+  "LV0134": {
+   "product_id": "P-CTL-002",
+   "confidence": "high",
+   "reason": "Temperature sensor matches the duct temperature/humidity sensor line",
+   "assumptions": []
+  },
+  "LV0135": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter matches the tender line exactly",
+   "assumptions": []
+  },
+  "LV0136": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour is a service, not a product",
+   "assumptions": []
+  },
+  "LV0137": {
+   "product_id": "P-INS-001",
+   "confidence": "high",
+   "reason": "Thermal duct insulation, 30 mm matches the tender thickness",
+   "assumptions": []
+  },
+  "LV0138": {
+   "product_id": "P-INS-002",
+   "confidence": "high",
+   "reason": "Thermal duct insulation, 60 mm matches the tender thickness",
+   "assumptions": []
+  },
+  "LV0139": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender needs 100 mm thermal insulation, but no matching thermal 100 mm product is offered",
+   "assumptions": []
+  },
+  "LV0140": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender needs 15 mm thermal insulation, and no 15 mm product is offered",
+   "assumptions": []
+  },
+  "LV0141": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender needs EI30 fire insulation, but candidates are regular thermal or weatherproof insulation",
+   "assumptions": []
+  },
+  "LV0142": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender needs EI60 exhaust fire insulation, but no matching fire insulation product is offered",
+   "assumptions": []
+  }
+ }
+}

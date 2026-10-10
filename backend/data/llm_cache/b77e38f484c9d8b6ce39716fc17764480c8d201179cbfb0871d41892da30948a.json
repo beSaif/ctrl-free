@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:27",
+ "api": "responses",
+ "input_tokens": 8147,
+ "output_tokens": 533,
+ "response": {
+  "LV0041": {
+   "product_id": "P-SUP-001",
+   "confidence": "high",
+   "reason": "Connection-angle support set, right product type.",
+   "assumptions": []
+  },
+  "LV0042": {
+   "product_id": "P-AHU-6200",
+   "confidence": "high",
+   "reason": "Supply air AHU, 6200 m3/h matches the product.",
+   "assumptions": []
+  },
+  "LV0043": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Heating/cooling coil, but no candidate is that product type.",
+   "assumptions": []
+  },
+  "LV0044": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Exhaust casing section, but all candidates are controls or support items.",
+   "assumptions": []
+  },
+  "LV0045": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct leakage test is a service, not any listed product.",
+   "assumptions": []
+  },
+  "LV0046": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular duct DN250, but no candidate is a duct.",
+   "assumptions": []
+  },
+  "LV0047": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular duct DN250, but no candidate is a duct.",
+   "assumptions": []
+  },
+  "LV0048": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular duct DN250, but no candidate is a duct.",
+   "assumptions": []
+  },
+  "LV0049": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "45° circular bend DN250, but the only bend candidate has the wrong size.",
+   "assumptions": []
+  },
+  "LV0050": {
+   "product_id": "P-FTG-B-250-90",
+   "confidence": "high",
+   "reason": "90° circular bend DN250 matches type, angle and size.",
+   "assumptions": []
+  }
+ }
+}

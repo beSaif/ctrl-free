@@ -1,0 +1,74 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:31",
+ "api": "responses",
+ "input_tokens": 6219,
+ "output_tokens": 535,
+ "response": {
+  "LV0123": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Inspection cover, no candidate matches this duct access component",
+   "assumptions": []
+  },
+  "LV0124": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Thermometer for duct installation, no sensor candidate matches",
+   "assumptions": []
+  },
+  "LV0125": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Mounting frame, no candidate is a mounting frame",
+   "assumptions": []
+  },
+  "LV0126": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Equipment labels, no candidate matches a label item",
+   "assumptions": []
+  },
+  "LV0127": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Colour arrows, no candidate matches labelling accessories",
+   "assumptions": []
+  },
+  "LV0128": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Equipotential bonding, no candidate matches bonding parts",
+   "assumptions": []
+  },
+  "LV0129": {
+   "product_id": "P-CTL-003",
+   "confidence": "medium",
+   "reason": "24V damper actuator, matches the actuator type",
+   "assumptions": [
+    "Torque, control mode, and IP54 details not specified in the product description"
+   ]
+  },
+  "LV0130": {
+   "product_id": "P-CTL-003",
+   "confidence": "medium",
+   "reason": "24V damper actuator, matches the actuator type",
+   "assumptions": [
+    "Torque, control mode, and IP54 details not specified in the product description"
+   ]
+  },
+  "LV0131": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Smoke detector, no candidate matches this detector type",
+   "assumptions": []
+  },
+  "LV0132": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter, exact type match",
+   "assumptions": []
+  }
+ }
+}

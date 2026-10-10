@@ -1,0 +1,72 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:32",
+ "api": "responses",
+ "input_tokens": 7303,
+ "output_tokens": 544,
+ "response": {
+  "LV0153": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Heating/cooling coil, but all candidates are controls/support parts, not a coil.",
+   "assumptions": []
+  },
+  "LV0154": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tropfenabscheiderteil of an AHU, but candidates are complete AHUs or controls, not this casing section.",
+   "assumptions": []
+  },
+  "LV0155": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Exhaust air casing/filter/fan section, but no candidate is a matching AHU casing section.",
+   "assumptions": []
+  },
+  "LV0156": {
+   "product_id": "P-SIL-001",
+   "confidence": "medium",
+   "reason": "Rectangular silencer, and P-SIL-001 is the matching rectangular silencer candidate.",
+   "assumptions": [
+    "Exact overall silencer size not stated in the tender; product size accepted."
+   ]
+  },
+  "LV0157": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Empty casing section, but candidates are complete AHUs or controls, not a casing section.",
+   "assumptions": []
+  },
+  "LV0158": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Supply-air casing section, but candidates are complete AHUs or controls, not a casing section.",
+   "assumptions": []
+  },
+  "LV0159": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Empty casing section, but candidates are complete AHUs or controls, not a casing section.",
+   "assumptions": []
+  },
+  "LV0160": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct leakage test service, but all candidates are equipment or controls, not a leak test.",
+   "assumptions": []
+  },
+  "LV0161": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Weather louvre, but all candidates are AHUs or controls, not a weather louvre.",
+   "assumptions": []
+  },
+  "LV0162": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rain cap/roof cowl, but all candidates are AHUs or controls, not a roof cowl.",
+   "assumptions": []
+  }
+ }
+}

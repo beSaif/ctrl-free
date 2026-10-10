@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:32",
+ "api": "responses",
+ "input_tokens": 6626,
+ "output_tokens": 492,
+ "response": {
+  "LV0163": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour coating is not one of the candidate product types.",
+   "assumptions": []
+  },
+  "LV0164": {
+   "product_id": "P-AIR-003",
+   "confidence": "high",
+   "reason": "Exhaust air valve, circular, DN100 = Ø 10 cm.",
+   "assumptions": []
+  },
+  "LV0165": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender needs exhaust air valve DN125, but the only valve candidates are DN100 or supply valves.",
+   "assumptions": []
+  },
+  "LV0166": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Transfer air element 17.5 x 49 x 24 cm, no matching candidate type or size.",
+   "assumptions": []
+  },
+  "LV0167": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Transfer air element, but none of the candidates are that product type.",
+   "assumptions": []
+  },
+  "LV0168": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Transfer air element 17.5 x 49 x 24 cm, no matching candidate type or size.",
+   "assumptions": []
+  },
+  "LV0169": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Transfer air element, but none of the candidates are that product type.",
+   "assumptions": []
+  },
+  "LV0170": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Air diffuser, but the candidates are controls or support parts.",
+   "assumptions": []
+  },
+  "LV0171": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Air diffuser, but the candidates are controls or support parts.",
+   "assumptions": []
+  },
+  "LV0172": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Air diffuser, but the candidates are controls or support parts.",
+   "assumptions": []
+  }
+ }
+}

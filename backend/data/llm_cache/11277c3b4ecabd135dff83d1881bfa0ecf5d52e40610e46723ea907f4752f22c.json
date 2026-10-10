@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-11T00:55:35",
+ "api": "responses",
+ "input_tokens": 6894,
+ "output_tokens": 438,
+ "response": {
+  "LV0233": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer, but no candidate matches 71 x 50 x 175 cm",
+   "assumptions": []
+  },
+  "LV0234": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer, but no candidate matches 65 x 60 x 150 cm",
+   "assumptions": []
+  },
+  "LV0235": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer, but no candidate matches 60 x 40 x 175 cm",
+   "assumptions": []
+  },
+  "LV0236": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer, but no candidate matches 30 x 30 x 175 cm",
+   "assumptions": []
+  },
+  "LV0237": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct access door/inspection cover, but all candidates are AHUs or controls",
+   "assumptions": []
+  },
+  "LV0238": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct access door for insulated ducts, but all candidates are AHUs or controls",
+   "assumptions": []
+  },
+  "LV0239": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Thermometer, but all candidates are AHUs or controls",
+   "assumptions": []
+  },
+  "LV0240": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Mounting frame, but all candidates are AHUs or controls",
+   "assumptions": []
+  },
+  "LV0241": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Equipment labels, but all candidates are fans",
+   "assumptions": []
+  },
+  "LV0242": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour arrows, but all candidates are AHUs or controls",
+   "assumptions": []
+  }
+ }
+}
