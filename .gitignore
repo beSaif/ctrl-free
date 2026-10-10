@@ -9,6 +9,7 @@ node_modules/
 dist/
 .DS_Store
 backend/data/tenders/
+backend/data/price_lists/
 *.log
 
 !frontend/.env.development

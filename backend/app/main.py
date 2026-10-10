@@ -87,7 +87,9 @@ def call_label(key: str, value: float | None) -> str | None:
 
 
 def _catalog_row(pid: str | None) -> dict | None:
-    return pipeline.catalog().get(pid) if pid else None
+    """Catalogue row with the net price the active price lists give it (price_list* fields say which)."""
+    r = pipeline.reference()
+    return r.catalog_row(pid) if (r and pid) else None
 
 
 def _product_brief(pid: str | None) -> dict | None:
@@ -95,7 +97,9 @@ def _product_brief(pid: str | None) -> dict | None:
     if not row:
         return {"product_id": pid, "description": None} if pid else None
     return {k: row.get(k) for k in ("product_id", "category", "subcategory", "manufacturer", "model", "description",
-                                    "unit", "net_cost_chf", "install_code", "source_type", "supplier_quote_required")}
+                                    "unit", "net_cost_chf", "install_code", "source_type", "supplier_quote_required")} | {
+        k: row[k] for k in ("price_list", "price_list_id", "price_list_kind", "price_list_date", "supplier", "price_list_source",
+                            "catalog_net_cost_chf") if k in row}
 
 
 def _group_of(p: dict) -> tuple[str, str, str | None, str | None]:
@@ -1235,6 +1239,99 @@ def results():
     return {"rows": [{k: v for k, v in r.items() if k != "outcome"} for r in rows],
             "recorded": len(recorded), "needed": 3, "learned": learned,
             "note": f"{len(recorded)} tender{'s' if len(recorded) != 1 else ''} recorded so far."}
+
+
+# ================================================================== price lists (supplier / Equans negotiated)
+# Precedence and storage: app/price_lists.py. Changing a list re-prices every tender (and logs moved lines).
+
+
+def _pl():
+    from . import price_lists
+    return price_lists
+
+
+def _pl_upload(file: UploadFile | None, demo: str | None) -> tuple[bytes, str]:
+    if demo:
+        return _pl().demo_file(demo)
+    if file is None:
+        raise HTTPException(400, "Upload a price list file (CSV or XLSX)")
+    return file.file.read(), file.filename or "price_list.csv"
+
+
+def _json_form(v: str | None, what: str) -> dict | None:
+    import json
+    if not v:
+        return None
+    try:
+        out = json.loads(v)
+    except json.JSONDecodeError:
+        raise HTTPException(400, f"{what} is not valid JSON")
+    return out if isinstance(out, dict) else None
+
+
+def _pl_get(fn, *a, **kw):
+    try:
+        return fn(*a, **kw)
+    except KeyError as e:
+        raise HTTPException(404, f"Price list {e.args[0] if e.args else ''} not found")
+
+
+@app.get("/api/reference/price-lists")
+def price_lists_overview():
+    return _pl().overview()
+
+
+@app.post("/api/reference/price-lists/preview")
+def price_list_preview(file: UploadFile | None = File(None), demo: str | None = Form(None),
+                       mapping: str | None = Form(None), meta: str | None = Form(None)):
+    """Read a CSV/XLSX price list: detected columns, rows matched / not matched, effect on open tenders. Saves nothing."""
+    data, name = _pl_upload(file, demo)
+    return _pl().preview(data, name, _json_form(mapping, "mapping"), _json_form(meta, "meta"))
+
+
+@app.post("/api/reference/price-lists")
+def price_list_create(file: UploadFile | None = File(None), demo: str | None = Form(None),
+                      mapping: str | None = Form(None), meta: str | None = Form(None), activate: bool = Form(True)):
+    data, name = _pl_upload(file, demo)
+    pl = _pl()
+    entry = pl.create(data, name, _json_form(mapping, "mapping"), _json_form(meta, "meta"), activate=activate)
+    return {"ok": True, "list": pl.summary(entry), **pl.overview()}
+
+
+@app.put("/api/reference/price-lists/order")
+def price_lists_order(body: dict = Body(...)):
+    order = body.get("order")
+    if not isinstance(order, list):
+        raise HTTPException(400, "order must be a list of price list ids (or [\"default\"])")
+    _pl().reorder([str(x) for x in order])
+    return _pl().overview()
+
+
+@app.get("/api/reference/price-lists/{lid}")
+def price_list_detail(lid: str):
+    return _pl_get(_pl().detail, lid)
+
+
+@app.patch("/api/reference/price-lists/{lid}")
+def price_list_patch(lid: str, body: dict = Body(...)):
+    allowed = {k: body[k] for k in ("active", "name", "supplier", "kind", "valid_from", "valid_to") if k in body}
+    _pl_get(_pl().update, lid, allowed)
+    return _pl().detail(lid)
+
+
+@app.delete("/api/reference/price-lists/{lid}")
+def price_list_delete(lid: str):
+    _pl_get(_pl().delete, lid)
+    return _pl().overview()
+
+
+@app.get("/api/reference/price-lists/{lid}/file")
+def price_list_file(lid: str):
+    meta = _pl_get(_pl().get, lid)
+    p = Path(config.PRICE_LISTS_DIR) / meta["file"]
+    if not p.exists():
+        raise HTTPException(404, "The original file is gone")
+    return FileResponse(p, filename=meta.get("original_name") or meta["file"])
 
 
 # ================================================================== reference

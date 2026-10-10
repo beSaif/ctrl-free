@@ -53,7 +53,8 @@ def rules() -> dict[str, dict]:
 
 def reference_version() -> tuple:
     files = [config.REFERENCE_DIR / n for n in ("catalog.csv", "productivity.csv", "project_parameters.json")]
-    return tuple(f.stat().st_mtime_ns if f.exists() else 0 for f in files)
+    pl = mod("price_lists")
+    return tuple(f.stat().st_mtime_ns if f.exists() else 0 for f in files) + (pl.version() if pl else 0,)
 
 
 def default_settings() -> dict:

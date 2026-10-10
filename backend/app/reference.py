@@ -192,7 +192,11 @@ def clear_cache() -> None:
 
 
 def catalog_row(product_id: str | None) -> dict | None:
-    return load_catalog().get(product_id) if product_id else None
+    """The catalogue row with its net price resolved through the active price lists (app.price_lists)."""
+    if not product_id:
+        return None
+    from app import price_lists
+    return price_lists.effective_catalog().get(product_id)
 
 
 def rule_row(install_code: str | None) -> dict | None:

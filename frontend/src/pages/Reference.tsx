@@ -7,9 +7,10 @@ import type { ReferenceResponse } from '../api/types'
 import { ErrorBox, FilterTabs, Loading, SearchBox, Td, Th } from '../components/ui'
 import { fmt2, fmtShortDate, fmtUnit } from '../lib/format'
 import { C } from '../lib/lines'
+import { PriceLists } from './PriceLists'
 
-type Tab = 'cat' | 'rules' | 'params'
-const KIND: Record<Tab, string> = { cat: 'catalog', rules: 'rules', parameters: 'parameters', params: 'parameters' } as Record<Tab, string>
+type Tab = 'cat' | 'rules' | 'params' | 'lists'
+const KIND: Record<Tab, string> = { cat: 'catalog', rules: 'rules', parameters: 'parameters', params: 'parameters', lists: 'price-lists' } as Record<Tab, string>
 
 const FACTOR_SHORT: Record<string, string> = {
   site_efficiency: '÷ site efficiency',
@@ -98,7 +99,7 @@ export function Reference() {
   const lang = useLang()
   const [params, setParams] = useSearchParams()
   const raw = params.get('tab')
-  const tab: Tab = raw === 'rules' || raw === 'params' ? raw : 'cat'
+  const tab: Tab = raw === 'rules' || raw === 'params' || raw === 'lists' ? raw : 'cat'
   const { data, isLoading, error } = useReference()
   const imp = useImportReference()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -123,11 +124,12 @@ export function Reference() {
             { key: 'cat', label: t('Product catalogue'), count: data.catalog.length },
             { key: 'rules', label: t('Install rules'), count: rules.length },
             { key: 'params', label: t('Default parameters') },
+            { key: 'lists', label: t('Price lists') },
           ]}
         />
         <span className="flex-auto" />
-        <span className="text-[13px] text-muted">{sourceText(data, tab, lang, t)}</span>
-        <label className="inline-flex items-center min-h-[34px] px-3.5 border border-ink rounded-[2px] bg-white cursor-pointer hover:bg-panel focus-within:outline-2 focus-within:outline-accent">
+        {tab !== 'lists' && <span className="text-[13px] text-muted">{sourceText(data, tab, lang, t)}</span>}
+        <label hidden={tab === 'lists'} className="inline-flex items-center min-h-[34px] px-3.5 border border-ink rounded-[2px] bg-white cursor-pointer hover:bg-panel focus-within:outline-2 focus-within:outline-accent">
           {imp.isPending ? t('Importing…') : t('Import new version')}
           <input
             ref={fileRef}
@@ -156,6 +158,7 @@ export function Reference() {
       )}
 
       <main className="px-6 pb-8">
+        {tab === 'lists' && <PriceLists />}
         {tab === 'cat' && (
           <>
             <div className="py-3">

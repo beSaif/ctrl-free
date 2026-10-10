@@ -10,6 +10,7 @@ load_dotenv(REPO_DIR / ".env")
 
 DATA_DIR = BACKEND_DIR / "data"
 REFERENCE_DIR = DATA_DIR / "reference"
+PRICE_LISTS_DIR = DATA_DIR / "price_lists"   # supplier / negotiated price lists (app.price_lists), runtime state
 TENDERS_DIR = DATA_DIR / "tenders"
 LLM_CACHE_DIR = DATA_DIR / "llm_cache"
 STARTER_DIR = REPO_DIR / "problem_statement" / "Schulhaus_Oberglatt_Hackathon_Starter_Package_v2"

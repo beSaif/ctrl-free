@@ -211,8 +211,10 @@ def price_position(position: dict, settings: dict, system_profile: str = "school
         return None
     product = ref.catalog_row(pid) if pid else None
 
-    # unit price: manual > supplier quote > catalogue (catalog | supplier_package)
+    # unit price: manual > supplier quote > active price lists > catalogue (catalog | supplier_package);
+    # ref.catalog_row already carries the price list's net price (precedence: app/price_lists.py)
     quote = position.get("supplier_quote") or {}
+    plist = None
     if _num(ov.get("unit_price")) is not None:
         unit_cost, price_src = _num(ov["unit_price"]), "manual"
         src_text = "Entered by you"
@@ -222,6 +224,11 @@ def price_position(position: dict, settings: dict, system_profile: str = "school
     elif product is not None:
         unit_cost, price_src = float(product["net_cost_chf"]), product["source_type"]
         src_text = f"catalog.csv row {pid}" + (" (budget price)" if price_src == "supplier_package" else "")
+        if product.get("price_list"):
+            src_text = product.get("price_list_source") or product["price_list"]
+            plist = {"id": product.get("price_list_id"), "name": product["price_list"],
+                     "kind": product.get("price_list_kind"), "supplier": product.get("supplier"),
+                     "date": product.get("price_list_date"), "row": product.get("price_list_row")}
     else:
         return None
 
@@ -289,6 +296,8 @@ def price_position(position: dict, settings: dict, system_profile: str = "school
         "rate": rate, "role": role, "labour": labour, "direct": direct,
         "category": (product or {}).get("category") or "Other",
         "explain": explain, "sources": sources,
+        # the list that set the unit price, and the standard catalogue price it replaced
+        **({"price_list": plist, "catalog_unit_cost": product.get("catalog_net_cost_chf")} if plist else {}),
     }
 
 
@@ -370,6 +379,8 @@ def derive_status(position: dict, price: dict | None) -> tuple[str, str]:
             return "supplier_quote_required", "Quote entered (price entered by you)"
         if position.get("offer_ref") and not product.get("supplier_quote_required"):
             return "supplier_quote_required", f"Tender names supplier offer {position['offer_ref']}: catalogue price until a quote is entered"
+        if price.get("price_list"):
+            return "supplier_quote_required", f"Supplier package: {price['price_list']['name']} price until a quote is entered"
         return "supplier_quote_required", "Supplier package: budget price until a quote is entered"
 
     if not price["install_code"] or not ref.rule_row(price["install_code"]) or price["install_code"] == "UNKNOWN":
@@ -382,7 +393,8 @@ def derive_status(position: dict, price: dict | None) -> tuple[str, str]:
         return "assumption_applied", f"Close match ({conf:.2f}): check type and size"
     where = f"quantity from tender p. {page}" if page else "quantity from the tender"
     src = {"manual": "Unit price entered by you", "supplier_quote": "Supplier quote"}.get(
-        price["unit_price_source"], "Catalogue product")
+        price["unit_price_source"], f"Net price from {price['price_list']['name']}" if price.get("price_list")
+        else "Catalogue product")
     return "calculated", f"{src}, {where}"
 
 
@@ -453,8 +465,12 @@ def explain_field(position: dict, price: dict | None, field: str) -> list[dict]:
                  "source": srcs["unit_price"]}]
     if field == "material":
         net = price["quantity"] * price["net_unit_cost"]
+        words = PRICE_SOURCE_WORDS.get(price["unit_price_source"], "unit price")
+        if price.get("price_list"):  # old vs new: the list price and the catalogue price it replaced
+            words = (f"net price from {price['price_list']['name']}; "
+                     f"catalogue CHF {swiss(price.get('catalog_unit_cost'))}")
         return [
-            {"text": f"{q} {u} × CHF {swiss(price['net_unit_cost'])} per {u} ({PRICE_SOURCE_WORDS.get(price['unit_price_source'], 'unit price')})",
+            {"text": f"{q} {u} × CHF {swiss(price['net_unit_cost'])} per {u} ({words})",
              "value": swiss(net), "source": srcs["unit_price"]},
             {"text": f"+ {fmt_pct(price['waste_pct'])} material waste", "value": swiss(price["material"]),
              "source": "Allowances in Pricing"},
