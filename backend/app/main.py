@@ -1143,6 +1143,62 @@ def export_sia(tid: str):
                     headers={"Content-Disposition": f'attachment; filename="{_safe_name(t)}_SIA.{ext}"'})
 
 
+# The filled tender: the original PDF with our prices written in (app/lv_fill.py). Built on
+# demand; the last build per tender is kept so the preview pages do not rebuild it each time.
+_LV_FILLED: dict[str, tuple[str, bytes, dict]] = {}
+
+
+def _lv_filled(tid: str) -> tuple[dict, bytes, dict]:
+    import hashlib
+    import json
+
+    from . import lv_fill
+
+    t, totals, _settings = _export_inputs(tid)
+    key = hashlib.sha1(json.dumps([t.get("positions"), t.get("pricing"), totals.get("direct"),
+                                   totals.get("offer_price"), totals.get("standard_price")],
+                                  sort_keys=True, default=str).encode()).hexdigest()
+    hit = _LV_FILLED.get(tid)
+    if hit and hit[0] == key:
+        return t, hit[1], hit[2]
+    data, report = lv_fill.build_filled_lv(t, totals, store.pdf_path(tid))
+    _LV_FILLED[tid] = (key, data, report)
+    return t, data, report
+
+
+@app.get("/api/tenders/{tid}/export/lv-filled.pdf")
+def export_lv_filled(tid: str, inline: bool = False):
+    """The original tender PDF with unit prices, amounts, totals and summaries written in.
+    `inline=1` is the in-app preview: shown in the browser, not counted as exported."""
+    t, data, _report = _lv_filled(tid)
+    if not inline:
+        _mark_exported(tid, "lv_filled")
+    name = f"{_safe_name(t)}_LV_filled.pdf"
+    return Response(data, media_type="application/pdf",
+                    headers={"Content-Disposition": f'{"inline" if inline else "attachment"}; filename="{name}"'})
+
+
+@app.get("/api/tenders/{tid}/export/lv-filled/summary")
+def export_lv_filled_summary(tid: str):
+    """What the filled tender contains: offer, LV sum, lines filled / open, and which output
+    pages carry our numbers (cover pages first)."""
+    _t, _data, report = _lv_filled(tid)
+    return {k: v for k, v in report.items() if k != "lines"}
+
+
+@app.get("/api/tenders/{tid}/export/lv-filled/pages/{n}.png")
+def export_lv_filled_page(tid: str, n: int, scale: float = Query(1.5, ge=0.25, le=3.0)):
+    """One page of the filled tender as an image (preview on the Export page)."""
+    import pymupdf
+
+    _t, data, _report = _lv_filled(tid)
+    with pymupdf.open("pdf", data) as doc:
+        if n < 1 or n > doc.page_count:
+            raise HTTPException(404, f"Page {n} does not exist (1-{doc.page_count})")
+        png = doc[n - 1].get_pixmap(matrix=pymupdf.Matrix(scale, scale), alpha=False).tobytes("png")
+    return Response(png, media_type="image/png", headers={"Cache-Control": "no-store"})
+
+
 @app.get("/api/tenders/{tid}/export/checklist")
 def export_checklist(tid: str):
     t, totals, _settings = _export_inputs(tid)

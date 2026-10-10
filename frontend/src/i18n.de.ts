@@ -2,6 +2,7 @@
 import { DE_TRACE } from './i18n.de.trace'
 import { DE_CHANGES } from './i18n.de.changes'
 import { DE_PICKER } from './i18n.de.picker'
+import { DE_FILLEDLV } from './i18n.de.filledlv'
 
 export const DE: Record<string, string> = {
   ' and ': ' und ',
@@ -772,4 +773,5 @@ export const DE: Record<string, string> = {
   ...DE_TRACE,
   ...DE_CHANGES,
   ...DE_PICKER,
+  ...DE_FILLEDLV,
 }
