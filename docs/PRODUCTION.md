@@ -13,12 +13,13 @@
 |---|---|---|
 | Hosting | `dev.sh` on a laptop | Azure Container Apps: backend and frontend images, autoscale to zero |
 | LLM | OpenAI API (rules-only fallback) | Azure OpenAI in Switzerland North, private endpoint, or a Swiss-hosted model |
-| Reference data | CSV/JSON in `backend/data/reference`, imported in the UI | Sync from Equans' ERP/price lists and productivity handbooks, versioned |
+| Reference data | CSV/JSON in `backend/data/reference`, imported in the UI; supplier and negotiated price lists (CSV/XLSX) with precedence | Sync from Equans' ERP, supplier price feeds and productivity handbooks, versioned |
 | Storage | JSON per tender on disk | Postgres for state, Blob for PDFs and exports, audit log table |
-| Auth | single user "You" | Entra ID SSO; roles for estimator and bid lead; log entries carry the real name |
+| Auth | demo person switcher (junior / senior); every log entry carries the name and role; senior approves on the Changes screen | Entra ID SSO with the same roles; approvals as a required step before submission |
 | Export | xlsx with live formulas, report PDF, simplified SIA CSV | Full SIA 451 interface file and a SEAP import |
 | Supplier quotes | drafted German emails, reply PDF read by Assist | Outlook/Graph integration: send the request, and replies land in the tender automatically |
 | Bid optimisation | parameters plus the estimator's read | Learn from Results history (award notices from simap), using p. 9 award scoring per tender |
+| Learning | learned matches in a JSON file, applied first on new tenders, disabled when overridden more than confirmed | Shared across estimators in Postgres, reviewed by a senior before they apply company-wide |
 | Positions | free-text LV parser (any layout with Mass-Gattg./Massbetrag columns) | Add NPK-coded LVs (exact match on NPK numbers) and SIA 451 input |
 
 ## Risks and how we handle them

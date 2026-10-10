@@ -1,16 +1,36 @@
 # 5-minute demo script
 
-Set up beforehand: `./dev.sh`, browser at http://localhost:5173, the Oberglatt tender already processed.
+Set up beforehand: `./dev.sh`, browser at http://localhost:5173, the Oberglatt tender already processed, working as **Lea Meier · Junior** (top bar).
+Start clean: no active price lists (Reference → Price lists) and no learned matches (Reference → Learned matches), unless you want to show the re-upload in step 5.
 Keep `backend/data/demo/supplier_reply_silencers.pdf` ready in Finder for drag and drop.
 
-1. **The problem (20 s).** "An estimator gets this: 202 pages of German. Today it's Ctrl+F through handbooks and Excel. Watch."
-2. **Upload (30 s).** New tender → upload the PDF (or the demo button). The list shows "Reading p. X of 202"; reading the whole tender takes about 4 seconds. Name, client and due date are read from p. 9.
-3. **Overview (20 s).** "3 steps left before you can submit." Every line has a first price or a clear next step. The aside shows "Verified against Equans' examples: 22/22".
-4. **One line, fully traceable (60 s).** Lines → LV0010, the supply air valve on p. 78. The PDF crop highlights "Stk 5". Walk through the sentences: 5 pc × CHF 74.80 × (1 + 4% waste) = 388.96; 4.35 h × CHF 96 = 417.30; total **806.26**, the same as Equans' own answer.
-5. **The estimator stays in control (40 s).** Change product → pick DN125 → the tender's variant rule (p. 36) asks for a reason → totals update everywhere → Undo.
-6. **Supplier loop (60 s).** Open LV0066, the 600×600×1750 silencer on p. 107 (on a budget price). One German request email is drafted for every silencer in the tender (the Silencers group), with the tender's Schalldämpfer rule (p. 39) quoted. Drop `supplier_reply_silencers.pdf` → "Assist found a quote: 5'150 vs budget 5'400" → Fill all 3 (LV0018, LV0066, LV0178) → marked "Assist", undoable. "Assist never changes a price without your OK."
-7. **Price decision (50 s).** Pricing → set competition to "Strong" and we-want-it to "Must win" → win chances move, and "Why 63%" explains it in words. Switch on project costs. Pick Target → "Use CHF X".
-8. **Export (20 s).** The workbook with live formulas and source comments, the pricing report, and the SIA file the tender asks for on p. 9. Mark as submitted; after the award the outcome goes into Results history so the next bid learns.
-9. **Close (10 s).** "LLM picks, code computes, estimator decides. Runs on Azure OpenAI; the full SIA 451 into SEAP is the next step."
+1. **The problem (15 s).** "An estimator gets this: 202 pages of German. Today it's Ctrl+F through handbooks and Excel. Watch."
+2. **Upload (20 s).** New tender → upload the PDF (or the demo button). Reading all 202 pages takes about 4 seconds. Name, client and due date are read from p. 9.
+3. **Overview (10 s).** "3 steps left before you can submit." The aside shows "Verified against Equans' examples: 22/22".
+4. **One line, every number traceable (60 s).** Lines → LV0010, the supply air valve on p. 78.
+   - Click **"Read from p. 78"** next to the quantity: the quoted tender line, highlighted in the PDF crop.
+   - Click **"From the install rule"** next to the hours: 0.65 h per pc, each site factor with its value and its key in `project_parameters.json` → **Open in Reference data** lands on the DIFFUSER row.
+   - **Tender asks · We offer**: Trox Hesco Z-LVS is named as an example ("z.B."), so DemoVent DV-Z-100 is an equivalent product: type ✓ size ✓ unit ✓.
+   - Scroll to **History**: read from p. 78 → matched by the rules → every change since, with who.
+5. **The estimator corrects, ctrl-free learns (40 s).** LV0021, the inspection cover on p. 81, has no match. Change product → search "inspection cover" → P-FIR-004; the comparison shows what differs and the p. 36 variant rule asks for a reason → use it. Back on the line: **Apply to 8 similar lines** (one undoable batch). Reference → **Learned matches** shows the rule, taught by Lea on Oberglatt LV0021. "The next tender with this wording comes back matched."
+6. **Supplier loop (35 s).** LV0066, the 600×600×1750 silencer on p. 107, on a budget price. The request covers every silencer in the tender (the list shows each line and its status). Drop `supplier_reply_silencers.pdf` → "Assist found a quote: 5'150 vs budget 5'400" → Fill all 3 → marked "Assist", approved by Lea, undoable.
+7. **Price decision (45 s).** Pricing → **Costs**: raise overhead one step; the row shows its CHF effect and "default 8.5%", and "What changed from defaults" lists it at the top. → **Strategy**: set competition to "Strong" and we-want-it to "Must win"; the win-chance and expected-profit chart moves, and the recommendation says which option maximises expected profit and what Aggressive costs. Pick Target → "Use CHF X".
+8. **Senior review (25 s).** Switch to **Marco Keller · Senior** → Changes: what the AI picked with low confidence, what Assist filled, what Lea changed, each before → after with its CHF effect. Approve all shown; revert one; it's undone everywhere.
+9. **Export (20 s).** **Filled tender (LV)**: the original PDF with our selling prices on the dotted lines and totals per section and system. Open a page thumbnail. Also the workbook with live formulas and source comments, and the SIA file the tender asks for on p. 9.
+10. **Close (10 s).** "LLM picks, code computes, estimator decides, senior signs off. Runs on Azure OpenAI; SIA 451 into SEAP is the next step."
 
-If the jury asks "does it work on any page?": let them pick a page, then filter the Lines by that page or open the full page viewer.
+## Equans' questions: where to show the answer
+
+| Question | Show |
+|---|---|
+| Equivalent products from other makers? | Line → **Tender asks · We offer**; Change product shows the checks per candidate. A make named with "z.B." or without wording is offered as equivalent; only "vorgeschrieben" or "kein Ersatz" prescribes it (LV0063 vs LV0010). |
+| Where does this number come from? | The note next to each number on a line opens its source and links to the Reference row. |
+| Their own catalogue and supplier prices? | Reference → **Price lists** → Import `backend/data/demo/equans_negotiated_prices_2026.csv` → activate: direct cost drops by about CHF 10'231. The line's unit price says which list it came from. Order: typed > quote > negotiated > supplier list > catalogue. |
+| Learning from past behaviour? | Reference → **Learned matches**. Re-upload the tender: the Overview says how many lines were matched from what you taught. |
+| Traceability and history of every change? | Line → **History**; tender → **Changes** (filter by person, type, AI low confidence). |
+| PDF order instead of by type? | Lines → **Group by: Tender order**: systems and sections as printed, with subtotals. |
+| "Applies to" for instructions? | Instructions → a rule → **Choose lines** (L): pick by system, section or product type. Confirm and next (Enter). |
+| Strategy, not only calculation? | Pricing → **Strategy**: chart, recommendation, what happens if competition is one step stronger or weaker. |
+| Expected output? | Export → **Filled tender (LV)**, and the Overview's last step links to it. |
+
+If the jury asks "does it work on any page?": let them pick a page, then switch the Lines to Tender order or open the full page viewer.
