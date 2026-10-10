@@ -925,10 +925,35 @@ def pricing_payload(t: dict) -> dict:
                  "note": (settings.get("notes") or {}).get(k, ""),
                  "changed_by": (settings.get("changed_by") or {}).get(k)}
              for k in CALL_LABELS}
+    effects, default_totals = _pricing_effects(t, v, changed)
     return {"settings": settings, "defaults": defaults, "totals": v["totals"],
             "changed_count": len(changed), "changed": changed, "calls": calls,
+            "effects": effects, "default_totals": default_totals,
+            "sources": {k: ref.setting_source(k) for k in fd} if ref else {},
             "labels": {"factors": getattr(ref, "FACTOR_LABELS", {}), "settings": getattr(ref, "SETTING_LABELS", {}),
                        "project_costs": ref.project_cost_labels() if ref else {}}}
+
+
+_effects_cache: dict[str, tuple] = {}
+
+
+def _pricing_effects(t: dict, v: dict, changed: list[str]) -> tuple[dict, dict]:
+    """Per changed setting, the cost it adds (cost now minus cost with only that setting at its default),
+    and the cost and options with every setting at its default (the chosen option kept).
+    Memoised per tender revision, like the view."""
+    key = (t.get("rev"), pipeline.reference_version())
+    hit = _effects_cache.get(t["id"])
+    if hit and hit[0] == key:
+        return hit[1]
+    pricing = mod("pricing")
+    systems, profile = t.get("systems") or [], t.get("profile") or "school"
+    effects = pricing.setting_effects(v["positions"], v["settings"], changed, systems, profile)
+    dflt = {**pipeline.default_settings(), "chosen": v["settings"].get("chosen")}
+    dt = pricing.project_totals(v["positions"], dflt, systems, profile)
+    out = (effects, {"cost": dt["cost"], "direct": dt["direct"], "standard_price": dt["standard_price"],
+                     "scenarios": dt["scenarios"]})
+    _effects_cache[t["id"]] = (key, out)
+    return out
 
 
 @app.get("/api/tenders/{tid}/pricing")
@@ -987,11 +1012,27 @@ def put_pricing(tid: str, body: PricingUpdate = Body(...)):
 
 
 @app.post("/api/tenders/{tid}/pricing/reset")
-def reset_pricing(tid: str):
+def reset_pricing(tid: str, body: dict | None = Body(None)):
+    """Every setting back to its default; with {"keys": ["overhead_pct", "factors.site_efficiency"]} only those."""
+    keys = (body or {}).get("keys")
     with store.edit(tid) as t:
         cur = t.get("pricing") or {}
-        keep = {k: cur[k] for k in ("chosen", "notes") if k in cur}
-        store.change(t, "You", "pricing_reset", "tender", tid, {"pricing": keep}, text="Reset pricing to defaults")
+        if keys:
+            fd = _flatten({k: x for k, x in pipeline.default_settings().items() if k not in _PRICING_SKIP})
+            bad = [k for k in keys if k not in fd]
+            if bad:
+                raise HTTPException(400, f"Unknown setting {bad[0]}")
+            upd: dict[str, Any] = {}
+            for k in keys:
+                if store.get_path(cur, k) is not None:
+                    upd[k] = fd[k]
+                    upd[f"changed_by.{k}"] = None
+            if upd:
+                names = ", ".join(sorted({k.split(".")[-1].replace("_", " ") for k in keys}))
+                store.change(t, "You", "pricing", "pricing", None, upd, text=f"Reset to default: {names}")
+        else:
+            keep = {k: cur[k] for k in ("chosen", "notes") if k in cur}
+            store.change(t, "You", "pricing_reset", "tender", tid, {"pricing": keep}, text="Reset pricing to defaults")
     return pricing_payload(store.load(tid))
 
 

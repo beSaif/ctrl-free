@@ -557,6 +557,33 @@ def win_sentence(row: dict, settings: dict, standard_price: float, ref_price: fl
     return out + "."
 
 
+COST_FREE_KEYS = {"competition", "appetite", "sensitivity", "ref_win", "min_win", "max_win", "chosen", "round_to"}
+
+
+def setting_effects(positions: list[dict], settings: dict, keys: list[str], systems: list[dict] | None = None,
+                    profile: str = "school") -> dict[str, float]:
+    """Cost effect of each changed setting: cost now minus cost with only that setting back at its default.
+
+    ``keys`` are flattened ("overhead_pct", "factors.site_efficiency"). Margins and the win-chance
+    calls do not change the cost, so they are left out (their effect is on the offer, computed from
+    the margin itself). Effects do not add up exactly: transport and overhead multiply the others.
+    """
+    s = ref.merge_settings(settings)
+    d = ref.default_settings()
+    now = project_totals(positions, s, systems, profile)["cost"]
+    out: dict[str, float] = {}
+    for k in keys:
+        group, _, sub = k.partition(".")
+        if group in COST_FREE_KEYS or group == "margins":
+            continue
+        if group not in d or (sub and (not isinstance(d[group], dict) or sub not in d[group])):
+            continue
+        alt = dict(s)
+        alt[group] = {**s[group], sub: d[group][sub]} if sub else d[group]
+        out[k] = round(now - project_totals(positions, alt, systems, profile)["cost"], 2)
+    return out
+
+
 def project_totals(positions: list[dict], settings: dict, systems: list[dict] | None = None,
                    profile: str = "school") -> dict:
     """SPEC Totals for a tender. Prices every position afresh (never trusts stored pricing)."""

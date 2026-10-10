@@ -48,7 +48,8 @@ export interface Api {
   patchInstruction(id: string, iid: string, body: InstructionPatch): Promise<Instruction>
   getPricing(id: string): Promise<PricingResponse>
   putPricing(id: string, body: PricingPut): Promise<PricingResponse>
-  resetPricing(id: string): Promise<PricingResponse>
+  /** Every setting back to its default, or only the given (flattened) keys, e.g. ['factors.site_efficiency']. */
+  resetPricing(id: string, keys?: string[]): Promise<PricingResponse>
   getQuotes(id: string): Promise<QuoteGroup[]>
   markQuoteSent(id: string, group: string, sent: boolean): Promise<unknown>
   readQuote(id: string, input: File | string, lvId?: string): Promise<QuoteProposal[]>
@@ -271,7 +272,7 @@ export const realApi: Api = {
   patchInstruction: (id, iid, body) => req('PATCH', `/tenders/${id}/instructions/${enc(iid)}`, body),
   getPricing: async (id) => normPricing(await req('GET', `/tenders/${id}/pricing`)),
   putPricing: async (id, body) => normPricing(await req('PUT', `/tenders/${id}/pricing`, body)),
-  resetPricing: async (id) => normPricing(await req('POST', `/tenders/${id}/pricing/reset`)),
+  resetPricing: async (id, keys) => normPricing(await req('POST', `/tenders/${id}/pricing/reset`, keys?.length ? { keys } : undefined)),
   getQuotes: async (id) => arr<QuoteGroup>(await req('GET', `/tenders/${id}/quotes`), 'groups', 'quotes').map(normQuoteGroup),
   markQuoteSent: (id, group, sent) => req('POST', `/tenders/${id}/quotes/${enc(group)}/sent?sent=${sent}`, { sent }),
   readQuote: async (id, input, lvId) => {

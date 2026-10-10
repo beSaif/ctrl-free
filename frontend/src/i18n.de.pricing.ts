@@ -1,0 +1,64 @@
+// German UI text for the two-step Pricing screen (Costs / Strategy). Swiss spelling (ss).
+export const DE_PRICING: Record<string, string> = {
+  Costs: 'Kosten',
+  'what does this job cost us': 'was kostet uns dieser Auftrag',
+  Strategy: 'Strategie',
+  'what price do we offer': 'welchen Preis bieten wir an',
+  'Pricing steps': 'Schritte der Preisfindung',
+  'Reset all': 'Alles zurücksetzen',
+  '+{n} points': '+{n} Punkte',
+  '−{n} points': '−{n} Punkte',
+  '−{n} points per +1% price': '−{n} Punkte je +1%',
+  On: 'Ein',
+  Off: 'Aus',
+  'Against the default, before rounding up to 1’000': 'Gegenüber dem Standardwert, vor dem Aufrunden auf 1’000',
+  'on the {name} price': 'auf den Preis {name}',
+  'on the offer': 'auf das Angebot',
+  'What does this job cost us?': 'Was kostet uns dieser Auftrag?',
+  'Project costs, margins, allowances and site factors. The price on the right follows every change; each change shows what it does to the offer.':
+    'Projektkosten, Margen, Zuschläge und Baustellenfaktoren. Der Preis rechts folgt jeder Änderung; jede Änderung zeigt, was sie am Angebot bewirkt.',
+  'would add CHF {a}': 'würde CHF {a} hinzufügen',
+  'A margin sets the price of its option; overhead and transport go on the cost.':
+    'Eine Marge bestimmt den Preis ihrer Variante; Gemeinkosten und Transport kommen auf die Kosten.',
+  'Hover a setting to see where its default comes from.': 'Fahren Sie über eine Einstellung, um zu sehen, woher ihr Standardwert stammt.',
+  'Next: choose the offer price': 'Weiter: Offertpreis wählen',
+  'default {v}': 'Standard {v}',
+  'Default from {src}': 'Standardwert aus {src}',
+  'Reset {name} to default': '{name} auf Standard zurücksetzen',
+  'Every setting is at its default from project_parameters.json.': 'Alle Einstellungen stehen auf ihrem Standardwert aus project_parameters.json.',
+  'What changed from defaults': 'Was vom Standard abweicht',
+  'Effect on the offer, against the default': 'Wirkung auf das Angebot, gegenüber dem Standard',
+  'same as with defaults': 'gleich wie mit Standardwerten',
+  '{d} against defaults (CHF {was})': '{d} gegenüber Standard (CHF {was})',
+  'Cost baseline (before margin)': 'Selbstkosten (vor Marge)',
+  'Price so far': 'Preis bisher',
+  'where the three answers start': 'Ausgangspunkt der drei Antworten',
+  'Expected profit = win chance × profit if won. Margins are set under Costs.':
+    'Erwarteter Gewinn = Zuschlagschance × Gewinn bei Zuschlag. Die Margen stellen Sie unter Kosten ein.',
+  '{name} maximises expected profit: CHF {e} ({w} win chance × CHF {p} if won).':
+    '{name} bringt den höchsten erwarteten Gewinn: CHF {e} ({w} Zuschlagschance × CHF {p} bei Zuschlag).',
+  '{name} gains {n} points of win chance for CHF {x} less expected profit.':
+    '{name} gewinnt {n} Punkte Zuschlagschance für CHF {x} weniger erwarteten Gewinn.',
+  '{name} earns CHF {x} more if won, but loses {n} points of win chance.':
+    '{name} bringt bei Zuschlag CHF {x} mehr, verliert aber {n} Punkte Zuschlagschance.',
+  'Your offer ({name}) gives up CHF {x} of expected profit against {best}.':
+    'Ihr Angebot ({name}) verzichtet gegenüber {best} auf CHF {x} erwarteten Gewinn.',
+  'Stronger competition ({c}): {name} stays best, {w} win chance.': 'Stärkere Konkurrenz ({c}): {name} bleibt am besten, {w} Zuschlagschance.',
+  'Stronger competition ({c}): {name} becomes best, {w} win chance.': 'Stärkere Konkurrenz ({c}): {name} wird am besten, {w} Zuschlagschance.',
+  'Lighter competition ({c}): {name} stays best, {w} win chance.': 'Schwächere Konkurrenz ({c}): {name} bleibt am besten, {w} Zuschlagschance.',
+  'Lighter competition ({c}): {name} becomes best, {w} win chance.': 'Schwächere Konkurrenz ({c}): {name} wird am besten, {w} Zuschlagschance.',
+  'Expected profit peaks above your options, at about CHF {p} ({m} margin).':
+    'Der erwartete Gewinn erreicht sein Maximum oberhalb Ihrer Varianten, bei etwa CHF {p} ({m} Marge).',
+  'Expected profit peaks below your options, at about CHF {p} ({m} margin).':
+    'Der erwartete Gewinn erreicht sein Maximum unterhalb Ihrer Varianten, bei etwa CHF {p} ({m} Marge).',
+  'What the numbers say': 'Was die Zahlen sagen',
+  'If your read is off:': 'Falls Ihre Einschätzung danebenliegt:',
+  'Win chance and expected profit by offer price': 'Zuschlagschance und erwarteter Gewinn nach Offertpreis',
+  'Click a point to pick that option': 'Klicken Sie einen Punkt, um diese Variante zu wählen',
+  '{name} has the best expected profit at CHF {p}. The curve peaks at about CHF {peak} ({m} margin).':
+    '{name} hat den besten erwarteten Gewinn bei CHF {p}. Die Kurve erreicht ihr Maximum bei etwa CHF {peak} ({m} Marge).',
+  'Expected profit (CHF)': 'Erwarteter Gewinn (CHF)',
+  'peak {p}': 'Maximum {p}',
+  'At CHF {p} ({m} margin): {w} win chance, CHF {e} expected profit.': 'Bei CHF {p} ({m} Marge): {w} Zuschlagschance, CHF {e} erwarteter Gewinn.',
+  'Move over the chart to read any price.': 'Fahren Sie über die Grafik, um jeden Preis abzulesen.',
+}

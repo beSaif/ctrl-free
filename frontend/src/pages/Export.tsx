@@ -125,22 +125,22 @@ export function Export() {
             </Check>
           )}
           {pcOn.length === 0 ? (
-            <Check color={C.attn} link={lnk(`/t/${id}/pricing`, t('Pricing'))}>
+            <Check color={C.attn} link={lnk(`/t/${id}/pricing/costs`, t('Pricing'))}>
               <strong className="font-semibold text-attn">{t('Project costs not included')}</strong> ·{' '}
               {t('engineering, commissioning, hygiene inspection, documentation (CHF {a} if all on)', { a: fmt0(allProjectCosts(tot)) })}
             </Check>
           ) : (
-            <Check color={C.ink} link={lnk(`/t/${id}/pricing`, t('Pricing'))}>
+            <Check color={C.ink} link={lnk(`/t/${id}/pricing/costs`, t('Pricing'))}>
               <strong className="font-semibold">{t('Project costs included')}</strong> · CHF {fmt0(tot.project_costs)}
             </Check>
           )}
           {chosen ? (
-            <Check color={C.accent} link={lnk(`/t/${id}/pricing`, t('Change'))}>
+            <Check color={C.accent} link={lnk(`/t/${id}/pricing/strategy`, t('Change'))}>
               <strong className="font-semibold">{t('Offer price CHF {p}', { p: fmt0(chosen.bid) })}</strong> ·{' '}
               {t('{name}, {m}% margin · {w} win chance', { name: t(chosen.name), m: chosen.margin_pct.toFixed(1), w: fmtShare(chosen.win) })}
             </Check>
           ) : (
-            <Check color={C.attn} link={lnk(`/t/${id}/pricing`, t('Pricing'))}>
+            <Check color={C.attn} link={lnk(`/t/${id}/pricing/strategy`, t('Pricing'))}>
               <strong className="font-semibold text-attn">{t('Offer price not chosen')}</strong> · {t('the standard margin gives CHF {p}', { p: fmt0(tot.standard_price) })}
             </Check>
           )}

@@ -502,7 +502,7 @@ function PriceSection({
             )}
             {factorText && !hoursSet && (
               <>
-                {t('Hours include the site factors from')} <Link to={`/t/${tenderId}/pricing`}>{t('Pricing')}</Link>: {factorText}.
+                {t('Hours include the site factors from')} <Link to={`/t/${tenderId}/pricing/costs#site-factors`}>{t('Pricing')}</Link>: {factorText}.
               </>
             )}
           </span>

@@ -1212,10 +1212,18 @@ export const mockApi: Api = {
     save()
     return pricingOf(t)
   },
-  async resetPricing(id) {
+  async resetPricing(id, keys?: string[]) {
     await delay(90)
     const t = tender(id)
-    t.pricing = { ...clone(DEFAULT_SETTINGS), chosen: t.pricing.chosen, notes: t.pricing.notes }
+    if (keys?.length) {
+      const s = t.pricing as unknown as Record<string, Record<string, unknown>>
+      const d = DEFAULT_SETTINGS as unknown as Record<string, Record<string, unknown>>
+      for (const k of keys) {
+        const [g, sub] = k.split('.')
+        if (sub) s[g][sub] = d[g][sub]
+        else (s as Record<string, unknown>)[g] = d[g]
+      }
+    } else t.pricing = { ...clone(DEFAULT_SETTINGS), chosen: t.pricing.chosen, notes: t.pricing.notes }
     touch(t)
     save()
     return pricingOf(t)
