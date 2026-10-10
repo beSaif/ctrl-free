@@ -4,14 +4,34 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useT } from '../i18n'
 import { usePricing } from '../api/hooks'
 import type { Position } from '../api/types'
-import { AssistTag, ErrorBox, FilterTabs, IconChevron, LinkButton, Button, Loading, SearchBox, type TabItem } from '../components/ui'
+import { AssistTag, ErrorBox, FilterTabs, IconChevron, Kbd, LinkButton, Button, Loading, Marker, SearchBox, type TabItem } from '../components/ui'
 import { cx } from '../lib/cx'
 import { FooterTotals } from '../components/FooterTotals'
 import { fmt2, fmtQty, fmtUnit } from '../lib/format'
-import { isSupplier, lineStatus, matchView, productLabel, quotedPrice, type LineFilter, type LineGroupBy } from '../lib/lines'
+import { C, isSupplier, lineStatus, matchView, productLabel, quotedPrice, type LineFilter, type LineGroupBy, type StatusView } from '../lib/lines'
 import { groupParam, linesQuery, useCatalog, useLineFilter, useLineQueue } from './linesShared'
 
-export const LINE_GRID = 'grid grid-cols-[56px_minmax(0,1.5fr)_52px_40px_minmax(0,1fr)_92px_104px_112px_184px] gap-x-3'
+export const LINE_GRID = 'grid grid-cols-[56px_minmax(0,1.5fr)_52px_40px_minmax(0,1fr)_92px_104px_184px] gap-x-3'
+
+// The person's own expand/collapse choices, per tender, filter, search and grouping, for this browser session
+// (so going to a line and back keeps them).
+const OPEN_KEY = 'ctrlfree.lines.groups'
+type Toggles = Record<string, Record<string, boolean>>
+function readToggles(): Toggles {
+  try {
+    return JSON.parse(sessionStorage.getItem(OPEN_KEY) || '{}') as Toggles
+  } catch {
+    return {}
+  }
+}
+
+/** What a group header says about its lines: the status they share (said once, there; quiet on the rows)
+ *  and, for the collapsed header, how many lines deviate from it. */
+interface GroupStatus {
+  quiet: string | null
+  shared: StatusView | null
+  odd: [string, number][]
+}
 
 export function Lines() {
   const { id = '' } = useParams()
@@ -27,37 +47,68 @@ export function Lines() {
   const rowRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
   const gp = groupParam(group)
 
-  // Large lists open with the biggest groups expanded and the rest collapsed (one click each, or all).
+  // "To review" opens with every group collapsed: the headers are the work list. Other large lists open
+  // with the biggest groups expanded and the rest collapsed (one click each, or all). A search opens all.
   // In tender order a section sits inside its system: collapsing the system hides its sections too.
-  const { groupOf, parentOf } = useMemo(() => {
+  const { groupOf, parentOf, status } = useMemo(() => {
     const m: Record<string, string> = {}
     const par: Record<string, string> = {}
+    const views: Record<string, StatusView[]> = {}
+    const supplierGroup: Record<string, boolean> = {}
     let g = ''
     for (const r of rows) {
       if (r.type === 'group') {
         g = r.key
+        views[g] = []
+        supplierGroup[g] = !!r.req
         if (r.parent) par[r.key] = r.parent
-      } else m[r.p.lv_id] = g
+      } else {
+        m[r.p.lv_id] = g
+        const v = lineStatus(r.p, t)
+        views[g]?.push(v)
+        if (par[g]) views[par[g]]?.push(v)
+      }
     }
-    return { groupOf: m, parentOf: par }
-  }, [rows])
+    const st: Record<string, GroupStatus> = {}
+    const needsQuote = t('Needs supplier quote')
+    for (const [k, vs] of Object.entries(views)) {
+      const same = vs.length > 0 && vs.every((v) => v.label === vs[0].label)
+      // a supplier-request group implies "needs supplier quote"; its header says where the request stands
+      const quiet = supplierGroup[k] ? needsQuote : same ? vs[0].label : null
+      const odd = new Map<string, number>()
+      for (const v of vs) if (v.label !== quiet && !isSilent(v)) odd.set(v.label, (odd.get(v.label) ?? 0) + 1)
+      st[k] = { quiet, shared: !supplierGroup[k] && same && !isSilent(vs[0]) ? vs[0] : null, odd: [...odd].sort((a, b) => b[1] - a[1]) }
+    }
+    return { groupOf: m, parentOf: par, status: st }
+  }, [rows, t])
   const groupKeys = useMemo(() => rows.filter((r) => r.type === 'group').map((r) => r.key), [rows])
   const topKeys = groupKeys.filter((k) => !parentOf[k])
   const big = queue.length > 80 && !q
-  // expanded/collapsed choices belong to one filter + search + grouping; switching starts fresh
-  const fk = filter + '|' + q + '|' + group
-  const [tog, setTog] = useState<{ k: string; v: Record<string, boolean> }>({ k: fk, v: {} })
-  const toggled = tog.k === fk ? tog.v : {}
-  const setToggled = (f: (x: Record<string, boolean>) => Record<string, boolean>) => setTog({ k: fk, v: f(toggled) })
+  // expanded/collapsed choices belong to one tender + filter + search + grouping
+  const fk = [id, filter, q, group].join('|')
+  const [togs, setTogs] = useState<Toggles>(readToggles)
+  const toggled = togs[fk] ?? {}
+  const setToggled = (f: (x: Record<string, boolean>) => Record<string, boolean>) => setTogs((x) => ({ ...x, [fk]: f(x[fk] ?? {}) }))
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(OPEN_KEY, JSON.stringify(togs))
+    } catch {
+      /* private mode: keep in memory */
+    }
+  }, [togs])
   const isCollapsed = (key: string) => {
     if (key in toggled) return toggled[key]
     if (sel && (groupOf[sel] === key || parentOf[groupOf[sel]] === key)) return false
+    if (filter === 'review' && !q) return !parentOf[key]
     return big && topKeys.indexOf(key) >= 5
   }
   const isHidden = (key: string) => isCollapsed(key) || (!!parentOf[key] && isCollapsed(parentOf[key]))
   const allOpen = groupKeys.every((k) => !isCollapsed(k))
   const setAll = (collapsed: boolean) => setToggled(() => Object.fromEntries(groupKeys.map((k) => [k, collapsed])))
-  const visibleQueue = queue.filter((p) => !isHidden(groupOf[p.lv_id] ?? ''))
+  // J / K walk into groups that are only collapsed by default (opening them on the way) and skip the ones the person closed
+  const closedByHand = (key: string) => toggled[key] === true || (!!parentOf[key] && toggled[parentOf[key]] === true)
+  const walkQueue = queue.filter((p) => !closedByHand(groupOf[p.lv_id] ?? ''))
+  const focusSel = useRef<string | null>(null)
 
   useEffect(() => {
     const h = setTimeout(() => {
@@ -67,8 +118,14 @@ export function Lines() {
   }, [search, q, filter, setFilter])
 
   useEffect(() => {
-    if (sel) rowRefs.current[sel]?.scrollIntoView({ block: 'nearest' })
-  }, [sel])
+    if (!sel) return
+    const el = rowRefs.current[sel]
+    el?.scrollIntoView({ block: 'nearest' })
+    if (el && focusSel.current === sel) {
+      el.focus()
+      focusSel.current = null
+    }
+  }, [sel, togs])
 
   // J / K move through the list, Enter opens.
   useEffect(() => {
@@ -76,26 +133,29 @@ export function Lines() {
       const el = e.target as HTMLElement
       if (e.metaKey || e.ctrlKey || e.altKey || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable) return
       if (document.querySelector('[role="dialog"]')) return
-      const vq = visibleQueue
+      const vq = walkQueue
       if (!vq.length) return
       const i = vq.findIndex((p) => p.lv_id === sel)
+      const go = (n: Position) => {
+        const g = groupOf[n.lv_id] ?? ''
+        if (isHidden(g)) setToggled((x) => ({ ...x, [g]: false, ...(parentOf[g] ? { [parentOf[g]]: false } : {}) }))
+        focusSel.current = n.lv_id
+        setSel(n.lv_id)
+        rowRefs.current[n.lv_id]?.focus()
+      }
       if (e.key === 'j' || e.key === 'J') {
         e.preventDefault()
-        const n = vq[Math.min(vq.length - 1, i + 1)]
-        setSel(n.lv_id)
-        rowRefs.current[n.lv_id]?.focus()
+        go(vq[Math.min(vq.length - 1, i + 1)])
       } else if (e.key === 'k' || e.key === 'K') {
         e.preventDefault()
-        const n = vq[Math.max(0, i - 1)]
-        setSel(n.lv_id)
-        rowRefs.current[n.lv_id]?.focus()
+        go(vq[Math.max(0, i - 1)])
       } else if (e.key === 'Enter' && !e.repeat && sel && el.tagName !== 'A' && el.tagName !== 'BUTTON') {
         nav(`/t/${id}/lines/${sel}${linesQuery(filter, q, groupParam(group))}`)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [visibleQueue, sel, nav, id, filter, q, group])
+  })
 
   const items: TabItem<LineFilter>[] = [
     { key: 'review', label: t('To review'), count: counts.review },
@@ -122,9 +182,8 @@ export function Lines() {
     <div className="flex-auto flex flex-col">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5 px-6 py-2.5 border-b border-rule">
         <FilterTabs label={t('Filter lines')} items={items} value={filter} onChange={(f) => setFilter(f, q)} />
-        <GroupBy value={group} onChange={setGroup} />
+        <GroupBy value={group} onChange={setGroup} hint={hint} />
         <div className="flex-[1_1_200px]" />
-        <span className="text-[13px] text-muted">{hint}</span>
         {groupKeys.length > 1 && (
           <button type="button" onClick={() => setAll(allOpen)} className="min-h-8 px-1 border-0 bg-transparent text-[13px] text-accent underline underline-offset-2">
             {allOpen ? t('Collapse all') : t('Expand all')}
@@ -162,7 +221,6 @@ export function Lines() {
                 <span>{t('Product')}</span>
                 <span className="text-right">{t('Unit price')}</span>
                 <span className="text-right">{t('Total')}</span>
-                <span>{t('Match')}</span>
                 <span>{t('Status')}</span>
               </div>
               {rows.map((r) =>
@@ -182,12 +240,23 @@ export function Lines() {
                     <span className={r.parent ? 'font-medium' : 'font-semibold'}>{r.name}</span>
                     <span className="text-muted">{r.meta}</span>
                     <span className="flex-auto" />
-                    {r.req && (
-                      <span className="text-[13px]" style={{ color: r.reqFg }}>
-                        {r.req}
+                    {/* lines that differ from the group's status, counted while their rows are hidden */}
+                    {isCollapsed(r.key) && status[r.key]?.odd.length > 0 && (
+                      <span className="text-[13px] text-muted">
+                        {status[r.key].odd.map(([label, n]) => t('{n} × {label}', { n, label })).join(' · ')}
                       </span>
                     )}
-                    <span className="font-mono min-w-[110px] text-right">{fmt2(r.sub)}</span>
+                    {r.req ? (
+                      <span className="text-[13px] min-w-[150px]" style={{ color: r.reqFg }}>
+                        {r.req}
+                      </span>
+                    ) : status[r.key]?.shared && status[r.key].shared!.label !== r.name ? (
+                      <span className="inline-flex items-center gap-2 text-[13px] min-w-[150px]" style={{ color: status[r.key].shared!.fg }}>
+                        <Marker color={status[r.key].shared!.marker} />
+                        {status[r.key].shared!.label}
+                      </span>
+                    ) : null}
+                    <span className="font-mono min-w-[110px] text-right">{r.sub ? fmt2(r.sub) : '–'}</span>
                   </button>
                   )
                 ) : isHidden(groupOf[r.p.lv_id] ?? '') ? null : (
@@ -198,6 +267,7 @@ export function Lines() {
                     to={`/t/${id}/lines/${r.p.lv_id}${linesQuery(filter, q, gp)}`}
                     pdfTo={`/t/${id}/pdf/${r.p.page}?lv=${r.p.lv_id}`}
                     product={productLabel(r.p, cat)}
+                    quiet={status[groupOf[r.p.lv_id]]?.quiet ?? null}
                     refCb={(el) => {
                       rowRefs.current[r.p.lv_id] = el
                     }}
@@ -205,12 +275,14 @@ export function Lines() {
                 ),
               )}
               {rows.length === 0 && <div className="px-6 py-8 text-muted">{q ? t('No line matches the search.') : t('No lines here.')}</div>}
-              <div className="px-6 py-2.5 text-[13px] text-muted">
-                {t('Showing {n} of {total} lines. Amounts in CHF, before transport, overhead and margin. Click a line to open it.', {
-                  n: queue.length,
-                  total: positions.length,
-                })}{' '}
-                <span className="hidden lg:inline">{t('Keys: J next, K previous, Enter opens.')}</span>
+              <div className="flex items-center gap-3 px-6 py-2.5 text-[13px] text-muted">
+                {t('Showing {n} of {total} lines · CHF before transport, overhead and margin', { n: queue.length, total: positions.length })}
+                <span className="hidden lg:inline-flex items-center gap-1 text-faint" title={t('Keys: J next, K previous, Enter opens.')}>
+                  <Kbd>J</Kbd>
+                  <Kbd>K</Kbd>
+                  <Kbd>Enter</Kbd>
+                  <span className="sr-only">{t('Keys: J next, K previous, Enter opens.')}</span>
+                </span>
               </div>
             </div>
           </section>
@@ -221,15 +293,18 @@ export function Lines() {
   )
 }
 
+/** Done states ("Priced", "Confirmed") are silent: a quiet marker, the label in the tooltip. */
+const isSilent = (v: StatusView) => v.marker === C.stone || v.marker === C.ink
+
 /** "Group by: Type · Tender order" (stored in the URL as g=order). */
-function GroupBy({ value, onChange }: { value: LineGroupBy; onChange: (g: LineGroupBy) => void }) {
+function GroupBy({ value, onChange, hint }: { value: LineGroupBy; onChange: (g: LineGroupBy) => void; hint: string }) {
   const t = useT()
   const opts: [LineGroupBy, string][] = [
     ['type', t('Type')],
     ['order', t('Tender order')],
   ]
   return (
-    <div role="radiogroup" aria-label={t('Group by')} className="flex items-center gap-1 text-[13px]">
+    <div role="radiogroup" aria-label={t('Group by')} title={hint} className="flex items-center gap-1 text-[13px]">
       <span className="text-muted mr-1" aria-hidden="true">
         {t('Group by')}
       </span>
@@ -258,6 +333,7 @@ function LineRow({
   to,
   pdfTo,
   product,
+  quiet,
   refCb,
 }: {
   p: Position
@@ -265,11 +341,20 @@ function LineRow({
   to: string
   pdfTo: string
   product: string
+  /** the status the group header already says; not repeated on the row */
+  quiet: string | null
   refCb: (el: HTMLAnchorElement | null) => void
 }) {
   const t = useT()
   const st = lineStatus(p, t)
   const m = matchView(p, t)
+  const sup = isSupplier(p)
+  const noProduct = product === '–'
+  // One cell, one thing: the line's status when it needs something the header doesn't already say,
+  // else a match worth a look (weak or none, or a budget price); strong matches and done lines stay quiet.
+  // The full status and match reason are in the tooltip (and on the line itself).
+  const showStatus = st.label !== quiet && !isSilent(st)
+  const note = showStatus ? null : sup ? (m.label === t('Budget') ? t('Budget price') : null) : m.strong ? matchNote(p, t) : null
   const quoted = quotedPrice(p)
   const byAssist = p.supplier_quote?.by === 'Assist'
   const pr = p.pricing
@@ -291,9 +376,13 @@ function LineRow({
         </span>
         <span className="font-mono text-right">{fmtQty(pr?.quantity ?? p.quantity)}</span>
         <span className="text-muted">{fmtUnit(p.unit)}</span>
-        <span className="overflow-hidden text-ellipsis whitespace-nowrap text-muted" title={product}>
-          {product}
-        </span>
+        {noProduct && sup && !p.supplier_quote ? (
+          <span className="text-faint">{t('Not in catalogue')}</span>
+        ) : (
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap text-muted" title={product}>
+            {product}
+          </span>
+        )}
         <span className="font-mono text-right whitespace-nowrap">
           {byAssist && isSupplier(p) && quoted !== null && (
             <span className="mr-1 align-middle">
@@ -303,12 +392,24 @@ function LineRow({
           {pr ? fmt2(pr.net_unit_cost) : '–'}
         </span>
         <span className="font-mono text-right font-medium">{pr ? fmt2(pr.direct) : '–'}</span>
-        <span className="text-[13px]" style={{ color: m.fg, fontWeight: m.strong ? 600 : 400 }}>
-          {m.label}
-        </span>
-        <span className="flex items-center gap-2" style={{ color: st.fg }}>
-          <span className="flex-none w-2 h-2" style={{ background: st.marker }} aria-hidden="true" />
-          {st.label}
+        <span className="flex items-center gap-2 min-w-0" title={st.label + ' · ' + m.line}>
+          {showStatus ? (
+            <>
+              <Marker color={st.marker} />
+              <span style={{ color: st.fg }}>{st.label}</span>
+            </>
+          ) : note ? (
+            <span className="text-[13px] pl-4" style={{ color: sup ? C.muted : m.fg }}>
+              {note}
+            </span>
+          ) : isSilent(st) ? (
+            <>
+              <Marker color={st.marker} />
+              <span className="sr-only">{st.label}</span>
+            </>
+          ) : (
+            <span className="sr-only">{st.label}</span>
+          )}
         </span>
       </Link>
       {/* the page number opens the Tender PDF on this line (a sibling, not nested in the row link) */}
@@ -322,4 +423,12 @@ function LineRow({
       </Link>
     </div>
   )
+}
+
+/** "Weak match", "Close match", "No match": the match label in the merged status cell. */
+function matchNote(p: Position, t: (s: string) => string): string {
+  const m = p.match
+  if (!m || !m.product_id) return t('No match')
+  const label = m.label || (m.confidence >= 0.85 ? 'Strong' : m.confidence >= 0.75 ? 'Close' : m.confidence >= 0.5 ? 'Weak' : 'None')
+  return label === 'None' ? t('No match') : t(label + ' match')
 }
