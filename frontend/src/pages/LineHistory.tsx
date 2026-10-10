@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useT, type T } from '../i18n'
 import { useUndo } from '../api/hooks'
 import type { CatalogRow, LogEntry, Position } from '../api/types'
-import { Button, Td, Th } from '../components/ui'
+import { Button, Disclosure, Td, Th } from '../components/ui'
 import { cx } from '../lib/cx'
 import { fmt2, fmtDateTime, fmtQty, fmtUnit } from '../lib/format'
 import { rec, whoLabel } from '../lib/trace'
@@ -181,6 +181,12 @@ export function LineHistory({
     }),
   ]
 
+  // collapsed: a count, and the latest hand change when there is one (the exception worth seeing)
+  const latest = [...rows].reverse().find((r) => r.entry && !r.entry.undone && r.changes.length > 0)
+  const latestText = latest ? [`${latest.changes[0].label}: ${latest.changes[0].before} → ${latest.changes[0].after}`, latest.who, latest.at ? fmtDateTime(latest.at) : ''].filter(Boolean).join(' · ') : ''
+  const events = rows.length === 1 ? t('1 event') : t('{n} events', { n: rows.length })
+  const summary = loading ? t('Loading') : latest ? `${events} · ${t('last change: {c}', { c: latestText })}` : log.length ? events : `${events} · ${t('no changes')}`
+
   const doUndo = async (e: LogEntry) => {
     setErr(null)
     try {
@@ -191,72 +197,66 @@ export function LineHistory({
   }
 
   return (
-    <section className="flex flex-col gap-2" aria-labelledby="line-history-h">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="line-history-h" className="m-0 text-[15px] font-semibold">
-          {t('History of this line')}
-        </h2>
-        <span className="text-[13px] text-muted">{t('From reading the tender to now, oldest first. Every change is recorded with who and when.')}</span>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px] border-collapse">
-          <thead>
-            <tr>
-              <Th className="w-[150px]">{t('When')}</Th>
-              <Th className="w-[140px]">{t('Who')}</Th>
-              <Th>{t('What')}</Th>
-              <Th className="w-[110px] text-right">
-                <span className="sr-only">{t('Undo')}</span>
-              </Th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => {
-              const e = r.entry
-              const isUndone = !!e?.undone
-              const canUndo = !!e && e.undoable !== false && !isUndone && e.action !== 'undo'
-              const blocked = canUndo && undoBlocked(e!, log)
-              return (
-                <tr key={r.id}>
-                  <Td className="py-2 font-mono text-[12.5px] text-muted whitespace-nowrap">{r.at ? fmtDateTime(r.at) : '–'}</Td>
-                  <Td className="py-2">{r.who}</Td>
-                  <Td className="py-2">
-                    <div className={cx('flex flex-col gap-0.5', isUndone && 'text-muted')}>
-                      <span className={cx(isUndone && 'line-through')}>{r.text}</span>
-                      {r.detail && <span className="text-[13px] text-muted">{r.detail}</span>}
-                      {r.quote && <span className="self-start px-1.5 bg-hl font-mono text-[12px] whitespace-pre-wrap">«{r.quote.replace(/\s{2,}/g, '   ')}»</span>}
-                      {r.changes.map((c, i) => (
-                        <span key={i} className="text-[13px]">
-                          <span className="text-muted">{c.label}: </span>
-                          <span className="font-mono text-[12.5px]">
-                            {c.before} → {c.after}
+    <section className="flex flex-col gap-2" aria-label={t('History of this line')}>
+      <Disclosure label={t('History of this line')} summary={summary}>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px] border-collapse">
+            <thead>
+              <tr>
+                <Th className="w-[150px]">{t('When')}</Th>
+                <Th className="w-[140px]">{t('Who')}</Th>
+                <Th>{t('What')}</Th>
+                <Th className="w-[110px] text-right">
+                  <span className="sr-only">{t('Undo')}</span>
+                </Th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => {
+                const e = r.entry
+                const isUndone = !!e?.undone
+                const canUndo = !!e && e.undoable !== false && !isUndone && e.action !== 'undo'
+                const blocked = canUndo && undoBlocked(e!, log)
+                return (
+                  <tr key={r.id}>
+                    <Td className="py-2 font-mono text-[12.5px] text-muted whitespace-nowrap">{r.at ? fmtDateTime(r.at) : '–'}</Td>
+                    <Td className="py-2">{r.who}</Td>
+                    <Td className="py-2">
+                      <div className={cx('flex flex-col gap-0.5', isUndone && 'text-muted')}>
+                        <span className={cx(isUndone && 'line-through')}>{r.text}</span>
+                        {r.detail && <span className="text-[13px] text-muted">{r.detail}</span>}
+                        {r.quote && <span className="self-start px-1.5 bg-hl font-mono text-[12px] whitespace-pre-wrap">«{r.quote.replace(/\s{2,}/g, '   ')}»</span>}
+                        {r.changes.map((c, i) => (
+                          <span key={i} className="text-[13px]">
+                            <span className="text-muted">{c.label}: </span>
+                            <span className="font-mono text-[12.5px]">
+                              {c.before} → {c.after}
+                            </span>
                           </span>
-                        </span>
-                      ))}
-                      {e?.batch && canUndo && <span className="text-[12.5px] text-faint">{t('Made together with other changes; Undo reverts them all.')}</span>}
-                    </div>
-                  </Td>
-                  <Td className="py-2 text-right">
-                    {isUndone ? (
-                      <span className="text-[13px] text-muted">{t('Undone')}</span>
-                    ) : canUndo ? (
-                      blocked ? (
-                        <span className="text-[12.5px] text-faint">{t('Changed again later')}</span>
-                      ) : (
-                        <Button size="xs" disabled={undo.isPending} onClick={() => doUndo(e!)}>
-                          {t('Undo')}
-                        </Button>
-                      )
-                    ) : null}
-                  </Td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-      {loading && <span className="text-[13px] text-muted">{t('Loading')}</span>}
-      {!loading && log.length === 0 && <span className="text-[13px] text-muted">{t('No changes since the tender was read.')}</span>}
+                        ))}
+                        {e?.batch && canUndo && <span className="text-[12.5px] text-faint">{t('Made together with other changes; Undo reverts them all.')}</span>}
+                      </div>
+                    </Td>
+                    <Td className="py-2 text-right">
+                      {isUndone ? (
+                        <span className="text-[13px] text-muted">{t('Undone')}</span>
+                      ) : canUndo ? (
+                        blocked ? (
+                          <span className="text-[12.5px] text-faint">{t('Changed again later')}</span>
+                        ) : (
+                          <Button size="xs" disabled={undo.isPending} onClick={() => doUndo(e!)}>
+                            {t('Undo')}
+                          </Button>
+                        )
+                      ) : null}
+                    </Td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Disclosure>
       {err && (
         <span role="alert" className="text-attn">
           {t('Could not undo.')} {err}

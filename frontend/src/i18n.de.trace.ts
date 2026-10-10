@@ -136,4 +136,16 @@ export const DE_TRACE: Record<string, string> = {
   'Quote confirmed': 'Offerte bestätigt',
   'this line': 'diese Position',
   'Open line {lv}': 'Position {lv} öffnen',
+  // decluttered line detail: breakdown popover, verified mark, tender rules, supplier box, history summary
+  'How the labour cost is calculated': 'Wie der Lohn berechnet wird',
+  'Tender rules for this line': 'Vorgaben der Ausschreibung zu dieser Position',
+  'Equans example {v}': 'Equans-Beispiel {v}',
+  'Equans total': 'Total Equans',
+  'Our total': 'Unser Total',
+  'Type the quoted unit price when the supplier answers.': 'Tragen Sie den offerierten Einheitspreis ein, sobald der Lieferant antwortet.',
+  'One request covers {n} lines': 'Eine Anfrage deckt {n} Positionen ab',
+  '1 event': '1 Eintrag',
+  '{n} events': '{n} Einträge',
+  'last change: {c}': 'letzte Änderung: {c}',
+  'no changes': 'keine Änderungen',
 }

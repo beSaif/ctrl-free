@@ -8,7 +8,7 @@ import { getApiMode } from '../api/client'
 import type { CatalogRow, LogEntry, Position, PositionPrice, PricingResponse, QuoteGroup, ReferenceResponse, RuleRow } from '../api/types'
 import { Source, SrcChange, SrcFoot, SrcRows, SrcStep } from '../components/Source'
 import { fmt2, fmtDateTime, fmtNum, fmtQty, fmtShortDate, fmtSigned, fmtUnit } from '../lib/format'
-import { factorLabel, roleLabel } from '../lib/lines'
+import { factorLabel, hoursSentence, labourSentence, roleLabel } from '../lib/lines'
 import { lastChange, rec, whoLabel } from '../lib/trace'
 
 export interface Trace {
@@ -243,6 +243,17 @@ function installCodeOf(p: Position): string | null {
   return pr?.install_code ?? p.overrides?.install_code ?? p.product?.install_code ?? p.match?.install_code ?? null
 }
 
+/** The hours arithmetic, one factor at a time. */
+function hoursSteps(p: Position, pr: PositionPrice, t: T): string[] {
+  let h = pr.quantity * pr.base_hours_per_unit
+  const steps = [`${fmtQty(pr.quantity)} ${fmtUnit(p.unit)} × ${fmt2(pr.base_hours_per_unit)} h = ${fmt2(h)} h`]
+  for (const f of pr.factors) {
+    h = f.op === '÷' ? h / f.value : h * f.value
+    steps.push(`${f.op} ${f.value.toFixed(2)} ${factorLabel(f.key, t)} = ${fmt2(h)} h`)
+  }
+  return steps
+}
+
 export function HoursSource({ p, trace, label, color, hourly }: { p: Position; trace: Trace; label: ReactNode; color: string; hourly: boolean }) {
   const t = useT()
   const lang = useLang()
@@ -256,16 +267,7 @@ export function HoursSource({ p, trace, label, color, hourly }: { p: Position; t
   const keys = rule ? (Array.isArray(rule.factor_keys) ? rule.factor_keys : String(rule.factor_keys || '').split('|').filter(Boolean)) : []
   const ruleChange = p.overrides?.install_code ? lastChange(trace.log, 'overrides.install_code') : undefined
 
-  // the arithmetic, one factor at a time
-  const steps: string[] = []
-  if (pr && !hourly) {
-    let h = pr.quantity * pr.base_hours_per_unit
-    steps.push(`${fmtQty(pr.quantity)} ${fmtUnit(p.unit)} × ${fmt2(pr.base_hours_per_unit)} h = ${fmt2(h)} h`)
-    for (const f of pr.factors) {
-      h = f.op === '÷' ? h / f.value : h * f.value
-      steps.push(`${f.op} ${f.value.toFixed(2)} ${factorLabel(f.key, t)} = ${fmt2(h)} h`)
-    }
-  }
+  const steps = pr && !hourly ? hoursSteps(p, pr, t) : []
 
   return (
     <Source label={label} color={color} title={t('Where the hours come from')} width={480}>
@@ -372,6 +374,45 @@ export function RateSource({ p, trace, label, hourly }: { p: Position; trace: Tr
       <span className="font-mono text-[12.5px]">
         {fmt2(pr.hours)} h × CHF {fmtNum(pr.rate, 0)}/h = CHF {fmt2(pr.labour)}
       </span>
+      <SrcFoot>
+        <span>{fileLabel(trace.ref, 'rules')}</span>
+        {code && <RefLink to={`/reference?tab=rules&code=${encodeURIComponent(code)}`}>{t('Open the rule in Reference data')}</RefLink>}
+      </SrcFoot>
+    </Source>
+  )
+}
+
+// ---- labour cost (the breakdown's Labour row) --------------------------------------------
+
+export function LabourSource({ p, trace, label, hourly, note }: { p: Position; trace: Trace; label: ReactNode; hourly: boolean; note?: ReactNode }) {
+  const t = useT()
+  const fileLabel = useFileLabel()
+  const pr = p.pricing
+  if (!pr) return <>{label}</>
+  const typed = p.overrides?.hours != null
+  const code = hourly ? trace.ref?.rules.find((r) => r.labour_role === pr.role)?.install_code : installCodeOf(p)
+  return (
+    <Source label={label} color="inherit" className="" title={t('How the labour cost is calculated')} width={480}>
+      <SrcStep title={t('Hours')}>
+        <div className="flex flex-col font-mono text-[12.5px]">
+          {hourly && !typed ? (
+            <span>{t('{h} h from the tender (hourly work)', { h: fmtQty(pr.quantity) })}</span>
+          ) : typed ? (
+            <span>{hoursSentence(pr, p.unit, t, true)}</span>
+          ) : (
+            hoursSteps(p, pr, t).map((s, i) => <span key={i}>{s}</span>)
+          )}
+        </div>
+        {note}
+        {pr.factors.length > 0 && !typed && !hourly && (
+          <span className="text-muted">
+            {t('Hours include the site factors from')} <Link to={`/t/${trace.tenderId}/pricing/costs#site-factors`}>{t('Pricing')}</Link>.
+          </span>
+        )}
+      </SrcStep>
+      <SrcStep title={t('Labour')}>
+        <span className="font-mono text-[12.5px]">{labourSentence(pr, t, hourly)}</span>
+      </SrcStep>
       <SrcFoot>
         <span>{fileLabel(trace.ref, 'rules')}</span>
         {code && <RefLink to={`/reference?tab=rules&code=${encodeURIComponent(code)}`}>{t('Open the rule in Reference data')}</RefLink>}

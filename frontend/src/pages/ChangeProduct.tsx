@@ -67,16 +67,11 @@ export function ChangeProduct() {
   const reasonOnly = unchanged && isVariant && reason.trim() !== (p.variant_reason ?? '')
   const differs = (chosenCmp?.rows ?? []).filter((r) => r.verdict === 'differs')
   const sysName = p.system.replace(/^\d+(\.\d+)*\s+/, '')
+  // under the crop only when the make limits the choice; an example make or none needs no sentence
+  // (the "Tender asks · We offer" summary says "(example make)")
   const makeCaption =
-    ex.makeRule && ex.makeRule.kind !== 'none'
-      ? ex.makeRule.kind === 'example'
-        ? t('The tender names {make} as an example ("{w}"). An equivalent product from another make is fine.', {
-            make: [ex.makeRule.make, ex.makeRule.model].filter(Boolean).join(' '),
-            w: ex.makeRule.wording ?? 'z.B.',
-          })
-        : ex.makeRule.kind === 'prescribed'
-          ? t('The tender prescribes {make}. Another make is a variant and needs a reason.', { make: [ex.makeRule.make, ex.makeRule.model].filter(Boolean).join(' ') })
-          : t('The tender leaves the make for you to fill in: any product that meets the description.')
+    ex.makeRule?.kind === 'prescribed'
+      ? t('The tender prescribes {make}. Another make is a variant and needs a reason.', { make: [ex.makeRule.make, ex.makeRule.model].filter(Boolean).join(' ') })
       : null
 
   const use = async () => {
@@ -96,8 +91,6 @@ export function ChangeProduct() {
           <IconBack />
           {t('Back to the line')}
         </LinkButton>
-        <span className="flex-auto" />
-        <span className="text-[13px] text-muted">{t('Change product for one line')}</span>
       </div>
 
       <main className="flex-auto flex justify-center px-6 pt-7 pb-12">
@@ -113,24 +106,19 @@ export function ChangeProduct() {
           </div>
 
           <div className="flex flex-wrap items-start gap-x-10 gap-y-7">
-            <div className="flex-[1_1_400px] min-w-0">
+            <div className="flex-[1_1_360px] min-w-0">
               {p.source && (
                 <PdfCrop
                   tenderId={id}
                   source={p.source}
                   pageCount={tender?.page_count}
-                  caption={
-                    makeCaption ??
-                    (p.make_hint
-                      ? t('The tender names a make as an example ("z.B"). Another make is allowed as a variant with a reason.')
-                      : t('The tender names no make. Pick the product that fits the text.'))
-                  }
+                  caption={makeCaption ?? undefined}
                 />
               )}
             </div>
 
             <section className="flex-[1_1_560px] min-w-0 flex flex-col gap-3.5">
-              <fieldset className="m-0 p-0 border-0">
+              <fieldset className="m-0 p-0 border-0 min-w-0">
                 <legend className="pb-2 font-semibold text-[15px]">
                   {searching && dq ? t('Products matching “{q}”', { q: dq }) : t('The {n} closest products in the catalogue', { n: (base.data ?? []).length || 5 })}
                 </legend>
@@ -138,7 +126,7 @@ export function ChangeProduct() {
                   <SearchBox value={q} onChange={setQ} label={t('Search all products')} placeholder={t('Search by name, size or product id')} className="mb-2 max-w-[420px]" />
                 )}
                 <div className="overflow-x-auto">
-                  <div className="min-w-[640px]" role="radiogroup" aria-label={t('Products')}>
+                  <div className="min-w-[600px]" role="radiogroup" aria-label={t('Products')}>
                     <div className={cx(GRID, 'py-1.5 border-b border-ink text-[13px] text-muted font-medium')}>
                       <span />
                       <span>{t('Product')}</span>
@@ -169,7 +157,7 @@ export function ChangeProduct() {
                               {c.description ?? c.product_id}
                               {c.product_id === suggestedId && <span className="text-accent text-[12.5px] font-normal">{'  · ' + t(tag === 'learned' ? 'learned from you' : 'suggested match')}</span>}
                               {tag === 'rules_pick' && <span className="text-muted text-[12.5px] font-normal">{'  · ' + t('code’s own pick')}</span>}
-                              {c.supplier_quote_required && <span className="text-attn text-[12.5px] font-normal">{'  · ' + t('budget price')}</span>}
+                              {c.supplier_quote_required && <span className="text-muted text-[12.5px] font-normal">{'  · ' + t('budget price')}</span>}
                             </span>
                             <span className="font-mono text-[12.5px] text-muted">
                               {c.product_id}
@@ -211,7 +199,7 @@ export function ChangeProduct() {
                   key={chosen.product_id}
                   cmp={chosenCmp}
                   rule={ex.makeRule ? { ...ex.makeRule, product_manufacturer: chosen.manufacturer ?? null, manufacturer_differs: chosenCmp.rows.some((r) => r.key === 'make' && r.verdict !== 'same'), variant_needed: chosenCmp.rows.some((r) => r.key === 'make' && r.verdict === 'differs') } : null}
-                  defaultOpen
+                  defaultOpen={false}
                   title={t('Tender asks · We offer with {p}', { p: chosen.product_id })}
                 />
               )}
