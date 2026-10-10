@@ -1,17 +1,21 @@
 // Changes: the review trail for the senior. Who did what (AI, Assist, each person), before → after,
 // the CHF impact, and Approve / Revert / Comment. Only a senior approves; others see the status.
+// AI picks of the same product, confidence and method collapse into one row with "Approve all";
+// expanding it lists the lines, each with its own actions. People's changes are never grouped.
 import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { useLang, useT, type T } from '../i18n'
+import { plural, useLang, useT, type T } from '../i18n'
 import { useChanges, useReviewChanges } from '../api/hooks'
 import type { ChangeEntry, ChangeField, ChangeLine, ChangeType, ChangesResponse, ReviewVerdict } from '../api/types'
-import { AssistMark, Button, ErrorBox, FilterTabs, Loading, TextInput, Toggle, UnderlineTabs } from '../components/ui'
+import { AssistMark, Button, ErrorBox, FilterTabs, IconChevron, Loading, TextInput, Toggle, UnderlineTabs } from '../components/ui'
+import { Source } from '../components/Source'
 import { cx } from '../lib/cx'
 import { C } from '../lib/lines'
 import { fmt2, fmtDateTime, fmtNum, fmtQty, fmtSigned, fmtUnit, isNum } from '../lib/format'
 
 type StateTab = 'to_review' | 'approved' | 'reverted' | 'all'
 type View = 'line' | 'time'
+type OnReview = (ids: string[], verdict: ReviewVerdict, note?: string) => void
 
 const TYPES: { key: ChangeType; label: string }[] = [
   { key: 'product', label: 'Product' },
@@ -55,6 +59,7 @@ export function Changes() {
         (tab === 'all' || e.state === tab),
     )
   }, [data, actor, type, lowOnly, tab])
+  const list = useMemo(() => (data ? items(filtered, view) : []), [data, filtered, view])
 
   if (isLoading) return <Loading label={t('Loading')} />
   if (error || !data) return <ErrorBox error={error} label={t('Could not load the changes.')} />
@@ -62,8 +67,9 @@ export function Changes() {
   const s = data.summary
   const me = data.me
   const pending = filtered.filter((e) => e.state === 'to_review')
-  const act = (logIds: string[], verdict: ReviewVerdict, note?: string) => review.mutate({ logIds, verdict, note })
+  const act: OnReview = (logIds, verdict, note) => review.mutate({ logIds, verdict, note })
   const inState = (st: StateTab) => data.entries.filter((e) => (st === 'all' || e.state === st) && (!actor || e.by === actor)).length
+  const rowProps = { tenderId: id, canReview: me.can_review, busy: review.isPending, onReview: act }
 
   return (
     <div className="flex-auto flex flex-col">
@@ -110,24 +116,27 @@ export function Changes() {
       </div>
 
       <main className="flex-auto px-6 pt-6 pb-10 flex flex-col gap-5">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="flex flex-col gap-1 max-w-[760px]">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          <div className="flex items-baseline gap-3">
             <h1 className="m-0 text-[24px] leading-[1.25] font-semibold">{t('Who did what')}</h1>
-            <span className="text-muted">
-              {t('The AI read the tender and picked the products, people adjusted lines and prices. Every change is listed with before and after, its effect in CHF and who made it.')}{' '}
-              {me.can_review
-                ? t('As senior you approve or revert each one.')
-                : t('Only a senior estimator approves changes; you see their status here.')}
-            </span>
+            <Source label={t('How review works')} title={t('How review works')} width={380}>
+              <p className="m-0">
+                {t('The AI read the tender and picked the products, people adjusted lines and prices. Every change is listed with before and after, its effect in CHF and who made it.')}
+              </p>
+              {/* a non-senior sees the "only a senior approves" line on the page instead */}
+              {me.can_review && <p className="m-0">{t('As senior you approve or revert each one.')}</p>}
+              <p className="m-0 text-muted">{t('AI picks of the same product with the same confidence are shown as one row; open it to see and review each line.')}</p>
+            </Source>
           </div>
+          <Summary data={data} onActor={(by) => set('by', by === actor ? '' : by)} actor={actor} />
+          <span className="flex-auto" />
           {me.can_review && pending.length > 0 && (
             <Button variant="primary" disabled={review.isPending} onClick={() => act(pending.map((e) => e.id), 'approved')}>
               {pending.length === 1 ? t('Approve 1 shown change') : t('Approve all {n} shown', { n: pending.length })}
             </Button>
           )}
         </div>
-
-        <Summary data={data} onActor={(by) => set('by', by === actor ? '' : by)} actor={actor} />
+        {!me.can_review && <p className="m-0 -mt-3 text-[13.5px] text-muted">{t('Only a senior estimator approves changes; you see their status here.')}</p>}
 
         {review.error && (
           <p role="alert" className="m-0 text-attn">
@@ -143,21 +152,23 @@ export function Changes() {
               <span className="text-right">{t('Effect')}</span>
               <span>{t('Review')}</span>
             </div>
-            {filtered.length === 0 ? (
+            {list.length === 0 ? (
               <div className="py-8 text-muted">{tab === 'to_review' ? t('Nothing waiting for review.') : t('Nothing in this tab.')}</div>
-            ) : view === 'line' ? (
-              groups(filtered, data.lines).map((g) => (
-                <Fragment key={g.key}>
-                  <GroupHead g={g} tenderId={id} />
-                  {g.entries.map((e) => (
-                    <Row key={e.id} e={e} tenderId={id} canReview={me.can_review} busy={review.isPending} onReview={act} />
-                  ))}
-                </Fragment>
-              ))
             ) : (
-              filtered.map((e) => (
-                <Row key={e.id} e={e} line={e.lv_id ? data.lines[e.lv_id] : undefined} tenderId={id} canReview={me.can_review} busy={review.isPending} onReview={act} />
-              ))
+              list.map((it) =>
+                it.kind === 'ai' ? (
+                  <AiGroup key={it.key} entries={it.entries} lines={data.lines} {...rowProps} />
+                ) : it.kind === 'line' ? (
+                  <Fragment key={it.key}>
+                    <GroupHead line={it.lv_id ? data.lines[it.lv_id] : undefined} tenderId={id} />
+                    {it.entries.map((e) => (
+                      <Row key={e.id} e={e} {...rowProps} />
+                    ))}
+                  </Fragment>
+                ) : (
+                  <Row key={it.key} e={it.e} line={it.e.lv_id ? data.lines[it.e.lv_id] : undefined} {...rowProps} />
+                ),
+              )
             )}
           </div>
         </section>
@@ -168,90 +179,97 @@ export function Changes() {
 
 // ---------------------------------------------------------------- summary
 
+/** One chip per person (and the AI): a filter, with the counts; the full split is in the tooltip. */
 function Summary({ data, actor, onActor }: { data: ChangesResponse; actor: string; onActor: (by: string) => void }) {
   const t = useT()
   const s = data.summary
+  if (s.by_actor.length === 0) return <span className="text-muted">{t('No changes yet.')}</span>
   return (
-    <div className="flex flex-wrap gap-x-10 gap-y-4">
-      <div className="flex flex-col gap-1.5">
-        <h2 className="m-0 text-[13px] font-medium text-muted">{t('By who')}</h2>
-        <div className="flex flex-wrap gap-1.5">
-          {s.by_actor.map((a) => (
-            <button
-              key={a.by}
-              type="button"
-              aria-pressed={actor === a.by}
-              onClick={() => onActor(a.by)}
-              className={cx(
-                'min-h-[52px] px-3.5 py-1.5 border rounded-[2px] flex flex-col items-start justify-center gap-px text-left',
-                actor === a.by ? 'bg-ink border-ink text-white' : 'bg-white border-rule text-ink hover:border-ink',
-              )}
-            >
-              <span className="font-medium inline-flex items-center gap-1.5">
-                <WhoMark by={a.by} />
-                {whoName(a.by, t)}
-              </span>
-              <span className="text-[12.5px] font-mono">
-                {a.by === 'AI' ? t('{n} decisions', { n: a.total }) : a.total === 1 ? t('1 change') : t('{n} changes', { n: a.total })}
-                {a.to_review > 0 && <> · {t('{n} to review', { n: a.to_review })}</>}
-              </span>
-            </button>
-          ))}
-          {s.by_actor.length === 0 && <span className="text-muted">{t('No changes yet.')}</span>}
-        </div>
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <h2 className="m-0 text-[13px] font-medium text-muted">{t('Changes by people and Assist')}</h2>
-        <div className="grid grid-cols-[auto_auto] gap-x-4 gap-y-0.5">
-          <span className="text-attn">{t('To review')}</span>
-          <span className="font-mono text-right text-attn">{s.to_review}</span>
-          <span>{t('Approved')}</span>
-          <span className="font-mono text-right">{s.approved}</span>
-          <span className="text-muted">{t('Reverted')}</span>
-          <span className="font-mono text-right text-muted">{s.reverted}</span>
-        </div>
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <h2 className="m-0 text-[13px] font-medium text-muted">{t('AI decisions')}</h2>
-        <div className="grid grid-cols-[auto_auto] gap-x-4 gap-y-0.5">
-          <span className={cx(s.ai_to_review > 0 && 'text-attn')}>{t('Low confidence, to review')}</span>
-          <span className={cx('font-mono text-right', s.ai_to_review > 0 && 'text-attn')}>{s.ai_to_review}</span>
-          <span>{t('Approved')}</span>
-          <span className="font-mono text-right">{s.ai_approved}</span>
-          <span className="text-muted">{t('Confident, no review needed')}</span>
-          <span className="font-mono text-right text-muted">{s.ai - s.ai_to_review - s.ai_approved}</span>
-        </div>
-      </div>
+    <div role="group" aria-label={t('By who')} className="flex flex-wrap gap-1.5">
+      {s.by_actor.map((a) => {
+        const on = actor === a.by
+        const tip =
+          a.by === 'AI'
+            ? t('{n} AI decisions: {r} to review, {a} approved, {c} confident with no review needed', {
+                n: a.total,
+                r: a.to_review,
+                a: s.ai_approved,
+                c: s.ai - s.ai_to_review - s.ai_approved,
+              })
+            : t('{n} changes: {r} to review, {a} approved, {v} reverted', { n: a.total, r: a.to_review, a: a.approved, v: a.reverted })
+        return (
+          <button
+            key={a.by}
+            type="button"
+            aria-pressed={on}
+            title={tip}
+            onClick={() => onActor(a.by)}
+            className={cx(
+              'min-h-[34px] px-3 border rounded-[2px] inline-flex items-center gap-2 text-left',
+              on ? 'bg-ink border-ink text-white' : 'bg-white border-rule text-ink hover:border-ink',
+            )}
+          >
+            <WhoMark by={a.by} />
+            <span className="font-medium">{whoName(a.by, t)}</span>
+            <span className="font-mono text-[12.5px]">{a.total}</span>
+            {a.to_review > 0 && (
+              <span className={cx('text-[12.5px]', !on && data.me.can_review && 'text-attn')}>· {t('{n} to review', { n: a.to_review })}</span>
+            )}
+          </button>
+        )
+      })}
     </div>
   )
 }
 
 // ---------------------------------------------------------------- grouping
 
-interface Group {
-  key: string
-  line?: ChangeLine
-  entries: ChangeEntry[]
+type Item =
+  | { kind: 'line'; key: string; sort: string; lv_id?: string | null; entries: ChangeEntry[] }
+  | { kind: 'one'; key: string; sort: string; e: ChangeEntry }
+  | { kind: 'ai'; key: string; sort: string; entries: ChangeEntry[] }
+
+/** AI picks that read the same: same product, confidence band, method and review state (and approver, so the group's label holds). */
+function pickKey(e: ChangeEntry): string {
+  const prod = e.fields.find((f) => f.path === 'match.product_id')?.after ?? ''
+  const okBy = e.state === 'approved' ? ([...e.reviews].reverse().find((r) => r.verdict === 'approved')?.by ?? '') : ''
+  return [e.state, okBy, prod, e.ai?.label ?? '', Math.round((e.ai?.confidence ?? 0) * 100), e.ai?.method ?? ''].join('|')
 }
 
-function groups(entries: ChangeEntry[], lines: Record<string, ChangeLine>): Group[] {
-  const by = new Map<string, Group>()
+function items(entries: ChangeEntry[], view: View): Item[] {
+  const out: Item[] = []
+  const ai = new Map<string, ChangeEntry[]>()
+  const byLine = new Map<string, Item & { kind: 'line' }>()
   for (const e of entries) {
-    const key = e.lv_id ?? '~tender'
-    if (!by.has(key)) by.set(key, { key, line: e.lv_id ? lines[e.lv_id] : undefined, entries: [] })
-    by.get(key)!.entries.push(e)
+    if (e.by === 'AI') {
+      const k = pickKey(e)
+      if (!ai.has(k)) ai.set(k, [])
+      ai.get(k)!.push(e)
+    } else if (view === 'time') {
+      out.push({ kind: 'one', key: e.id, sort: e.at, e })
+    } else {
+      // tender-wide changes (pricing, instructions, quotes) sort last
+      const k = e.lv_id ?? '~tender'
+      if (!byLine.has(k)) byLine.set(k, { kind: 'line', key: k, sort: k + ' 0', lv_id: e.lv_id, entries: [] })
+      byLine.get(k)!.entries.push(e)
+    }
   }
-  // lines in document order, tender-wide changes (pricing, instructions, quotes) last
-  return [...by.values()].sort((a, b) => a.key.localeCompare(b.key))
+  out.push(...byLine.values())
+  for (const [k, es] of ai) {
+    es.sort((a, b) => (a.lv_id ?? '').localeCompare(b.lv_id ?? ''))
+    const sort = view === 'time' ? es.reduce((m, e) => (e.at > m ? e.at : m), '') : (es[0].lv_id ?? '~') + ' 1'
+    out.push({ kind: 'ai', key: 'ai|' + k, sort, entries: es })
+  }
+  // By line: document order; Newest first: newest on top (a group sits at its newest entry)
+  return out.sort((a, b) => (view === 'time' ? b.sort.localeCompare(a.sort) : a.sort.localeCompare(b.sort)))
 }
 
-function GroupHead({ g, tenderId }: { g: Group; tenderId: string }) {
+function GroupHead({ line: l, tenderId }: { line?: ChangeLine; tenderId: string }) {
   const t = useT()
   const lang = useLang()
-  if (!g.line) {
+  if (!l) {
     return <div className="pt-5 pb-1.5 border-b border-rule font-semibold">{t('Whole tender: pricing, instructions and supplier requests')}</div>
   }
-  const l = g.line
   return (
     <div className="flex flex-wrap items-baseline gap-x-3 pt-5 pb-1.5 border-b border-rule">
       <Link to={`/t/${tenderId}/lines/${l.lv_id}?f=all`} className="font-mono font-semibold">
@@ -267,11 +285,82 @@ function GroupHead({ g, tenderId }: { g: Group; tenderId: string }) {
   )
 }
 
+// ---------------------------------------------------------------- AI picks, grouped
+
+function AiGroup({
+  entries: es,
+  lines,
+  tenderId,
+  canReview,
+  busy,
+  onReview,
+}: {
+  entries: ChangeEntry[]
+  lines: Record<string, ChangeLine>
+  tenderId: string
+  canReview: boolean
+  busy: boolean
+  onReview: OnReview
+}) {
+  const t = useT()
+  const [open, setOpen] = useState(false)
+  const lineOf = (e: ChangeEntry) => (e.lv_id ? lines[e.lv_id] : undefined)
+  const rowProps = { tenderId, canReview, busy, onReview }
+  if (es.length === 1) return <Row e={es[0]} line={lineOf(es[0])} {...rowProps} />
+  const head = es[0]
+  const ids = es.map((e) => e.id)
+  const total = es.reduce((sum, e) => sum + (isNum(e.impact?.value) ? e.impact!.value : 0), 0)
+  const reopenable = head.state === 'approved' && es.every((e) => !e.state_why)
+  const lvIds = es.map((e) => e.lv_id).filter(Boolean)
+  return (
+    <>
+      <div className={cx(GRID, 'py-3 border-b border-rowrule items-start')}>
+        <Who e={head} />
+        <div className="flex flex-col gap-1 min-w-0">
+          <Pick e={head} />
+          <button
+            type="button"
+            aria-expanded={open}
+            onClick={() => setOpen(!open)}
+            className="self-start max-w-full inline-flex items-center gap-2 min-h-7 p-0 border-0 bg-transparent text-left text-[13.5px] text-ink hover:text-accent"
+          >
+            <IconChevron open={open} />
+            <span className="font-medium whitespace-nowrap">{plural(t, es.length, '{n} line', '{n} lines')}</span>
+            <span className="min-w-0 truncate font-mono text-[12.5px] text-muted">
+              {lvIds.slice(0, 6).join(', ')}
+              {lvIds.length > 6 && ' …'}
+            </span>
+          </button>
+        </div>
+        <span className="flex flex-col items-end">
+          <span className="font-mono">{fmt2(total)}</span>
+          <span className="text-[12px] text-muted">{t('lines total')}</span>
+        </span>
+        <div className="flex flex-col gap-1.5 items-start">
+          <StateLabel e={head} />
+          {canReview && head.state === 'to_review' && (
+            <Button size="xs" disabled={busy} onClick={() => onReview(ids, 'approved')}>
+              {t('Approve all {n}', { n: es.length })}
+            </Button>
+          )}
+          {canReview && reopenable && (
+            <Button size="xs" variant="quiet" disabled={busy} onClick={() => onReview(ids, 'reopened')}>
+              {t('Reopen all {n}', { n: es.length })}
+            </Button>
+          )}
+        </div>
+      </div>
+      {open && es.map((e) => <Row key={e.id} e={e} line={lineOf(e)} sub {...rowProps} />)}
+    </>
+  )
+}
+
 // ---------------------------------------------------------------- one change
 
 function Row({
   e,
   line,
+  sub,
   tenderId,
   canReview,
   busy,
@@ -279,43 +368,54 @@ function Row({
 }: {
   e: ChangeEntry
   line?: ChangeLine
+  /** one line inside an opened AI group: the group row already says who, what and the state */
+  sub?: boolean
   tenderId: string
   canReview: boolean
   busy: boolean
-  onReview: (ids: string[], verdict: ReviewVerdict, note?: string) => void
+  onReview: OnReview
 }) {
   const t = useT()
   const lang = useLang()
   const [mode, setMode] = useState<'' | 'comment' | 'revert'>('')
   const [note, setNote] = useState('')
   const comments = e.reviews.filter((r) => r.note)
+  const isAi = e.by === 'AI'
+  const lineHref = line && `/t/${tenderId}/lines/${line.lv_id}?f=all`
+  const title = line && ((lang === 'en' ? line.title_en : null) || line.title_de)
   const send = (verdict: ReviewVerdict) => {
     onReview([e.id], verdict, note || undefined)
     setMode('')
     setNote('')
   }
   return (
-    <div className={cx(GRID, 'py-3 border-b border-rowrule items-start')}>
-      <div className="flex flex-col gap-0.5 min-w-0">
-        <span className="font-medium inline-flex items-center gap-1.5">
-          <WhoMark by={e.by} />
-          {e.by === 'AI' ? t('AI') : whoName(e.by, t)}
-        </span>
-        <span className="text-[12.5px] text-muted">
-          {e.by === 'AI' ? t('Read and matched') : e.by === 'Assist' ? t('Assist') : e.role === 'senior' ? t('Senior') : e.role === 'junior' ? t('Junior') : ''}
-          {e.approved_by && <> · {t('OK by {who}', { who: e.approved_by })}</>}
-        </span>
-        <span className="font-mono text-[12.5px] text-muted">{fmtDateTime(e.at)}</span>
-      </div>
+    <div className={cx(GRID, 'border-b border-rowrule items-start', sub ? 'py-2 bg-panel' : 'py-3')}>
+      {sub && line ? (
+        <Link to={lineHref!} className="pl-5 font-mono text-[13.5px]">
+          {line.lv_id}
+        </Link>
+      ) : (
+        <Who e={e} />
+      )}
 
       <div className="flex flex-col gap-1 min-w-0">
-        {line && (
-          <Link to={`/t/${tenderId}/lines/${line.lv_id}?f=all`} className="text-[13px] min-w-0 truncate">
-            <span className="font-mono">{line.lv_id}</span> {(lang === 'en' ? line.title_en : null) || line.title_de}
-          </Link>
+        {isAi && !sub && <Pick e={e} />}
+        {/* a confident pick needs nobody: its reason is a tooltip on the line link */}
+        {sub ? (
+          <span className="text-[13.5px] min-w-0">
+            {title} {isAi && <ReadFrom e={e} />}
+          </span>
+        ) : (
+          line && (
+            <span className="text-[13px] min-w-0 truncate">
+              <Link to={lineHref!} title={isAi && e.state === 'auto' ? (e.text ?? undefined) : undefined}>
+                <span className="font-mono">{line.lv_id}</span> {title}
+              </Link>{' '}
+              {isAi && <ReadFrom e={e} />}
+            </span>
+          )
         )}
-        {e.by === 'AI' ? <AiWhat e={e} /> : <Fields e={e} />}
-        {e.text && e.by === 'AI' && <span className="text-[13px] text-muted">{e.text}</span>}
+        {isAi ? <AiWhy e={e} quiet={!sub && e.state === 'auto'} /> : <Fields e={e} />}
         {e.instruction && (
           <Link to={`/t/${tenderId}/instructions/${e.instruction.id}`} className="text-[13px]">
             {e.instruction.type} · {t('p. {page}', { page: e.instruction.page })}
@@ -353,7 +453,7 @@ function Row({
       <Impact e={e} />
 
       <div className="flex flex-col gap-1.5 items-start">
-        <StateLabel e={e} />
+        {!sub && <StateLabel e={e} />}
         {mode === 'revert' ? (
           <span className="flex flex-wrap items-center gap-1.5">
             <span className="text-[13px]">{e.batch ? t('Revert the whole Assist batch?') : t('Revert this change?')}</span>
@@ -367,7 +467,8 @@ function Row({
         ) : (
           <span className="flex flex-wrap gap-1.5">
             {canReview && e.state === 'to_review' && (
-              <Button size="xs" variant="primary" disabled={busy} onClick={() => send('approved')}>
+              // the one primary button is "Approve all shown" at the top
+              <Button size="xs" disabled={busy} onClick={() => send('approved')}>
                 {t('Approve')}
               </Button>
             )}
@@ -381,7 +482,7 @@ function Row({
                 {t('Revert')}
               </Button>
             )}
-            {e.by === 'AI' && e.lv_id && canReview && e.state !== 'auto' && (
+            {isAi && e.lv_id && canReview && e.state !== 'auto' && (
               <Link to={`/t/${tenderId}/lines/${e.lv_id}/product`} className="text-[13px] self-center">
                 {t('Change product')}
               </Link>
@@ -398,10 +499,40 @@ function Row({
   )
 }
 
+/** Who and when. The AI reads the whole tender at one time, so its time is a tooltip. */
+function Who({ e }: { e: ChangeEntry }) {
+  const t = useT()
+  if (e.by === 'AI') {
+    return (
+      <div className="flex flex-col gap-0.5 min-w-0" title={t('Read and matched') + ' · ' + fmtDateTime(e.at)}>
+        <span className="font-medium inline-flex items-center gap-1.5">
+          <WhoMark by="AI" />
+          {t('AI')}
+        </span>
+        {e.approved_by && <span className="text-[12.5px] text-muted">{t('OK by {who}', { who: e.approved_by })}</span>}
+      </div>
+    )
+  }
+  return (
+    <div className="flex flex-col gap-0.5 min-w-0">
+      <span className="font-medium inline-flex items-center gap-1.5">
+        <WhoMark by={e.by} />
+        {whoName(e.by, t)}
+      </span>
+      <span className="text-[12.5px] text-muted">
+        {e.by === 'Assist' ? t('Assist') : e.role === 'senior' ? t('Senior') : e.role === 'junior' ? t('Junior') : ''}
+        {e.approved_by && <> · {t('OK by {who}', { who: e.approved_by })}</>}
+      </span>
+      <span className="font-mono text-[12.5px] text-muted">{fmtDateTime(e.at)}</span>
+    </div>
+  )
+}
+
 function StateLabel({ e }: { e: ChangeEntry }) {
   const t = useT()
   const last = [...e.reviews].reverse().find((r) => r.verdict === 'approved')
   let label: ReactNode
+  let tip: string | undefined
   let color: string = C.muted
   if (e.state === 'reverted') {
     label = e.reverted ? t('Reverted · {who}', { who: e.reverted.by }) : t('Reverted')
@@ -416,13 +547,15 @@ function StateLabel({ e }: { e: ChangeEntry }) {
             ? t('Approved · {who}', { who: last.by })
             : t('Approved')
   } else if (e.state === 'auto') {
-    label = e.state_why === 'price_list' ? t('Follows the price list, no review needed') : t('Confident pick, no review needed')
+    // the default: short, the reason on hover
+    label = t('No review needed')
+    tip = e.state_why === 'price_list' ? t('Follows the price list, no review needed') : t('Confident pick, no review needed')
   } else {
     color = C.attn
     label = t('To review')
   }
   return (
-    <span className="inline-flex items-center gap-2 text-[13.5px]" style={{ color }}>
+    <span className="inline-flex items-center gap-2 text-[13.5px]" style={{ color }} title={tip}>
       <span className="flex-none w-2 h-2" style={{ background: color }} aria-hidden="true" />
       {label}
     </span>
@@ -450,36 +583,57 @@ function Impact({ e }: { e: ChangeEntry }) {
   )
 }
 
-function AiWhat({ e }: { e: ChangeEntry }) {
+/** "Picked P-CTL-001 Differential pressure transmitter · Close 75% · LLM" */
+function Pick({ e }: { e: ChangeEntry }) {
   const t = useT()
   const ai = e.ai
   const prod = e.fields.find((f) => f.path === 'match.product_id')
-  const qty = e.fields.find((f) => f.path === 'quantity')
   const label = ai?.label ? (t('match.' + ai.label) === 'match.' + ai.label ? ai.label : t('match.' + ai.label)) : null
   return (
-    <span className="flex flex-col gap-0.5">
-      <span>
-        {prod?.after ? (
-          <>
-            {t('Picked')} <span className="font-mono">{String(prod.after)}</span> {prod.after_label}
-          </>
-        ) : (
-          t('No catalogue product picked')
-        )}
-        {label && (
-          <span className={cx('ml-2 text-[13px]', ai?.low ? 'text-attn' : 'text-muted')}>
-            {label}
-            {isNum(ai?.confidence) && ai!.confidence! > 0 && <> {Math.round(ai!.confidence! * 100)}%</>} · {ai?.method === 'llm' ? t('LLM') : ai?.method === 'rules' ? t('Rules') : ai?.method}
-          </span>
-        )}
-      </span>
-      <span className="text-[13px] text-muted">
-        {isNum(qty?.after)
-          ? t('Read from the tender, p. {page}: {q} {u}', { page: ai?.page ?? '–', q: fmtQty(qty.after), u: fmtUnit(ai?.unit) })
-          : t('Read from the tender, p. {page}: no quantity', { page: ai?.page ?? '–' })}
-      </span>
-      {ai?.assumptions?.length ? <span className="text-[13px] text-muted">{t('Assumed: {a}', { a: ai.assumptions.join('; ') })}</span> : null}
+    <span>
+      {prod?.after ? (
+        <>
+          {t('Picked')} <span className="font-mono">{String(prod.after)}</span> {prod.after_label}
+        </>
+      ) : (
+        t('No catalogue product picked')
+      )}
+      {label && (
+        <span className="ml-2 text-[13px] text-muted">
+          {label}
+          {isNum(ai?.confidence) && ai!.confidence! > 0 && <> {Math.round(ai!.confidence! * 100)}%</>} · {ai?.method === 'llm' ? t('LLM') : ai?.method === 'rules' ? t('Rules') : ai?.method}
+        </span>
+      )}
     </span>
+  )
+}
+
+/** Where the AI read the line: "p. 82 · 2 pc", the full sentence on hover. */
+function ReadFrom({ e }: { e: ChangeEntry }) {
+  const t = useT()
+  const ai = e.ai
+  const qty = e.fields.find((f) => f.path === 'quantity')
+  const has = isNum(qty?.after)
+  const tip = has
+    ? t('Read from the tender, p. {page}: {q} {u}', { page: ai?.page ?? '–', q: fmtQty(qty!.after as number), u: fmtUnit(ai?.unit) })
+    : t('Read from the tender, p. {page}: no quantity', { page: ai?.page ?? '–' })
+  return (
+    <span className="text-[13px] text-muted font-mono whitespace-nowrap" title={tip}>
+      · {t('p. {page}', { page: ai?.page ?? '–' })} · {has ? `${fmtQty(qty!.after as number)} ${fmtUnit(ai?.unit)}` : <span className="font-sans">{t('no quantity')}</span>}
+    </span>
+  )
+}
+
+/** The AI's reason and any assumption, in muted text; `quiet` leaves the reason to the tooltip. */
+function AiWhy({ e, quiet }: { e: ChangeEntry; quiet?: boolean }) {
+  const t = useT()
+  const a = e.ai?.assumptions
+  if (!e.text && !a?.length) return null
+  return (
+    <>
+      {e.text && !quiet && <span className="text-[13px] text-muted">{e.text}</span>}
+      {a?.length ? <span className="text-[13px] text-muted">{t('Assumed: {a}', { a: a.join('; ') })}</span> : null}
+    </>
   )
 }
 

@@ -114,6 +114,17 @@ export const DE_CHANGES: Record<string, string> = {
   commissioning: 'Inbetriebnahme',
   hygiene: 'Hygiene',
   documentation: 'Dokumentation',
+  'How review works': 'So funktioniert die Prüfung',
+  'AI picks of the same product with the same confidence are shown as one row; open it to see and review each line.':
+    'KI-Wahlen mit gleichem Produkt und gleicher Sicherheit stehen in einer Zeile; öffnen Sie sie, um jede Position zu sehen und zu prüfen.',
+  '{n} AI decisions: {r} to review, {a} approved, {c} confident with no review needed':
+    '{n} KI-Entscheide: {r} zu prüfen, {a} freigegeben, {c} sicher, ohne Prüfung',
+  '{n} changes: {r} to review, {a} approved, {v} reverted': '{n} Änderungen: {r} zu prüfen, {a} freigegeben, {v} rückgängig gemacht',
+  'lines total': 'Positionsbeträge',
+  'Approve all {n}': 'Alle {n} freigeben',
+  'Reopen all {n}': 'Alle {n} wieder öffnen',
+  'No review needed': 'Keine Prüfung nötig',
+  'no quantity': 'keine Menge',
 
   // Overview and Export
   '1 change waiting for senior review': '1 Änderung wartet auf die Prüfung durch einen Senior',
