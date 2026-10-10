@@ -3,6 +3,7 @@ import {
   useEffect,
   useId,
   useRef,
+  useState,
   type ComponentPropsWithRef,
   type ReactNode,
   type TdHTMLAttributes,
@@ -542,5 +543,51 @@ export function IconCheck({ color = 'currentColor', size = 12 }: { color?: strin
     <svg width={size} height={size} viewBox="0 0 12 12" fill="none" stroke={color} strokeWidth="1.8" aria-hidden="true">
       <path d="M2.5 6.3l2.3 2.3 4.7-5" />
     </svg>
+  )
+}
+
+/** Show-on-demand block: a quiet "Label ▸" toggle with an optional count/summary; the body renders only when open.
+ *  Use it for detail people need sometimes (history, explanations, proof), not for the main task on a screen. */
+export function Disclosure({
+  label,
+  summary,
+  defaultOpen = false,
+  open: openProp,
+  onToggle,
+  className,
+  children,
+}: {
+  label: ReactNode
+  /** quiet text after the label, e.g. "2 changed" or "(3)" */
+  summary?: ReactNode
+  defaultOpen?: boolean
+  /** controlled mode */
+  open?: boolean
+  onToggle?: (open: boolean) => void
+  className?: string
+  children: ReactNode
+}) {
+  const id = useId()
+  const [inner, setInner] = useState(defaultOpen)
+  const open = openProp ?? inner
+  const toggle = () => {
+    setInner(!open)
+    onToggle?.(!open)
+  }
+  return (
+    <div className={className}>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={toggle}
+        className="inline-flex items-center gap-2 min-h-8 p-0 border-0 bg-transparent text-left text-ink hover:text-accent"
+      >
+        <IconChevron open={open} />
+        <span className="font-semibold">{label}</span>
+        {summary != null && <span className="text-muted font-normal text-[13px]">{summary}</span>}
+      </button>
+      {open && <div id={id}>{children}</div>}
+    </div>
   )
 }

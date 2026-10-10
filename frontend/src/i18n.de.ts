@@ -8,6 +8,9 @@ import { DE_PRICING } from './i18n.de.pricing'
 import { DE_PRICELISTS } from './i18n.de.pricelists'
 import { DE_EQUIVALENCE } from './i18n.de.equivalence'
 import { DE_PDF } from './i18n.de.pdf'
+import { DE_SHELL } from './i18n.de.shell'
+import { DE_LINES } from './i18n.de.lines'
+import { DE_LISTS } from './i18n.de.lists'
 export const DE: Record<string, string> = {
   ' and ': ' und ',
   'match.Strong': 'Sicher',
@@ -782,4 +785,7 @@ export const DE: Record<string, string> = {
   ...DE_PRICELISTS,
   ...DE_EQUIVALENCE,
   ...DE_PDF,
+  ...DE_SHELL,
+  ...DE_LINES,
+  ...DE_LISTS,
 }
