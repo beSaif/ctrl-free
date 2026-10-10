@@ -8,6 +8,7 @@ import type { Position, PositionPatch, QuoteGroup } from '../api/types'
 import { Button, ErrorBox, IconBack, IconCheck, Kbd, LinkButton, Loading } from '../components/ui'
 import { cx } from '../lib/cx'
 import { PdfCrop } from '../components/PdfCrop'
+import { ProductEquivalence } from '../components/Equivalence'
 import { FooterTotals } from '../components/FooterTotals'
 import { useAssistCtx } from '../assist/context'
 import { DropZone, FilledNote, ProposalCard, ReplyCrop } from '../assist/InlineAssist'
@@ -411,19 +412,26 @@ function PriceSection({
           </Note>
         </span>
 
-        <span className="text-muted">{t('Product')}</span>
+        <span className="text-muted self-start">{t('Product')}</span>
         <span className="flex flex-col gap-0.5">
           <span>
             {hourly ? t('Hourly work, no product') : productLabel(p, cat)} · <Link to={`/t/${tenderId}/lines/${p.lv_id}/product${location.search}`}>{t('Change product')}</Link>
           </span>
-          <span className="text-[13px]" style={{ color: hourly ? C.muted : m.fg }}>
-            {hourly ? t('The tender asks for hours: priced as our own labour, not a supplier item') : m.line}
-          </span>
+          {o.product_id && o.product_id !== p.match?.product_id && !hourly && !sup ? (
+            <span className="text-[13px] text-accent">
+              {p.match?.product_id ? t('Changed by you. The match was {p}', { p: p.match.product_id }) : t('Chosen by you. The code found no product.')}
+            </span>
+          ) : p.match?.method === 'learned' && !sup ? null : (
+            <span className="text-[13px]" style={{ color: hourly ? C.muted : m.fg }}>
+              {hourly ? t('The tender asks for hours: priced as our own labour, not a supplier item') : m.line}
+            </span>
+          )}
           {p.variant_reason && (
             <span className="text-[13px] text-attn">
               {t('Variant')}: {p.variant_reason}
             </span>
           )}
+          {!hourly && <ProductEquivalence tenderId={tenderId} p={p} />}
         </span>
 
         {!hourly && (

@@ -38,6 +38,7 @@ export function Overview() {
   const open = ps.filter(isOpen)
   const priceable = ps.filter(isPriceable)
   const pricedLines = ps.filter((p) => (p.pricing?.direct ?? 0) > 0).length
+  const learnedN = ps.filter((p) => p.match?.method === 'learned').length
   const supplierOpen = open.filter((p) => isSupplier(p) && isPriceable(p) && quotedPrice(p) === null && p.status !== 'insufficient_information')
   const tot = pr.totals
   const openIns = ins.instructions.filter((i) => i.state === 'open')
@@ -198,6 +199,12 @@ export function Overview() {
             </li>
           ))}
         </ol>
+        {learnedN > 0 && (
+          <p className="m-0 -mt-3 text-[13px] text-muted">
+            {learnedN === 1 ? t('1 line matched from what you taught earlier.') : t('{n} lines matched from what you taught earlier.', { n: learnedN })}{' '}
+            <Link to="/reference?tab=learned">{t('See learned matches')}</Link>
+          </p>
+        )}
       </section>
 
       <aside aria-label={t('Tender facts')} className="flex-[1_1_360px] max-w-[460px] min-w-0 px-6 pt-7 pb-10 border-l border-rule flex flex-col gap-6">

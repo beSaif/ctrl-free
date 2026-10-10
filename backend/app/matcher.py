@@ -1005,6 +1005,11 @@ def match_positions(positions: list[dict], catalog=None, progress: Callable[[int
             "candidates": public_candidates(cands[lv]),
             "attributes": {k2: v for k2, v in attrs[lv].items() if k2 != "type_source"},
         }
+    # how the tender names a make (example / prescribed / open); a prescribed make we do not offer goes to review
+    from . import equivalence
+    by_lv = {p["lv_id"]: p for p in positions}
+    for p in todo:
+        out[p["lv_id"]] = equivalence.annotate(p, out[p["lv_id"]], rows_by_id, by_lv.get(p.get("parent_lv_id")))
     return out
 
 

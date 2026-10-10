@@ -335,6 +335,13 @@ def _run_stages(tid: str, timings: dict) -> None:
                                                                       use_llm=False), {})
         else:
             _warn(tid, "match", "Matcher not available: lines have no product yet")
+        # what estimators taught on earlier tenders comes first (learned.py); the matcher's pick stays a candidate
+        learned = mod("learned")
+        if learned is not None and matches:
+            try:
+                matches = learned.apply_rules(tid, positions, matches, catalog())
+            except Exception as e:
+                _warn(tid, "learned", e)
     _set_progress(tid, stage="translating", message="Translating line titles")
     for th in side:
         th.join()
