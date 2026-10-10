@@ -3,7 +3,8 @@ import { Fragment, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
 import { api } from '../api/client'
-import { useDeleteTender, useInstructions, usePositions, usePricing, useReference, useTender, useVerification } from '../api/hooks'
+import { useDeleteTender, useInstructions, useMyName, usePositions, usePricing, useReference, useTender, useVerification } from '../api/hooks'
+import { changedBy, rec } from '../lib/trace'
 import { Button, Dialog, IconCheck, LinkButton, Loading } from '../components/ui'
 import { cx } from '../lib/cx'
 import { PageViewer } from '../components/PdfCrop'
@@ -34,6 +35,7 @@ export function Overview() {
   const { data: verif } = useVerification(id)
   const [pageOpen, setPageOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const me = useMyName()
   if (!tender || !pos || !ins || !pr) return <Loading label={t('Loading')} />
 
   const ps = pos.positions
@@ -48,6 +50,7 @@ export function Overview() {
   const riskN = openIns.filter((i) => i.kind === 'risk').length
   const s = pr.settings
   const chosen = s.chosen ? tot.scenarios.find((x) => x.name === s.chosen) : undefined
+  const chosenBy = rec(rec(s.changed_by).chosen).by as string | undefined
   const pcOn = Object.values(s.project_costs).some(Boolean)
   const std = standardMargin(s)
   const base = `/t/${id}`
@@ -253,7 +256,7 @@ export function Overview() {
             )}
           </div>
           <span className="text-[13px] text-muted">
-            {chosen ? t('Chosen by you in Pricing. You can still change it.') : t('Not the offer price yet. It becomes final in step 3.')}
+            {chosen ? t('Chosen by {who} in Pricing. You can still change it.', { who: changedBy(chosenBy, me, t) }) : t('Not the offer price yet. It becomes final in step 3.')}
           </span>
         </section>
 

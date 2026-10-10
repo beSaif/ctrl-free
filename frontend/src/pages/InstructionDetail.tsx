@@ -4,7 +4,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLang, useT, type T } from '../i18n'
-import { useInstructions, usePatchInstruction, usePositions, useTender } from '../api/hooks'
+import { useInstructions, useMyName, usePatchInstruction, usePositions, useTender } from '../api/hooks'
+import { changedBy } from '../lib/trace'
 import type { Instruction, InstructionPatch, Position } from '../api/types'
 import { Button, ErrorBox, IconBack, Kbd, LinkButton, Loading, SegmentedControl } from '../components/ui'
 import { PdfCrop } from '../components/PdfCrop'
@@ -108,11 +109,12 @@ function InstructionDetailView() {
     return () => window.removeEventListener('keydown', onKey)
   })
 
+  const me = useMyName()
   if (isLoading) return <Loading label={t('Loading')} />
   if (error || !s) return <ErrorBox error={error} label={t('This instruction was not found.')} />
 
   const open = s.state === 'open'
-  const stateText = open ? t('To confirm') : s.state === 'confirmed' ? t('Confirmed by you') : t('Marked not relevant')
+  const stateText = open ? t('To confirm') : s.state === 'confirmed' ? t('Confirmed by {who}', { who: changedBy(s.confirmed_by, me, t) }) : t('Marked not relevant')
   const lines = applies.map((x) => byLv.get(x)).filter((p): p is Position => !!p)
   const sumDirect = lines.reduce((a, p) => a + (p.pricing?.direct ?? 0), 0)
   const linesChanged = !sameSet(applies, suggested)
@@ -278,7 +280,7 @@ function InstructionDetailView() {
                   <>
                     <span className="flex items-center gap-2 font-medium">
                       <span className="w-2 h-2 bg-ink" aria-hidden="true" />
-                      {s.state === 'confirmed' ? t('Confirmed by you') : t('Marked not relevant')}
+                      {s.state === 'confirmed' ? t('Confirmed by {who}', { who: changedBy(s.confirmed_by, me, t) }) : t('Marked not relevant')}
                       {s.confirmed_at ? ` · ${fmtShortDate(s.confirmed_at, lang)}` : ''}
                     </span>
                     {dirty && (

@@ -17,6 +17,8 @@ export const DE_TRACE: Record<string, string> = {
   'Open p. {page} of the PDF': 'S. {page} im PDF öffnen',
   'tender value ({q})': 'Wert der Ausschreibung ({q})',
   'Changed by {who}': 'Geändert von {who}',
+  'Confirmed by {who}': 'Bestätigt von {who}',
+  'Chosen by {who} in Pricing. You can still change it.': 'Gewählt von {who} in der Preisbildung. Sie können ihn noch ändern.',
   'No price yet': 'Noch kein Preis',
   'Quote entered: CHF {q} per {u}. Confirm to use it.': 'Offerte eingetragen: CHF {q} pro {u}. Bestätigen, um sie zu verwenden.',
   'There is no budget price, so the line is not priced yet. Type the quoted unit price above when the supplier answers.': 'Es gibt keinen Budgetpreis, darum ist die Position noch nicht kalkuliert. Tragen Sie den offerierten Einheitspreis oben ein, sobald der Lieferant antwortet.',
