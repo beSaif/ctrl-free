@@ -655,6 +655,8 @@ export interface Verification {
     install_ok: number
     direct_ok: number
     status_ok: number
+    /** example lines whose total differs only because an active price list replaces the catalogue price */
+    price_list_rows?: number
     subset_direct_ours?: number
     subset_direct_golden?: number
     subset_direct_ok?: boolean

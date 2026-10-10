@@ -383,6 +383,9 @@ function VerifiedPanel({ v, tenderId }: { v: NonNullable<ReturnType<typeof useVe
         })}{' '}
         {s.subset_direct_golden !== undefined &&
           t('Subset direct cost CHF {a} (Equans: {b}).', { a: fmt2(s.subset_direct_ours), b: fmt2(s.subset_direct_golden) })}
+        {(s.price_list_rows ?? 0) > 0 && (
+          <> {t('{n} differ because an active price list replaces the catalogue prices the examples use.', { n: s.price_list_rows ?? 0 })}</>
+        )}
       </span>
       <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open} className="self-start p-0 min-h-0 border-0 bg-transparent text-accent underline underline-offset-2 text-[13px]">
         {open ? t('Hide the examples') : t('Show the examples')}

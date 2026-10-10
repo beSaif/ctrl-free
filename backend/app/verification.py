@@ -133,6 +133,8 @@ def verify(tender: dict, settings: dict | None = None, benchmark_dir: Path | Non
                 our_direct=direct,
                 direct_ok=direct is not None and golden_direct is not None and abs(direct - golden_direct) <= MONEY_TOL,
                 our_status=ev["status"], status_ok=ev["status"] == row["golden_status"],
+                # an active price list replaces the catalogue price the examples were computed with
+                price_list=((price or {}).get("price_list") or {}).get("name"),
             )
         rows.append(row)
 
@@ -161,6 +163,7 @@ def verify(tender: dict, settings: dict | None = None, benchmark_dir: Path | Non
         "install_ok": sum(r["install_ok"] for r in rows),
         "direct_ok": sum(r["direct_ok"] for r in rows),
         "status_ok": sum(r["status_ok"] for r in rows),
+        "price_list_rows": sum(1 for r in rows if r.get("price_list") and not r["direct_ok"]),
         "subset_direct_ours": totals["direct"],
         "subset_direct_golden": _f(gsum.get("direct_cost_chf")),
         "subset_direct_ok": _eq(totals["direct"], _f(gsum.get("direct_cost_chf"))),
