@@ -1,7 +1,7 @@
 // N04b Line detail: PDF crop, tender rule, editable price with sentences, supplier quote,
 // Assist in place, Confirm (Enter) / Flag / Undo, Previous K / Next J through the queue.
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
 import { useInstructions, useLineLog, useMarkSent, useMyName, usePatchPosition, usePosition, usePricing, useReference, useTender, useVerification } from '../api/hooks'
 import type { Position, PositionPatch, QuoteGroup } from '../api/types'
@@ -44,6 +44,7 @@ export function LineDetail() {
   const t = useT()
   const lang = useLang()
   const nav = useNavigate()
+  const fromPdf = (useLocation().state as { pdf?: string } | null)?.pdf
   const ctx = useAssistCtx()
   const [filter, q, , groupBy] = useLineFilter()
   const { queue, positions, quotes } = useLineQueue(id, filter, q)
@@ -151,6 +152,11 @@ export function LineDetail() {
           <IconBack />
           {t('All lines')}
         </LinkButton>
+        {fromPdf && (
+          <LinkButton to={fromPdf} size="sm" variant="quiet">
+            {t('Back to Tender PDF')}
+          </LinkButton>
+        )}
         <span className="flex-auto" />
         <span className="text-[13px] text-muted">{qi >= 0 ? t('{label} {i} of {n}', { label: posLabel, i: qi + 1, n: navList.length }) : ''}</span>
         <Button size="sm" onClick={() => goTo(prev)} disabled={!prev}>
@@ -185,6 +191,7 @@ export function LineDetail() {
                     tenderId={id}
                     source={p.source}
                     pageCount={tender?.page_count}
+                    pdfLink={`/t/${id}/pdf/${p.source.page}?lv=${p.lv_id}`}
                     caption={t('The marked row is where the quantity {q} {u} was read.', { q: fmtQty(p.quantity), u: fmtUnit(p.unit) })}
                   />
                 </div>

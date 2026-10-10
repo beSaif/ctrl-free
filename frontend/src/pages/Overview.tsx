@@ -272,7 +272,7 @@ export function Overview() {
             <span>{tender.trade}</span>
             <span className="text-muted">{t('Document')}</span>
             <span className="break-words">
-              {tender.file_name} · {t('{n} pages', { n: tender.page_count })}
+              {tender.file_name} · {t('{n} pages', { n: tender.page_count })} · <Link to={`/t/${id}/pdf`}>{t('Browse the pages')}</Link>
             </span>
             <span className="text-muted">{t('Priced with')}</span>
             <span>

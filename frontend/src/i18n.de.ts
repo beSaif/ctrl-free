@@ -7,6 +7,7 @@ import { DE_FILLEDLV } from './i18n.de.filledlv'
 import { DE_PRICING } from './i18n.de.pricing'
 import { DE_PRICELISTS } from './i18n.de.pricelists'
 import { DE_EQUIVALENCE } from './i18n.de.equivalence'
+import { DE_PDF } from './i18n.de.pdf'
 export const DE: Record<string, string> = {
   ' and ': ' und ',
   'match.Strong': 'Sicher',
@@ -780,4 +781,5 @@ export const DE: Record<string, string> = {
   ...DE_PRICING,
   ...DE_PRICELISTS,
   ...DE_EQUIVALENCE,
+  ...DE_PDF,
 }

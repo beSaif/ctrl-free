@@ -1,6 +1,7 @@
 // Tender PDF traceability: a crop of the rendered page around the position's block, with the
 // description lines tinted and the quantity line highlighted. "Open full page" shows the page.
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { useT } from '../i18n'
 import { pageImageUrl, useApiMode } from '../api/client'
 import type { SourceLine } from '../api/types'
@@ -143,6 +144,7 @@ export function PdfCrop({
   heading,
   fallback,
   caption,
+  pdfLink,
 }: {
   tenderId: string
   source: CropSource
@@ -150,6 +152,8 @@ export function PdfCrop({
   heading?: ReactNode
   fallback?: ReactNode
   caption?: ReactNode
+  /** Tender PDF page for this source: replaces the "Open full page" popup with a link to it. */
+  pdfLink?: string
 }) {
   const t = useT()
   useApiMode()
@@ -163,9 +167,15 @@ export function PdfCrop({
     <section className="flex flex-col gap-2">
       <div className="flex justify-between items-baseline gap-3">
         <h2 className="m-0 text-[15px] font-semibold">{heading ?? t('Tender PDF · p. {page}', { page: source.page })}</h2>
-        <button type="button" onClick={() => setOpen(true)} className="min-h-8 border-0 bg-transparent p-0 text-[13px] text-accent underline underline-offset-2 hover:text-accent-hover">
-          {t('Open full page')}
-        </button>
+        {pdfLink ? (
+          <Link to={pdfLink} className="inline-flex items-center min-h-8 text-[13px] underline underline-offset-2">
+            {t('Open in Tender PDF')}
+          </Link>
+        ) : (
+          <button type="button" onClick={() => setOpen(true)} className="min-h-8 border-0 bg-transparent p-0 text-[13px] text-accent underline underline-offset-2 hover:text-accent-hover">
+            {t('Open full page')}
+          </button>
+        )}
       </div>
       <div className="border border-stone bg-panel p-4">
         <div className="bg-white border border-rule px-[18px] py-4 flex flex-col">

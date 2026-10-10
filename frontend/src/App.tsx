@@ -15,6 +15,7 @@ import { Changes } from './pages/Changes'
 import { OutcomePage } from './pages/Outcome'
 import { Results } from './pages/Results'
 import { Reference } from './pages/Reference'
+import { TenderPdf } from './pages/TenderPdf'
 
 function NotFound() {
   const t = useT()
@@ -42,6 +43,8 @@ export default function App() {
         <Route path="lines" element={<Lines />} />
         <Route path="lines/:lv" element={<LineDetail />} />
         <Route path="lines/:lv/product" element={<ChangeProduct />} />
+        <Route path="pdf" element={<TenderPdf />} />
+        <Route path="pdf/:page" element={<TenderPdf />} />
         <Route path="instructions" element={<Instructions />} />
         <Route path="instructions/:iid" element={<InstructionDetail />} />
         <Route path="pricing" element={<Pricing />} />

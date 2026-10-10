@@ -196,6 +196,7 @@ export function Lines() {
                     p={r.p}
                     selected={r.p.lv_id === sel}
                     to={`/t/${id}/lines/${r.p.lv_id}${linesQuery(filter, q, gp)}`}
+                    pdfTo={`/t/${id}/pdf/${r.p.page}?lv=${r.p.lv_id}`}
                     product={productLabel(r.p, cat)}
                     refCb={(el) => {
                       rowRefs.current[r.p.lv_id] = el
@@ -255,12 +256,14 @@ function LineRow({
   p,
   selected,
   to,
+  pdfTo,
   product,
   refCb,
 }: {
   p: Position
   selected: boolean
   to: string
+  pdfTo: string
   product: string
   refCb: (el: HTMLAnchorElement | null) => void
 }) {
@@ -271,41 +274,52 @@ function LineRow({
   const byAssist = p.supplier_quote?.by === 'Assist'
   const pr = p.pricing
   return (
-    <Link
-      ref={refCb}
-      to={to}
-      aria-current={selected ? 'true' : undefined}
-      className={cx(
-        LINE_GRID,
-        'items-center w-full min-h-9 px-6 py-1 border-b border-rowrule bg-white text-ink! no-underline hover:bg-panel',
-        selected && 'row-selected',
-      )}
-    >
-      <span className="font-mono text-[13px] text-muted">{p.page}</span>
-      <span className="overflow-hidden text-ellipsis whitespace-nowrap" title={p.title_de}>
-        {p.title_de}
-      </span>
-      <span className="font-mono text-right">{fmtQty(pr?.quantity ?? p.quantity)}</span>
-      <span className="text-muted">{fmtUnit(p.unit)}</span>
-      <span className="overflow-hidden text-ellipsis whitespace-nowrap text-muted" title={product}>
-        {product}
-      </span>
-      <span className="font-mono text-right whitespace-nowrap">
-        {byAssist && isSupplier(p) && quoted !== null && (
-          <span className="mr-1 align-middle">
-            <AssistTag title={t('Filled by Assist from the supplier reply')} />
-          </span>
+    <div className="relative">
+      <Link
+        ref={refCb}
+        to={to}
+        aria-current={selected ? 'true' : undefined}
+        className={cx(
+          LINE_GRID,
+          'items-center w-full min-h-9 px-6 py-1 border-b border-rowrule bg-white text-ink! no-underline hover:bg-panel',
+          selected && 'row-selected',
         )}
-        {pr ? fmt2(pr.net_unit_cost) : '–'}
-      </span>
-      <span className="font-mono text-right font-medium">{pr ? fmt2(pr.direct) : '–'}</span>
-      <span className="text-[13px]" style={{ color: m.fg, fontWeight: m.strong ? 600 : 400 }}>
-        {m.label}
-      </span>
-      <span className="flex items-center gap-2" style={{ color: st.fg }}>
-        <span className="flex-none w-2 h-2" style={{ background: st.marker }} aria-hidden="true" />
-        {st.label}
-      </span>
-    </Link>
+      >
+        <span aria-hidden="true" />
+        <span className="overflow-hidden text-ellipsis whitespace-nowrap" title={p.title_de}>
+          {p.title_de}
+        </span>
+        <span className="font-mono text-right">{fmtQty(pr?.quantity ?? p.quantity)}</span>
+        <span className="text-muted">{fmtUnit(p.unit)}</span>
+        <span className="overflow-hidden text-ellipsis whitespace-nowrap text-muted" title={product}>
+          {product}
+        </span>
+        <span className="font-mono text-right whitespace-nowrap">
+          {byAssist && isSupplier(p) && quoted !== null && (
+            <span className="mr-1 align-middle">
+              <AssistTag title={t('Filled by Assist from the supplier reply')} />
+            </span>
+          )}
+          {pr ? fmt2(pr.net_unit_cost) : '–'}
+        </span>
+        <span className="font-mono text-right font-medium">{pr ? fmt2(pr.direct) : '–'}</span>
+        <span className="text-[13px]" style={{ color: m.fg, fontWeight: m.strong ? 600 : 400 }}>
+          {m.label}
+        </span>
+        <span className="flex items-center gap-2" style={{ color: st.fg }}>
+          <span className="flex-none w-2 h-2" style={{ background: st.marker }} aria-hidden="true" />
+          {st.label}
+        </span>
+      </Link>
+      {/* the page number opens the Tender PDF on this line (a sibling, not nested in the row link) */}
+      <Link
+        to={pdfTo}
+        title={t('Show on p. {page} in the Tender PDF', { page: p.page })}
+        aria-label={t('{lv} on p. {page} in the Tender PDF', { lv: p.lv_id, page: p.page })}
+        className="absolute left-6 top-0 bottom-0 w-[56px] inline-flex items-center font-mono text-[13px] text-muted! underline decoration-stone underline-offset-2 hover:text-accent!"
+      >
+        {p.page}
+      </Link>
+    </div>
   )
 }

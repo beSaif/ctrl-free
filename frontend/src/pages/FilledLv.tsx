@@ -2,6 +2,7 @@
 // with a preview of a few of its pages.
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useT } from '../i18n'
 import { api, filledLvPageUrl, filledLvPdfUrl } from '../api/client'
 import { Button, Dialog, Spinner } from '../components/ui'
@@ -93,6 +94,10 @@ export function FilledLv({ id, onDownload, busy }: { id: string; onDownload: () 
               ))}
             </div>
           )}
+          <span className="text-[13px] text-muted">
+            <Link to={`/t/${id}/pdf?mode=filled`}>{t('Check every page in the Tender PDF')}</Link>{' '}
+            {t('(the filled pages with each line clickable)')}
+          </span>
         </>
       )}
 
@@ -104,9 +109,14 @@ export function FilledLv({ id, onDownload, busy }: { id: string; onDownload: () 
         width={760}
         footer={
           <>
-            <a href={filledLvPdfUrl(id, view ?? undefined)} target="_blank" rel="noreferrer" className="mr-auto self-center text-[13.5px]">
-              {t('Open the whole PDF')}
-            </a>
+            <span className="mr-auto self-center flex flex-wrap gap-x-4 text-[13.5px]">
+              <a href={filledLvPdfUrl(id, view ?? undefined)} target="_blank" rel="noreferrer">
+                {t('Open the whole PDF')}
+              </a>
+              {s && view !== null && view > s.cover_pages && (
+                <Link to={`/t/${id}/pdf/${view - s.cover_pages}?mode=filled`}>{t('Check the lines in the Tender PDF')}</Link>
+              )}
+            </span>
             <Button size="sm" disabled={at <= 0} onClick={() => setView(pages[at - 1])}>
               {t('Previous')}
             </Button>

@@ -159,6 +159,7 @@ function TenderShell({ id }: { id: string }) {
       count: ready ? (toReview ? t('{n} to review', { n: toReview }) : t('done')) : null,
       attn: toReview > 0,
     },
+    { to: `${base}/pdf`, label: 'Tender PDF' },
     {
       to: `${base}/instructions`,
       label: 'Instructions & norms',
