@@ -8,7 +8,8 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 REPO_DIR = BACKEND_DIR.parent
 load_dotenv(REPO_DIR / ".env")
 
-DATA_DIR = BACKEND_DIR / "data"
+# DATA_DIR moves all runtime state (tenders, price lists, learned matches) e.g. onto a mounted volume.
+DATA_DIR = Path(os.getenv("DATA_DIR") or BACKEND_DIR / "data")
 REFERENCE_DIR = DATA_DIR / "reference"
 PRICE_LISTS_DIR = DATA_DIR / "price_lists"   # supplier / negotiated price lists (app.price_lists), runtime state
 TENDERS_DIR = DATA_DIR / "tenders"
@@ -24,6 +25,11 @@ AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
 AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2025-04-01-preview")
 # Set LLM_OFFLINE=1 to run without any API calls (rules-only matching, cache hits still used).
 LLM_OFFLINE = os.getenv("LLM_OFFLINE") == "1"
+
+# Hosted deployment: APP_PASSWORD puts HTTP basic auth (any user name) in front of everything but
+# /api/health; the API also serves the built frontend from FRONTEND_DIST when that folder exists.
+APP_PASSWORD = os.getenv("APP_PASSWORD")
+FRONTEND_DIST = Path(os.getenv("FRONTEND_DIST") or REPO_DIR / "frontend" / "dist")
 
 # Demo identities (no login): the frontend sends the chosen person's id in the X-Actor header.
 # role "senior" may approve and revert changes on the Changes screen; a request without a known

@@ -1,11 +1,13 @@
 """FastAPI routes (docs/SPEC.md "API"). Run: cd backend && uv run uvicorn app.main:app --reload --port 8000"""
 from __future__ import annotations
 
+import base64
 import copy
 import io
 import logging
 import math
 import re
+import secrets
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -51,6 +53,34 @@ class _ActorMiddleware:
 
 
 app.add_middleware(_ActorMiddleware)
+
+
+class _PasswordMiddleware:
+    """HTTP basic auth with config.APP_PASSWORD (any user name) for the hosted demo. /api/health stays
+    open for the platform's health check."""
+
+    def __init__(self, app):
+        self.app = app
+        self.expected = config.APP_PASSWORD.encode()
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http" or scope["path"] == "/api/health" or self._ok(scope):
+            return await self.app(scope, receive, send)
+        await Response("Password required", 401, {"WWW-Authenticate": 'Basic realm="ctrl-free"'})(scope, receive, send)
+
+    def _ok(self, scope) -> bool:
+        auth = next((v for k, v in scope.get("headers") or [] if k == b"authorization"), b"")
+        if not auth.lower().startswith(b"basic "):
+            return False
+        try:
+            _, _, pw = base64.b64decode(auth[6:]).partition(b":")
+        except ValueError:
+            return False
+        return secrets.compare_digest(pw, self.expected)
+
+
+if config.APP_PASSWORD:
+    app.add_middleware(_PasswordMiddleware)
 
 mod = pipeline.mod
 
@@ -1661,3 +1691,21 @@ def get_log(tid: str, lv_id: str | None = None, by: str | None = None, limit: in
     if by:
         entries = [e for e in entries if e.get("by") == by]
     return {"log": entries[:limit], "total": len(entries)}
+
+
+# ================================================================== frontend (hosted build)
+# Registered last so every /api route wins. Unknown paths get index.html (client-side routes).
+
+if config.FRONTEND_DIST.is_dir():
+    _dist = config.FRONTEND_DIST.resolve()
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def frontend(path: str):
+        if path.startswith("api/"):
+            raise HTTPException(404, "Not found")
+        f = (_dist / path).resolve()
+        if path and f.is_relative_to(_dist) and f.is_file():
+            # hashed bundles never change; index.html must not be cached or a deploy is not picked up
+            immutable = f.parent.name == "assets"
+            return FileResponse(f, headers={"Cache-Control": "public, max-age=31536000, immutable" if immutable else "no-cache"})
+        return FileResponse(_dist / "index.html", headers={"Cache-Control": "no-cache"})

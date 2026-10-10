@@ -1,0 +1,16 @@
+**/node_modules
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.DS_Store
+.git
+.env
+.env.*
+frontend/dist
+frontend/screenshots
+backend/data/tenders
+backend/data/price_lists
+backend/data/learned.json
+research
+docs
+problem_statement/*.pdf
