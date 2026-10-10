@@ -193,6 +193,15 @@ export function useCreateTender() {
   })
 }
 
+export function useDeleteTender() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.deleteTender(id),
+    // only the lists: the open tender's own queries would refetch into a 404 before we navigate away
+    onSuccess: () => qc.invalidateQueries({ predicate: (q) => q.queryKey[0] === 'tenders' || q.queryKey[0] === 'results' }),
+  })
+}
+
 export function useImportReference() {
   const qc = useQueryClient()
   return useMutation({

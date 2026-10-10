@@ -1,9 +1,9 @@
 // N03 Overview: "N steps left before you can submit" + due date, price so far, tender facts.
 import { Fragment, useState, type ReactNode } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
-import { useInstructions, usePositions, usePricing, useReference, useTender, useVerification } from '../api/hooks'
-import { IconCheck, LinkButton, Loading } from '../components/ui'
+import { useDeleteTender, useInstructions, usePositions, usePricing, useReference, useTender, useVerification } from '../api/hooks'
+import { Button, Dialog, IconCheck, LinkButton, Loading } from '../components/ui'
 import { cx } from '../lib/cx'
 import { PageViewer } from '../components/PdfCrop'
 import { fmt0, fmt2, fmtDateTime, fmtDaysLeft, fmtShare } from '../lib/format'
@@ -31,6 +31,7 @@ export function Overview() {
   const { data: ref } = useReference()
   const { data: verif } = useVerification(id)
   const [pageOpen, setPageOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   if (!tender || !pos || !ins || !pr) return <Loading label={t('Loading')} />
 
   const ps = pos.positions
@@ -257,8 +258,12 @@ export function Overview() {
               <Link to="/reference">{t('Reference data')}</Link>
             </span>
           </div>
+          <Button variant="quiet" size="xs" onClick={() => setDeleteOpen(true)} className="self-start mt-2 px-0!">
+            {t('Delete tender')}
+          </Button>
         </section>
       </aside>
+      {deleteOpen && <DeleteTenderDialog id={id} name={tender.name || tender.file_name} onClose={() => setDeleteOpen(false)} />}
       {rule && (
         <PageViewer
           open={pageOpen}
@@ -270,6 +275,39 @@ export function Overview() {
         />
       )}
     </main>
+  )
+}
+
+function DeleteTenderDialog({ id, name, onClose }: { id: string; name: string; onClose: () => void }) {
+  const t = useT()
+  const nav = useNavigate()
+  const del = useDeleteTender()
+  const confirm = () => del.mutate(id, { onSuccess: () => nav('/', { replace: true }) })
+  return (
+    <Dialog
+      open
+      onClose={onClose}
+      title={t('Delete tender')}
+      closeLabel={t('Close')}
+      width={520}
+      footer={
+        <>
+          <Button onClick={onClose}>{t('Cancel')}</Button>
+          <Button variant="dark" onClick={confirm} disabled={del.isPending}>
+            {del.isPending ? t('Deleting…') : t('Delete tender')}
+          </Button>
+        </>
+      }
+    >
+      <div className="px-6 py-5 flex flex-col gap-3">
+        <p className="m-0">{t('Delete "{name}"? The PDF, the lines, your prices and the history are removed. This cannot be undone.', { name })}</p>
+        {del.error && (
+          <p role="alert" className="m-0 text-attn">
+            {t('Could not delete the tender.')} <span className="text-muted">({del.error.message})</span>
+          </p>
+        )}
+      </div>
+    </Dialog>
   )
 }
 

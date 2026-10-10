@@ -424,6 +424,9 @@ def patch_tender(tid: str, body: TenderPatch):
 @app.delete("/api/tenders/{tid}")
 def delete_tender(tid: str):
     _tender(tid)
+    # the background run would write the tender back after the delete
+    if pipeline.is_running(tid):
+        raise HTTPException(409, "The tender is still being read. Delete it once reading has finished.")
     store.delete(tid)
     return {"ok": True}
 

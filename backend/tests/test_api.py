@@ -295,6 +295,8 @@ def test_upload_other_pdf_runs_without_lines(client):
     assert client.get(f"/api/tenders/{s['id']}/positions").json()["positions"] == []
     assert client.post("/api/tenders", files={"file": ("x.pdf", b"nope", "application/pdf")}).status_code == 400
     assert client.delete(f"/api/tenders/{s['id']}").status_code == 200
+    assert client.get(f"/api/tenders/{s['id']}").status_code == 404
+    assert client.delete(f"/api/tenders/{s['id']}").status_code == 404
 
 
 def _inject_reply(tid, factors=(0.95, 1.1)):

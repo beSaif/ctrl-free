@@ -1047,6 +1047,13 @@ export const mockApi: Api = {
     save()
     return summary(t)
   },
+  async deleteTender(id) {
+    await delay(120)
+    const t = tender(id)
+    db.tenders = db.tenders.filter((x) => x !== t)
+    save()
+    return { ok: true }
+  },
   async getTender(id) {
     await delay(60)
     const t = tender(id)

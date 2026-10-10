@@ -39,6 +39,7 @@ export interface Api {
   createTender(form: FormData): Promise<TenderSummary>
   createDemoTender(): Promise<TenderSummary>
   getTender(id: string): Promise<TenderDetail>
+  deleteTender(id: string): Promise<unknown>
   getPositions(id: string, filter?: string, q?: string): Promise<PositionsResponse>
   getPosition(id: string, lv: string): Promise<PositionDetail>
   patchPosition(id: string, lv: string, body: PositionPatch): Promise<PositionDetail>
@@ -254,6 +255,7 @@ export const realApi: Api = {
   createTender: (form) => req('POST', '/tenders', form),
   createDemoTender: () => req('POST', '/tenders/demo'),
   getTender: (id) => req('GET', `/tenders/${id}`),
+  deleteTender: (id) => req('DELETE', `/tenders/${id}`),
   getPositions: async (id, filter, q) => {
     const r = await req<PositionsResponse | PositionsResponse['positions']>('GET', `/tenders/${id}/positions${qs({ filter, q })}`)
     return Array.isArray(r) ? { positions: r } : r

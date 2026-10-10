@@ -80,6 +80,11 @@ export const DE: Record<string, string> = {
   'CHF {p} profit if won': 'CHF {p} Gewinn bei Zuschlag',
   'Calculated total was {c} ({d}).': 'Kalkulierter Betrag war {c} ({d}).',
   Cancel: 'Abbrechen',
+  'Delete tender': 'Ausschreibung löschen',
+  'Deleting…': 'Wird gelöscht…',
+  'Delete "{name}"? The PDF, the lines, your prices and the history are removed. This cannot be undone.':
+    '«{name}» löschen? Das PDF, die Positionen, Ihre Preise und der Verlauf werden entfernt. Das lässt sich nicht rückgängig machen.',
+  'Could not delete the tender.': 'Die Ausschreibung konnte nicht gelöscht werden.',
   Catalogue: 'Katalog',
   'Catalogue ({p} products) and install rules ({r}) from': 'Katalog ({p} Produkte) und Montageregeln ({r}) aus',
   'Catalogue has only a budget figure for this product': 'Der Katalog hat für dieses Produkt nur einen Budgetpreis',
