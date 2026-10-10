@@ -1,0 +1,16 @@
+product_id,description,unit,net_price,note
+P-INS-002,60 mm mineral wool duct insulation,m2,66.50,Framework agreement DemoInsulation 2026
+P-INS-001,30 mm mineral wool duct insulation,m2,47.90,Framework agreement DemoInsulation 2026
+P-CTL-001,Differential pressure transmitter,pc,565.00,Controls frame contract
+P-CTL-002,Temperature sensor,pc,349.00,Controls frame contract
+P-CTL-003,Actuator 24V,pc,432.00,Controls frame contract
+P-VAV-003,Variable volume controller DN125,pc,1198.00,DemoControl volume bonus
+P-VAV-004,Variable volume controller DN160,pc,1338.00,DemoControl volume bonus
+P-VAV-005,Variable volume controller DN200,pc,1552.00,DemoControl volume bonus
+P-CAV-001,Constant volume controller DN250,pc,812.00,DemoControl volume bonus
+P-SIL-002,Compact silencer DN100 length 900 mm,pc,344.00,DemoAcoustic project price
+P-FIR-001,Fire damper EI90-S DN100 with actuator,pc,1420.00,DemoFire 2026
+P-FIR-003,EI30 circular fire seal DN160,pc,431.00,DemoFire 2026
+P-FIR-002,EI30 rectangular fire seal 300x200 mm,pc,752.00,DemoFire 2026 (price increase)
+P-SUP-001,Connection-angle set,pc,79.00,DemoMount
+P-GRL-001,Weather louvre 600x400 mm,pc,410.00,Not in the standard catalogue yet

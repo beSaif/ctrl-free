@@ -391,7 +391,7 @@ def build_xlsx(tender: dict, totals: dict, settings: dict) -> bytes:
             continue  # status shown, amounts blank
         r = str(i)
         # unit price: formula into Catalog for catalogue / budget prices, value for quotes and manual prices
-        if pr["unit_price_source"] in ("catalog", "supplier_package") and prod:
+        if pr["unit_price_source"] in ("catalog", "supplier_package") and prod and not pr.get("price_list"):
             ws_offer[C["Net unit price"] + r] = f"=INDEX(Catalog!${net_col}$2:${net_col}${cat_last},MATCH({C['Product id']}{r},Catalog!$A$2:$A${cat_last},0))"
             _comment(ws_offer[C["Net unit price"] + r], f"catalog.csv {pid} net_cost_chf" + (" (budget price)" if pr["unit_price_source"] == "supplier_package" else ""))
         else:

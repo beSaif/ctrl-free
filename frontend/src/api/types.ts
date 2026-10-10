@@ -197,6 +197,10 @@ export interface PositionPrice {
   calculated?: { quantity?: number; net_unit_cost?: number; hours?: number; direct?: number }
   calculated_hours?: number
   hours_overridden?: boolean
+  /** set when an active price list gave the unit price (sources.unit_price names it, with date and row) */
+  price_list?: { id: string; name: string; kind?: 'negotiated' | 'supplier' | string; supplier?: string | null; date?: string | null; row?: number }
+  /** the standard catalogue price the price list replaced */
+  catalog_unit_cost?: number
 }
 
 export interface CatalogRow {
@@ -213,6 +217,16 @@ export interface CatalogRow {
   install_code: string
   source_type: 'catalog' | 'supplier_package' | string
   supplier_quote_required: boolean
+  /** price list that sets net_cost_chf (display name), e.g. "Equans negotiated prices 2026"; absent = standard catalogue */
+  price_list?: string
+  price_list_id?: string
+  /** valid from (ISO date) */
+  price_list_date?: string | null
+  supplier?: string | null
+  /** "Equans negotiated prices 2026 (valid from 1 Jan 2026), row 4" */
+  price_list_source?: string
+  /** standard catalogue net price before the list */
+  catalog_net_cost_chf?: number
 }
 
 export interface Position {

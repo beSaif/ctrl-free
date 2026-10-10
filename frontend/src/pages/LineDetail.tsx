@@ -391,7 +391,7 @@ function PriceSection({
   } else if (priceSet) {
     unitNote = catalogue !== undefined ? t('Changed by you. Catalogue says {c}', { c: fmt2(catalogue) }) : t('Changed by you')
     unitFg = C.accent
-  } else unitNote = pr?.unit_price_source === 'manual' ? t('Typed by you') : t('Catalogue price')
+  } else unitNote = pr?.unit_price_source === 'manual' ? t('Typed by you') : pr?.price_list ? t('From {l}', { l: pr.price_list.name }) : t('Catalogue price')
 
   const factorText = pr?.factors.length ? pr.factors.map((f) => `${f.op} ${f.value.toFixed(2)} ${factorLabel(f.key, t)}`).join(', ') : ''
 

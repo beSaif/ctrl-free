@@ -159,7 +159,7 @@ export function useActor(): string {
   )
 }
 
-async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
+export async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
   const init: RequestInit = { method, headers: { 'X-Actor': actorId } }
   if (body instanceof FormData) init.body = body
   else if (body !== undefined) {
