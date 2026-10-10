@@ -44,7 +44,8 @@ export function LineDetail() {
   const t = useT()
   const lang = useLang()
   const nav = useNavigate()
-  const fromPdf = (useLocation().state as { pdf?: string } | null)?.pdf
+  const loc = useLocation()
+  const fromPdf = (loc.state as { pdf?: string } | null)?.pdf
   const ctx = useAssistCtx()
   const [filter, q, , groupBy] = useLineFilter()
   const { queue, positions, quotes } = useLineQueue(id, filter, q)
@@ -76,6 +77,15 @@ export function LineDetail() {
     return () => ctx.setLine(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [p])
+
+  // #supplier / #f-qty (from the Tender PDF popover's next step): scroll there, and put the cursor in a field
+  const hasLine = !!p
+  useEffect(() => {
+    const el = loc.hash ? document.getElementById(decodeURIComponent(loc.hash.slice(1))) : null
+    if (!el) return
+    el.scrollIntoView({ block: 'center' })
+    if (el instanceof HTMLInputElement) el.focus({ preventScroll: true })
+  }, [loc.hash, lv, hasLine])
 
   const doPatch = (body: PositionPatch) => patch.mutateAsync({ lv, body })
   // fire-and-forget edits: a failed save is shown under the buttons (patch.error), not as an unhandled rejection
@@ -638,7 +648,7 @@ function SupplierSection({
     }
   }
   return (
-    <section className="flex flex-col gap-2.5 px-4 py-3.5 border" style={{ borderColor: border }}>
+    <section id="supplier" className="flex flex-col gap-2.5 px-4 py-3.5 border scroll-mt-4" style={{ borderColor: border }}>
       <div className="flex flex-wrap justify-between items-baseline gap-2">
         <h2 className="m-0 text-[15px] font-semibold">{t('Supplier quote')}</h2>
         {group && (
