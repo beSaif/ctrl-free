@@ -10,6 +10,7 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    proxy: { '/api': 'http://127.0.0.1:8000' },
+    // API_PORT lets several checkouts run side by side (default 8000)
+    proxy: { '/api': `http://127.0.0.1:${process.env.API_PORT ?? 8000}` },
   },
 })
