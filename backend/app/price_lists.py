@@ -539,17 +539,19 @@ def _log_repricing(before: list[dict], after: list[dict], what: str, by: str) ->
         batch = store.new_id("b_")
         with store.edit(t["id"], by=by) as tt:
             for ln in e["lines"]:
-                store.append_log(tt, by, "price_list", target=("position", ln["lv_id"]),
-                                 before={"unit_price": ln["old"], "unit_price_source": ln["old_source"]},
-                                 after={"unit_price": ln["new"], "unit_price_source": ln["new_source"]},
-                                 undoable=False, batch=batch,
-                                 text=f"{what}: unit price CHF {swiss(ln['old'])} -> CHF {swiss(ln['new'])}")
+                le = store.append_log(tt, by, "price_list", target=("position", ln["lv_id"]),
+                                      before={"unit_price": ln["old"], "unit_price_source": ln["old_source"]},
+                                      after={"unit_price": ln["new"], "unit_price_source": ln["new_source"]},
+                                      undoable=False, batch=batch,
+                                      text=f"{what}: unit price CHF {swiss(ln['old'])} → CHF {swiss(ln['new'])}")
+                le["direct_delta"] = ln["direct_delta"]
             sign = "+" if e["direct_delta"] >= 0 else "-"
-            store.append_log(tt, by, "price_list", target=("tender", tt["id"]),
+            le = store.append_log(tt, by, "price_list", target=("tender", tt["id"]),
                              before={"direct": e["direct_before"]}, after={"direct": e["direct_after"]},
                              undoable=False, batch=batch,
                              text=(f"{what}: {e['lines_changed']} line{'s' if e['lines_changed'] != 1 else ''} re-priced, "
                                    f"direct cost {sign}CHF {swiss(abs(e['direct_delta']))}"))
+            le["direct_delta"] = e["direct_delta"]
         pipeline._view_cache.pop(t["id"], None)
         n += 1
     return n

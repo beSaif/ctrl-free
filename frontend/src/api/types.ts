@@ -723,12 +723,12 @@ export interface ChangeEntry {
   types: ChangeType[]
   undoable: boolean
   fields: ChangeField[]
-  impact: { value: number; basis: 'line' | 'price' | 'line_total' } | null
+  impact: { value: number; basis: 'line' | 'price' | 'line_total' | 'direct' } | null
   instruction?: { id: string; type: string; page: number } | null
   reverted?: { by: string; at: string } | null
   reviews: ChangeReview[]
   state: ChangeState
-  state_why?: 'made_by_senior' | 'ok_by_senior' | null
+  state_why?: 'made_by_senior' | 'ok_by_senior' | 'price_list' | null
   ai?: { method: string; confidence: number | null; label: string | null; low: boolean; page: number; unit: string | null; assumptions: string[] }
 }
 

@@ -416,7 +416,7 @@ function StateLabel({ e }: { e: ChangeEntry }) {
             ? t('Approved · {who}', { who: last.by })
             : t('Approved')
   } else if (e.state === 'auto') {
-    label = t('Confident pick, no review needed')
+    label = e.state_why === 'price_list' ? t('Follows the price list, no review needed') : t('Confident pick, no review needed')
   } else {
     color = C.attn
     label = t('To review')
@@ -445,7 +445,7 @@ function Impact({ e }: { e: ChangeEntry }) {
   return (
     <span className="flex flex-col items-end">
       <span className="font-mono">{fmtSigned(im.value)}</span>
-      <span className="text-[12px] text-muted">{im.basis === 'price' ? t('offer price') : t('line total')}</span>
+      <span className="text-[12px] text-muted">{im.basis === 'price' ? t('offer price') : im.basis === 'direct' ? t('direct cost') : t('line total')}</span>
     </span>
   )
 }

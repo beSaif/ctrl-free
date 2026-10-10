@@ -68,6 +68,8 @@ export const DE_CHANGES: Record<string, string> = {
   'OK given by a senior': 'OK von einem Senior',
   'Approved · {who}': 'Freigegeben · {who}',
   'Confident pick, no review needed': 'Sichere Wahl, keine Prüfung nötig',
+  'Follows the price list, no review needed': 'Folgt der Preisliste, keine Prüfung nötig',
+  'direct cost': 'Direktkosten',
   'line total': 'Positionsbetrag',
   'no price change': 'Preis unverändert',
   'offer price': 'Offertpreis',

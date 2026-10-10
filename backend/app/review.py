@@ -182,6 +182,8 @@ def _state(e: dict, reviews: list[dict], reverted: dict | None) -> tuple[str, st
     """(state, why) for a logged change."""
     if e.get("undone"):
         return "reverted", None
+    if _repriced_line(e):
+        return "auto", "price_list"
     verdicts = [r for r in reviews if r.get("verdict") in ("approved", "reopened")]
     if verdicts and verdicts[-1]["verdict"] == "approved":
         return "approved", None
@@ -190,6 +192,12 @@ def _state(e: dict, reviews: list[dict], reverted: dict | None) -> tuple[str, st
     if e.get("approved_by_role") == "senior":
         return "approved", "ok_by_senior"
     return "to_review", None
+
+
+def _repriced_line(e: dict) -> bool:
+    """A line re-priced because a price list was switched on/off or reordered: a consequence of that one
+    decision (reviewed on its tender-level entry), shown for traceability but nothing to approve per line."""
+    return e.get("action") == "price_list" and (e.get("target") or {}).get("kind") == "position"
 
 
 def is_change(e: dict) -> bool:
@@ -256,7 +264,11 @@ def changes(t: dict) -> dict:
                                      "lv_id", "target", "text", "batch")}
         out["types"] = _types(e)
         out["undoable"] = bool(e.get("undoable", True)) and not e.get("undone")
-        if tg.get("kind") == "position" and tg.get("id") in raw_by_lv:
+        if e.get("action") == "price_list":
+            out["fields"] = _plain_fields(e)
+            d = e.get("direct_delta")
+            out["impact"] = {"value": d, "basis": "line" if tg.get("kind") == "position" else "direct"} if d is not None else None
+        elif tg.get("kind") == "position" and tg.get("id") in raw_by_lv:
             out["fields"], out["impact"] = _position_fields(t, e, raw_by_lv[tg["id"]])
         else:
             out["fields"] = _plain_fields(e)

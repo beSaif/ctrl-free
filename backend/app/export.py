@@ -397,7 +397,7 @@ def build_xlsx(tender: dict, totals: dict, settings: dict) -> bytes:
         else:
             ws_offer[C["Net unit price"] + r] = pr["net_unit_cost"]
             _comment(ws_offer[C["Net unit price"] + r], pr["sources"]["unit_price"])
-        ws_offer[C["Price source"] + r] = pr["unit_price_source"]
+        ws_offer[C["Price source"] + r] = "price_list" if pr.get("price_list") else pr["unit_price_source"]
         ws_offer[C["Waste %"] + r] = "=waste_pct"
         ws_offer[C["Material"] + r] = f"=ROUND({C['Qty']}{r}*{C['Net unit price']}{r}*(1+{C['Waste %']}{r}/100),2)"
         code = pr["install_code"]

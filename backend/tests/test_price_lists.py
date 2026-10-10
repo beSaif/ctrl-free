@@ -178,3 +178,37 @@ def test_api_activate_reprices_logs_and_reverts(client, tid, lists_dir):
     assert client.get(f"/api/tenders/{tid}/pricing").json()["totals"]["direct"] == pytest.approx(direct0, abs=0.01)
     assert client.delete(f"/api/reference/price-lists/{lid}").status_code == 200
     assert client.get(f"/api/reference/price-lists/{lid}").status_code == 404
+
+
+@pytest.mark.skipif(not config.DEMO_PDF.exists(), reason="demo PDF missing")
+def test_repricing_is_one_review_item_not_one_per_line(client, tid, lists_dir):
+    """Switching a price list on is one decision for the senior: the re-priced lines are listed with their
+    CHF effect for traceability, but only the tender-level entry waits for review."""
+    before = client.get(f"/api/tenders/{tid}/changes").json()["summary"]["to_review"]
+    prev = client.post("/api/reference/price-lists/preview", data={"demo": "equans_negotiated_prices_2026.csv"}).json()
+    eff = next(e for e in prev["effect"] if e["tender_id"] == tid)
+    r = client.post("/api/reference/price-lists", data={"demo": "equans_negotiated_prices_2026.csv",
+                                                        "meta": json.dumps(prev["meta"])})
+    assert r.status_code == 200, r.text
+    ch = client.get(f"/api/tenders/{tid}/changes").json()
+    newest = next(e for e in ch["entries"] if e["action"] == "price_list")  # entries are newest first
+    pl = [e for e in ch["entries"] if e["action"] == "price_list" and e["batch"] == newest["batch"]]
+    lines = [e for e in pl if e["target"]["kind"] == "position"]
+    tender = [e for e in pl if e["target"]["kind"] == "tender"]
+    assert len(lines) == eff["lines_changed"] and len(tender) == 1
+    assert all(e["state"] == "auto" and e["state_why"] == "price_list" for e in lines)
+    assert all(e["impact"]["basis"] == "line" and e["impact"]["value"] != 0 for e in lines)
+    assert sum(e["impact"]["value"] for e in lines) == pytest.approx(eff["direct_delta"], abs=0.05)
+    assert tender[0]["state"] == "to_review"
+    assert tender[0]["impact"] == {"value": pytest.approx(eff["direct_delta"], abs=0.01), "basis": "direct"}
+    assert ch["summary"]["to_review"] == before + 1
+
+    # the offer workbook writes the list's price and names the list as the price source
+    import io
+
+    import openpyxl
+    lv = lines[0]["lv_id"]
+    new_price = next(f["after"] for f in lines[0]["fields"] if f["path"] == "unit_price")
+    wb = openpyxl.load_workbook(io.BytesIO(client.get(f"/api/tenders/{tid}/export/xlsx").content))
+    row = next(r for r in wb["Offer"].iter_rows(values_only=True) if r and r[0] == lv)
+    assert new_price in row and "price_list" in row
