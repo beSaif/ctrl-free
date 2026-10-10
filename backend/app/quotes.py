@@ -39,6 +39,8 @@ def _needs_quote(p: dict, matches: dict | None, rows_by_id: dict) -> bool:
         return True
     m = (matches or {}).get(p["lv_id"]) or p.get("match") or {}
     pid = m.get("product_id")
+    if not pid and (m.get("label") or "None") == "None" and p.get("quantity"):
+        return True  # not in the catalogue: a supplier has to price it
     return bool(pid and rows_by_id.get(pid, {}).get("supplier_quote_required"))
 
 

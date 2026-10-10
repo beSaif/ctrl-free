@@ -131,9 +131,12 @@ def price_position(position: dict, settings: dict, system_profile: str = "school
     ov = _ov(position)
     qty = effective_quantity(position)
     pid = effective_product_id(position)
-    if not pid or qty is None or qty <= 0:
+    if qty is None or qty <= 0:
         return None
-    product = ref.catalog_row(pid)
+    quote0 = position.get("supplier_quote") or {}
+    if not pid and _num(ov.get("unit_price")) is None and _num(quote0.get("unit_price")) is None:
+        return None
+    product = ref.catalog_row(pid) if pid else None
 
     # unit price: manual > supplier quote > catalogue (catalog | supplier_package)
     quote = position.get("supplier_quote") or {}
@@ -191,7 +194,7 @@ def price_position(position: dict, settings: dict, system_profile: str = "school
     if _num(ov.get("quantity")) is not None:
         q_src = f"Changed by you ({q_src.lower() if not page else q_src} says {fmt_qty(position.get('quantity'))})"
     sources = {
-        "product": f"catalog.csv row {pid}" if product else f"Product {pid} (not in the catalogue)",
+        "product": f"catalog.csv row {pid}" if product else (f"Product {pid} (not in the catalogue)" if pid else "Not in the catalogue"),
         "unit_price": src_text,
         "install_rule": f"productivity.csv {code}" if rule else "No install rule",
         "quantity": q_src,
@@ -264,11 +267,18 @@ def derive_status(position: dict, price: dict | None) -> tuple[str, str]:
     if price is None:
         if effective_product_id(position):
             return "review_required", "Product not in the catalogue and no unit price entered"
+        if m.get("label") == "None" and not m.get("product_id"):
+            return "supplier_quote_required", "Not in the catalogue: ask a supplier for a price"
         cands = m.get("candidates") or []
         if cands:
             best = max((_num(c.get("score")) or 0) for c in cands)
             return "review_required", f"No confident match (best {best:.2f})"
         return "review_required", "No product matched yet"
+    if not price.get("product_id"):
+        # not in the catalogue, priced from a supplier quote or a price the estimator typed
+        if price["unit_price_source"] == "supplier_quote":
+            return "supplier_quote_required", "Not in the catalogue · quote entered"
+        return "supplier_quote_required", "Not in the catalogue · price entered by you"
     if conf is not None and conf < WEAK:
         return "review_required", f"No confident match (best {conf:.2f})"
 
