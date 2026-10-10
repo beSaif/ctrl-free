@@ -299,6 +299,45 @@ def _pos_long(p: dict, titles: dict) -> str:
     return f"{p['lv_id']} {t}{qs}, p. {p.get('page')}"
 
 
+def describe_applies(ids: list[str], positions: list[dict], family: str | None = None,
+                     titles: dict | None = None, variant: bool = False) -> tuple[str, str]:
+    """(applies_label, applies_long) for the lines a rule applies to: the suggestion and every edit."""
+    titles = titles or {}
+    fam_label = matcher.family_label(family) if family else None
+    if variant and not ids:
+        return "Product changes", "Any line where you pick a product other than the one specified."
+    if ids and len(ids) <= 4:
+        plist = [p for p in positions if p["lv_id"] in ids]
+        return _short_ids(ids), "; ".join(_pos_long(p, titles) for p in plist) + "."
+    if ids:
+        pages = sorted({p.get("page") for p in positions if p["lv_id"] in ids if p.get("page")})
+        some = f"{', '.join(ids[:12])}{' …' if len(ids) > 12 else ''}"
+        if fam_label:
+            label, long = f"{len(ids)} {fam_label.lower()}", f"All {fam_label.lower()} lines ({len(ids)}): {some}"
+        else:
+            label, long = f"{len(ids)} lines", f"{len(ids)} lines: {some}"
+        return label, long + (f", pages {pages[0]}–{pages[-1]}." if len(pages) > 1 else (f", page {pages[0]}." if pages else "."))
+    if family:
+        return f"{fam_label} lines", f"{fam_label} lines (none found in this tender's priced lines)."
+    return "Whole installation", "The whole installation."
+
+
+def line_families(positions: list[dict]) -> list[dict]:
+    """Product families of the priceable lines, to pick e.g. all silencers in one go (the same mapping
+    the rules use for their suggested lines). [{key, label, label_de, lv_ids}] in order of first line."""
+    out: dict[str, dict] = {}
+    for p in positions:
+        if p.get("kind") in ("subtotal", "text_only"):
+            continue
+        fam = matcher.family_of(_position_type(p, None))
+        if not fam:
+            continue
+        f = out.setdefault(fam, {"key": fam, "label": matcher.family_label(fam) or fam,
+                                 "label_de": matcher.family_label(fam, "de") or fam, "lv_ids": []})
+        f["lv_ids"].append(p["lv_id"])
+    return list(out.values())
+
+
 def _covered_by_product(rule_text: str, ids: list[str], matches: dict, rows_by_id: dict) -> str | None:
     feats = [eng for rx, eng in FEATURES if rx.search(rule_text)]
     if not feats or not ids:
@@ -510,23 +549,7 @@ def extract_instructions(pages_text: dict[int, str] | None, positions: list[dict
     out = []
     for n, a in enumerate(chosen, 1):
         ids = a["ids"]
-        fam_label = matcher.family_label(a["family"]) if a["family"] else None
-        if "variant" in a["sig"]:
-            label, long = "Product changes", "Any line where you pick a product other than the one specified."
-        elif ids and len(ids) <= 4:
-            label = _short_ids(ids)
-            plist = [p for p in positions if p["lv_id"] in ids]
-            long = "; ".join(_pos_long(p, titles) for p in plist) + "."
-        elif ids:
-            pages = sorted({p.get("page") for p in positions if p["lv_id"] in ids if p.get("page")})
-            label = f"{len(ids)} {fam_label.lower() if fam_label else 'lines'}"
-            long = f"All {fam_label.lower() if fam_label else ''} lines ({len(ids)}): {', '.join(ids[:12])}{' …' if len(ids) > 12 else ''}" + \
-                   (f", pages {pages[0]}–{pages[-1]}." if len(pages) > 1 else (f", page {pages[0]}." if pages else "."))
-        elif a["family"]:
-            label = f"{fam_label} lines"
-            long = f"{fam_label} lines (none found in this tender's priced lines)."
-        else:
-            label, long = "Whole installation", "The whole installation."
+        label, long = describe_applies(ids, positions, a["family"], titles, variant="variant" in a["sig"])
         quote = a["quote"]
         if not verbatim_in(quote, a["text"]):  # should never happen; keep the honest full text instead
             quote = a["text"]

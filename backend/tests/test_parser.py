@@ -157,6 +157,25 @@ def test_subtotals(parsed):
     assert all(p["lv_id"].startswith("ST") for p in subs)
 
 
+def test_pdf_order(parsed):
+    """Every row carries its index in the LV stream: unique, and it follows pages and systems as printed."""
+    pos = parsed["positions"]
+    order = [p["pdf_order"] for p in pos]
+    assert all(isinstance(o, int) and o >= 0 for o in order)
+    assert len(set(order)) == len(order)
+    printed = sorted(pos, key=lambda p: p["pdf_order"])
+    pages = [p["page"] for p in printed]
+    assert pages == sorted(pages)
+    # a system's rows are one run in printed order, in the order the systems are listed
+    runs = [s for i, s in enumerate(p["system"] for p in printed) if i == 0 or printed[i - 1]["system"] != s]
+    assert runs == [s["label"] for s in parsed["systems"] if s["label"] in runs]
+    assert len(runs) == len(set(runs))
+    # the section subtotal ("Total Kanäle B") closes its section: it comes after the section's lines
+    sub = next(p for p in pos if p["title_de"] == 'Total Kanäle "B"')
+    same = [p for p in pos if p["system"] == sub["system"] and p["section"] == sub["section"] and p["kind"] != "subtotal"]
+    assert same and all(p["pdf_order"] < sub["pdf_order"] for p in same)
+
+
 # ----------------------------------------------------------------------------- schema / geometry
 
 def test_position_schema_and_geometry(parsed):

@@ -8,8 +8,8 @@ import { AssistTag, ErrorBox, FilterTabs, IconChevron, LinkButton, Button, Loadi
 import { cx } from '../lib/cx'
 import { FooterTotals } from '../components/FooterTotals'
 import { fmt2, fmtQty, fmtUnit } from '../lib/format'
-import { isSupplier, lineStatus, matchView, productLabel, quotedPrice, type LineFilter } from '../lib/lines'
-import { linesQuery, useCatalog, useLineFilter, useLineQueue } from './linesShared'
+import { isSupplier, lineStatus, matchView, productLabel, quotedPrice, type LineFilter, type LineGroupBy } from '../lib/lines'
+import { groupParam, linesQuery, useCatalog, useLineFilter, useLineQueue } from './linesShared'
 
 export const LINE_GRID = 'grid grid-cols-[56px_minmax(0,1.5fr)_52px_40px_minmax(0,1fr)_92px_104px_112px_184px] gap-x-3'
 
@@ -18,39 +18,46 @@ export function Lines() {
   const t = useT()
   const nav = useNavigate()
   const [params] = useSearchParams()
-  const [filter, q, setFilter] = useLineFilter()
+  const [filter, q, setFilter, group, setGroup] = useLineFilter()
   const [search, setSearch] = useState(q)
   const { rows, queue, counts, positions, isLoading, error } = useLineQueue(id, filter, q)
   const { data: pr } = usePricing(id)
   const cat = useCatalog()
   const [sel, setSel] = useState<string | null>(params.get('sel'))
   const rowRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
+  const gp = groupParam(group)
 
   // Large lists open with the biggest groups expanded and the rest collapsed (one click each, or all).
-  const groupOf = useMemo(() => {
+  // In tender order a section sits inside its system: collapsing the system hides its sections too.
+  const { groupOf, parentOf } = useMemo(() => {
     const m: Record<string, string> = {}
+    const par: Record<string, string> = {}
     let g = ''
     for (const r of rows) {
-      if (r.type === 'group') g = r.key
-      else m[r.p.lv_id] = g
+      if (r.type === 'group') {
+        g = r.key
+        if (r.parent) par[r.key] = r.parent
+      } else m[r.p.lv_id] = g
     }
-    return m
+    return { groupOf: m, parentOf: par }
   }, [rows])
   const groupKeys = useMemo(() => rows.filter((r) => r.type === 'group').map((r) => r.key), [rows])
+  const topKeys = groupKeys.filter((k) => !parentOf[k])
   const big = queue.length > 80 && !q
-  // expanded/collapsed choices belong to one filter + search; switching starts fresh
-  const fk = filter + '|' + q
+  // expanded/collapsed choices belong to one filter + search + grouping; switching starts fresh
+  const fk = filter + '|' + q + '|' + group
   const [tog, setTog] = useState<{ k: string; v: Record<string, boolean> }>({ k: fk, v: {} })
   const toggled = tog.k === fk ? tog.v : {}
   const setToggled = (f: (x: Record<string, boolean>) => Record<string, boolean>) => setTog({ k: fk, v: f(toggled) })
   const isCollapsed = (key: string) => {
     if (key in toggled) return toggled[key]
-    if (sel && groupOf[sel] === key) return false
-    return big && groupKeys.indexOf(key) >= 5
+    if (sel && (groupOf[sel] === key || parentOf[groupOf[sel]] === key)) return false
+    return big && topKeys.indexOf(key) >= 5
   }
+  const isHidden = (key: string) => isCollapsed(key) || (!!parentOf[key] && isCollapsed(parentOf[key]))
   const allOpen = groupKeys.every((k) => !isCollapsed(k))
   const setAll = (collapsed: boolean) => setToggled(() => Object.fromEntries(groupKeys.map((k) => [k, collapsed])))
-  const visibleQueue = queue.filter((p) => !isCollapsed(groupOf[p.lv_id] ?? ''))
+  const visibleQueue = queue.filter((p) => !isHidden(groupOf[p.lv_id] ?? ''))
 
   useEffect(() => {
     const h = setTimeout(() => {
@@ -83,12 +90,12 @@ export function Lines() {
         setSel(n.lv_id)
         rowRefs.current[n.lv_id]?.focus()
       } else if (e.key === 'Enter' && !e.repeat && sel && el.tagName !== 'A' && el.tagName !== 'BUTTON') {
-        nav(`/t/${id}/lines/${sel}${linesQuery(filter, q)}`)
+        nav(`/t/${id}/lines/${sel}${linesQuery(filter, q, groupParam(group))}`)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [visibleQueue, sel, nav, id, filter, q])
+  }, [visibleQueue, sel, nav, id, filter, q, group])
 
   const items: TabItem<LineFilter>[] = [
     { key: 'review', label: t('To review'), count: counts.review },
@@ -100,19 +107,22 @@ export function Lines() {
   if (counts.notpriced) items.push({ key: 'notpriced', label: t('Not priced'), count: counts.notpriced })
 
   const hint =
-    filter === 'review'
-      ? t('Same product type together, largest amount first')
-      : filter === 'priced'
-        ? t('Least sure match first')
-        : filter === 'all'
-          ? t('Tender order, by area')
-          : t('Tender order')
+    group === 'order'
+      ? t('As printed: system, section, page')
+      : filter === 'review'
+        ? t('Same product type together, largest amount first')
+        : filter === 'priced'
+          ? t('Least sure match first')
+          : filter === 'all'
+            ? t('Tender order, by area')
+            : t('Tender order')
   const reviewDone = filter === 'review' && counts.review === 0 && !q && positions.length > 0
 
   return (
     <div className="flex-auto flex flex-col">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5 px-6 py-2.5 border-b border-rule">
         <FilterTabs label={t('Filter lines')} items={items} value={filter} onChange={(f) => setFilter(f, q)} />
+        <GroupBy value={group} onChange={setGroup} />
         <div className="flex-[1_1_200px]" />
         <span className="text-[13px] text-muted">{hint}</span>
         {groupKeys.length > 1 && (
@@ -157,15 +167,19 @@ export function Lines() {
               </div>
               {rows.map((r) =>
                 r.type === 'group' ? (
+                  r.parent && isCollapsed(r.parent) ? null : (
                   <button
                     type="button"
                     key={r.key}
                     onClick={() => setToggled((x) => ({ ...x, [r.key]: !isCollapsed(r.key) }))}
                     aria-expanded={!isCollapsed(r.key)}
-                    className="flex items-center gap-2.5 w-full min-h-9 px-6 border-0 border-b border-rule bg-panel text-left text-ink hover:bg-rowrule"
+                    className={cx(
+                      'flex items-center gap-2.5 w-full min-h-9 px-6 border-0 border-b text-left text-ink',
+                      r.parent ? 'pl-11 border-rowrule bg-white hover:bg-panel' : 'border-rule bg-panel hover:bg-rowrule',
+                    )}
                   >
                     <IconChevron open={!isCollapsed(r.key)} />
-                    <span className="font-semibold">{r.name}</span>
+                    <span className={r.parent ? 'font-medium' : 'font-semibold'}>{r.name}</span>
                     <span className="text-muted">{r.meta}</span>
                     <span className="flex-auto" />
                     {r.req && (
@@ -175,12 +189,13 @@ export function Lines() {
                     )}
                     <span className="font-mono min-w-[110px] text-right">{fmt2(r.sub)}</span>
                   </button>
-                ) : isCollapsed(groupOf[r.p.lv_id] ?? '') ? null : (
+                  )
+                ) : isHidden(groupOf[r.p.lv_id] ?? '') ? null : (
                   <LineRow
                     key={r.p.lv_id}
                     p={r.p}
                     selected={r.p.lv_id === sel}
-                    to={`/t/${id}/lines/${r.p.lv_id}${linesQuery(filter, q)}`}
+                    to={`/t/${id}/lines/${r.p.lv_id}${linesQuery(filter, q, gp)}`}
                     product={productLabel(r.p, cat)}
                     refCb={(el) => {
                       rowRefs.current[r.p.lv_id] = el
@@ -201,6 +216,37 @@ export function Lines() {
         )}
       </main>
       <FooterTotals tenderId={id} />
+    </div>
+  )
+}
+
+/** "Group by: Type · Tender order" (stored in the URL as g=order). */
+function GroupBy({ value, onChange }: { value: LineGroupBy; onChange: (g: LineGroupBy) => void }) {
+  const t = useT()
+  const opts: [LineGroupBy, string][] = [
+    ['type', t('Type')],
+    ['order', t('Tender order')],
+  ]
+  return (
+    <div role="radiogroup" aria-label={t('Group by')} className="flex items-center gap-1 text-[13px]">
+      <span className="text-muted mr-1" aria-hidden="true">
+        {t('Group by')}
+      </span>
+      {opts.map(([k, label]) => (
+        <button
+          key={k}
+          type="button"
+          role="radio"
+          aria-checked={value === k}
+          onClick={() => onChange(k)}
+          className={cx(
+            'min-h-[30px] px-2.5 border rounded-[2px] bg-white',
+            value === k ? 'border-ink text-ink font-semibold' : 'border-rule text-muted hover:border-ink hover:text-ink',
+          )}
+        >
+          {label}
+        </button>
+      ))}
     </div>
   )
 }

@@ -139,9 +139,12 @@ export function reviewBreakdown(open: Position[], totalDirect: number, t: T): st
 // ---- grouping for the list ------------------------------------------------------------
 
 export type LineFilter = 'review' | 'priced' | 'all' | 'check' | 'missing' | 'notpriced'
+/** 'type': each filter's working order (product type, money at risk); 'order': as printed in the tender. */
+export type LineGroupBy = 'type' | 'order'
 
+/** A group row; `parent` is set on a section heading inside a system (tender order). */
 export type Row =
-  | { type: 'group'; key: string; name: string; meta: string; req?: string; reqFg?: string; sub: number }
+  | { type: 'group'; key: string; name: string; meta: string; req?: string; reqFg?: string; sub: number; parent?: string }
   | { type: 'line'; p: Position }
 
 const direct = (p: Position) => p.pricing?.direct ?? 0
@@ -166,6 +169,55 @@ export function filterCounts(ps: Position[]) {
   }
 }
 
+const inFilter: Record<LineFilter, (p: Position) => boolean> = {
+  review: isOpen,
+  priced: (p) => !isSupplier(p) && (p.status === 'calculated' || p.status === 'assumption_applied'),
+  all: () => true,
+  check: (p) => p.status === 'review_required',
+  missing: (p) => p.status === 'insufficient_information',
+  notpriced: (p) => !isPriceable(p),
+}
+
+function pagesLabel(ls: Position[], t: T) {
+  const lo = Math.min(...ls.map((p) => p.page))
+  const hi = Math.max(...ls.map((p) => p.page))
+  return lo === hi ? t('p. {page}', { page: lo }) : t('pp. {a} to {b}', { a: lo, b: hi })
+}
+
+/** Tender order: the filter's lines as printed, under the PDF's system and section headings (letter + name). */
+function orderRows(all: Position[], ps: Position[], filter: LineFilter, t: T, nLines: (n: number) => string) {
+  const at = new Map(all.map((p, i) => [p.lv_id, p.pdf_order ?? i]))
+  const ls = ps.filter(inFilter[filter]).sort((a, b) => at.get(a.lv_id)! - at.get(b.lv_id)!)
+  // consecutive runs, so a heading appears where the PDF has it
+  const runs = (xs: Position[], same: (a: Position, b: Position) => boolean) =>
+    xs.reduce<Position[][]>((acc, p) => {
+      const last = acc[acc.length - 1]
+      if (last && same(last[0], p)) last.push(p)
+      else acc.push([p])
+      return acc
+    }, [])
+  const rows: Row[] = []
+  const queue: Position[] = []
+  for (const sys of runs(ls, (a, b) => a.system === b.system)) {
+    const sk = 'o-' + at.get(sys[0].lv_id)
+    rows.push({ type: 'group', key: sk, name: sys[0].system || t('Other'), meta: nLines(sys.length) + ' · ' + pagesLabel(sys, t), sub: sum(sys) })
+    for (const sec of runs(sys, (a, b) => (a.section ?? '') === (b.section ?? ''))) {
+      const s0 = sec[0]
+      if (s0.section || s0.section_name)
+        rows.push({
+          type: 'group',
+          key: 'o-' + at.get(s0.lv_id) + '-s',
+          name: [s0.section, s0.section_name].filter(Boolean).join(' '),
+          meta: nLines(sec.length) + ' · ' + pagesLabel(sec, t),
+          sub: sum(sec),
+          parent: sk,
+        })
+      sec.forEach((p) => (rows.push({ type: 'line', p }), queue.push(p)))
+    }
+  }
+  return { rows, queue }
+}
+
 export function buildRows(
   all: Position[],
   quotes: QuoteGroup[],
@@ -173,12 +225,14 @@ export function buildRows(
   q: string,
   t: T,
   lang: 'en' | 'de' = 'en',
+  groupBy: LineGroupBy = 'type',
 ): { rows: Row[]; queue: Position[] } {
   const ps = all.filter((p) => matchesSearch(p, q))
+  const nLines = (n: number) => (n === 1 ? t('{n} line', { n }) : t('{n} lines', { n }))
+  if (groupBy === 'order') return orderRows(all, ps, filter, t, nLines)
   const rows: Row[] = []
   const queue: Position[] = []
   const lineRows = (ls: Position[]) => ls.forEach((p) => (rows.push({ type: 'line', p }), queue.push(p)))
-  const nLines = (n: number) => (n === 1 ? t('{n} line', { n }) : t('{n} lines', { n }))
 
   if (filter === 'review') {
     const open = ps.filter(isOpen)
