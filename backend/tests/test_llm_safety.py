@@ -84,6 +84,14 @@ def test_combine_rules_not_strong_lets_llm_decide_among_valid_candidates():
     strong = {"product_id": "A", "confidence": 0.9, "label": "Strong", "method": "rules", "assumptions": []}
     low = {"product_id": "A", "confidence": 0.45, "label": "Weak", "method": "llm", "assumptions": []}
     assert matcher.combine_picks(strong, low, cands)["label"] == "Strong"
+    # LLM assumptions on a confirmation are notes, not a downgrade
+    noted = {**low, "confidence": 0.92, "label": "Strong", "assumptions": ["Colour not specified"]}
+    both = matcher.combine_picks(strong, noted, cands)
+    assert both["label"] == "Strong" and both["assumptions"] == [] and both["llm_notes"] == ["Colour not specified"]
+    # confirmation never raises a partial code match
+    close = {"product_id": "A", "confidence": 0.7, "label": "Close", "method": "rules", "assumptions": []}
+    high = {"product_id": "A", "confidence": 0.92, "label": "Strong", "method": "llm", "assumptions": []}
+    assert matcher.combine_picks(close, high, cands)["label"] == "Close"
 
 
 class _SlowFailingClient:

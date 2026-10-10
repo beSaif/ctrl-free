@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:04",
+ "api": "responses",
+ "input_tokens": 7162,
+ "output_tokens": 563,
+ "response": {
+  "LV0143": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Fire insulation with EI60 is not matched by any candidate.",
+   "assumptions": []
+  },
+  "LV0144": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular EI30 fire penetration seal, but the only seal candidate is the wrong size.",
+   "assumptions": []
+  },
+  "LV0145": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular EI30 fire penetration seal, but the only seal candidate is the wrong size.",
+   "assumptions": []
+  },
+  "LV0146": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular EI30 fire penetration seal, but the only seal candidate is the wrong size.",
+   "assumptions": []
+  },
+  "LV0147": {
+   "product_id": "P-SUP-001",
+   "confidence": "high",
+   "reason": "Connection-angle support set matches the tender type.",
+   "assumptions": []
+  },
+  "LV0148": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Inspection cover for fire insulation, but the only cover candidate is the wrong size.",
+   "assumptions": []
+  },
+  "LV0149": {
+   "product_id": "P-AHU-10500",
+   "confidence": "high",
+   "reason": "Supply air AHU with 10'500 m3/h matches the candidate airflow.",
+   "assumptions": []
+  },
+  "LV0150": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Casing section of a ventilation unit is not matched by the AHU candidates.",
+   "assumptions": []
+  },
+  "LV0151": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Casing section of a ventilation unit is not matched by the AHU candidates.",
+   "assumptions": []
+  },
+  "LV0152": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Casing section of a ventilation unit is not matched by the AHU candidates.",
+   "assumptions": []
+  }
+ }
+}

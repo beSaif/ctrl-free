@@ -1,0 +1,46 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T10:55:54",
+ "api": "responses",
+ "input_tokens": 1044,
+ "output_tokens": 306,
+ "response": {
+  "ST048": {
+   "title_en": "Total thermal duct insulation, mineral wool",
+   "description_en": "Total for thermal duct insulation in mineral wool, block F."
+  },
+  "ST049": {
+   "title_en": "Total ventilation system, gymnasium",
+   "description_en": "Total for ventilation system 244.01 serving the gymnasium."
+  },
+  "LV0254": {
+   "title_en": "Mounting feet, example",
+   "description_en": "Mounting feet, for example Walraven type."
+  },
+  "LV0255": {
+   "title_en": "Mounting rail, example",
+   "description_en": "Mounting rail, example type for support installations."
+  },
+  "ST050": {
+   "title_en": "Total fittings and instruments, C",
+   "description_en": "Total for fittings and instruments, block C."
+  },
+  "ST051": {
+   "title_en": "Total installation and transport",
+   "description_en": "Total for installation labour and transport."
+  },
+  "ST052": {
+   "title_en": "Total services",
+   "description_en": "Total for services."
+  },
+  "ST053": {
+   "title_en": "Total installation and services, E",
+   "description_en": "Total for installation and services, block E."
+  },
+  "ST054": {
+   "title_en": "Total flat-roof mounting system",
+   "description_en": "Total for mounting system 244.06 for flat roof."
+  }
+ }
+}

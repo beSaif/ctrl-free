@@ -1,0 +1,21 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "assist_command",
+ "created": "2026-10-10T11:18:02",
+ "api": "responses",
+ "input_tokens": 671,
+ "output_tokens": 73,
+ "response": {
+  "intent": "set_quantity",
+  "lv_ids": [
+   "LV0010"
+  ],
+  "product_id": null,
+  "quantity": 99,
+  "status": null,
+  "field": null,
+  "condition": null,
+  "confirm": false,
+  "reply": "Ik pas de hoeveelheid van LV0010 aan naar 99."
+ }
+}

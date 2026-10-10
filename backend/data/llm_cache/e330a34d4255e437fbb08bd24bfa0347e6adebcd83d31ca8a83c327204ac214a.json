@@ -1,0 +1,131 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "tender_instructions",
+ "created": "2026-10-10T10:56:18",
+ "api": "responses",
+ "input_tokens": 5691,
+ "output_tokens": 1531,
+ "response": {
+  "instructions": [
+   {
+    "rule_id": "r001",
+    "quote_de": "Sofern mit der Submission andere als vorgeschriebene Materialien offeriert werden, hat dies als Variante mit einer entsprechenden Begründung - z.B. technisch besser oder gleichwertig, preisgünstiger oder ähnliches - zu geschehen.",
+    "text_en": "If materials other than those specified are offered with the tender, this must be done as a variant with an appropriate justification, e.g. technically better or equivalent, cheaper or similar.",
+    "kind": "scope",
+    "why": "Any deviation from specified materials must be clearly declared as a variant, affecting how we prepare the bid."
+   },
+   {
+    "rule_id": "r000",
+    "quote_de": "Es dürfen nur bewährte und betriebssichere Fabrikat offeriert werden, für welche seitens des Unternehmers die volle Garantie für einwandfreien Unterhalt und Garantieservice übernommen werden kann.",
+    "text_en": "Only proven and reliable makes may be offered, for which the contractor can assume full warranty for proper maintenance and warranty service.",
+    "kind": "scope",
+    "why": "Restricts the choice of products and brands to reliable, supportable makes only."
+   },
+   {
+    "rule_id": "r005",
+    "quote_de": "Eine gleichmässige Temperaturmischung ohne Schichtungen ist zu garantieren. Für alle Anlagen mit Aussenluft-/Umluftbetrieb sind Misch-Schikanen einzurechnen.",
+    "text_en": "Uniform temperature mixing without stratification must be guaranteed. For all systems with outdoor air/recirculation operation, mixing baffles must be included in the price.",
+    "kind": "cost",
+    "why": "Include mixing baffles for any recirculation AHU to avoid missing material and labor."
+   },
+   {
+    "rule_id": "r006",
+    "quote_de": "Je 1 Satz Ersatzfilterzellen gleicher Qualität ist mitzuliefern.",
+    "text_en": "One set of replacement filter cells of equal quality must be supplied for each unit.",
+    "kind": "cost",
+    "why": "Budget spare filter cells for each filter stage, which is an explicit supply obligation."
+   },
+   {
+    "rule_id": "r007",
+    "quote_de": "Jeder Filterteil ist mit einem anzeigenden Differenzdruckmanometer mit Endschalter auszurüsten.",
+    "text_en": "Each filter section must be equipped with an indicating differential pressure gauge with end switch.",
+    "kind": "cost",
+    "why": "Add differential pressure gauges with end switches to every filter section."
+   },
+   {
+    "rule_id": "r026",
+    "quote_de": "Der Unternehmer hat die notwendigen Einrichtungen und Hilfeleistungen zu erbringen. Nachprüfungen und allfällige Folgekosten hat der Unternehmer zu tragen.",
+    "text_en": "The contractor must provide the necessary facilities and assistance. Re-tests and any resulting follow-up costs are borne by the contractor.",
+    "kind": "risk",
+    "why": "Duct tightness testing can create unpaid follow-up costs if the first test fails."
+   },
+   {
+    "rule_id": "r028",
+    "quote_de": "Jede Klappe (auch Einstellklappe) muss mit einem luftdichten Revisionsdeckel zugänglich gemacht werden.",
+    "text_en": "Every damper, including balancing dampers, must be made accessible with an airtight inspection cover.",
+    "kind": "cost",
+    "why": "Inspection access and airtight covers must be included for all dampers."
+   },
+   {
+    "rule_id": "r029",
+    "quote_de": "Jede Brandschutzklappe muss mit Motorantrieb inkl. elektrischem Endschalter mit Öffnungs- und Schliesskontakt und Thermostat ausgerüstet sein.",
+    "text_en": "Every fire damper must be equipped with a motor actuator including an electrical limit switch with opening and closing contact and thermostat.",
+    "kind": "cost",
+    "why": "Fire dampers need a complete actuator package, not just the damper body."
+   },
+   {
+    "rule_id": "r031",
+    "quote_de": "Schalldämpfer ausgebildet als Absorptions- oder Relaxationsschalldämpfer mit breitbandiger Dämpfung.",
+    "text_en": "Silencers shall be designed as absorption or reactive silencers with broadband attenuation.",
+    "kind": "scope",
+    "why": "Defines the silencer type and performance basis for the priced items."
+   },
+   {
+    "rule_id": "r032",
+    "quote_de": "Alle Gitter sind zweckentsprechend mit einer Mengenreguliereinheit ausgerüstet.",
+    "text_en": "All grilles must be equipped with a flow regulation unit appropriate to their purpose.",
+    "kind": "cost",
+    "why": "Supply flow control devices with every grille, not only the grille itself."
+   },
+   {
+    "rule_id": "r034",
+    "quote_de": "Alle Anlageteile wie Monobloc-Apparate, Ventilatoren, Pumpen, Schalt-, Regel- und Kontrollinstrumente usw. sind mit Bezeichnungsschildern, mit Apparatebezeichnung und Apparatenummer entsprechend den Schemaunterlagen zu bezeichnen.",
+    "text_en": "All system components such as monobloc units, fans, pumps, switching, control and monitoring instruments, etc. must be labeled with nameplates showing the equipment designation and equipment number according to the schematic documents.",
+    "kind": "cost",
+    "why": "Include durable labeling for all equipment and controls."
+   },
+   {
+    "rule_id": "r045",
+    "quote_de": "Die Anlage ist im UML-Betrieb anzufahren",
+    "text_en": "The system must be started up in recirculation mode.",
+    "kind": "scope",
+    "why": "The control/start-up sequence must support recirculation operation for variable air volume systems."
+   },
+   {
+    "rule_id": "r050",
+    "quote_de": "Der Transport der Materialien zum Montageort ist Sache des Unternehmers.",
+    "text_en": "Transport of the materials to the installation location is the contractor's responsibility.",
+    "kind": "cost",
+    "why": "Internal transport to site must be included in our unit rates unless already covered elsewhere."
+   },
+   {
+    "rule_id": "r055",
+    "quote_de": "Sämtliches Aufhängematerial muss in verzinkter Ausführung eingerechnet werden (Dübel und Schrauben promatverzinkt).",
+    "text_en": "All suspension material must be included in galvanized execution (anchors and screws hot-dip galvanized).",
+    "kind": "cost",
+    "why": "All hangers and fixing hardware must be priced as galvanized."
+   },
+   {
+    "rule_id": "r059",
+    "quote_de": "Ergeben sich bei der Inbetriebnahme Überschreitungen der geforderten Geräuschpegel, werden dem Unternehmer sämtliche im Zusammenhang mit der Änderung entstehenden Kosten belastet.",
+    "text_en": "If the required noise levels are exceeded during commissioning, all costs arising from the modification will be charged to the contractor.",
+    "kind": "risk",
+    "why": "Commissioning noise failures can trigger full corrective-cost exposure."
+   },
+   {
+    "rule_id": "r060",
+    "quote_de": "Für die Ausführung der Dämmungen gelten die Bestimmungen des SIA und die Richtlinien der IsolSuisse und der örtlichen Vorschriften der Feuerpolizei und Kantonaler Energiefachstellen.",
+    "text_en": "The execution of insulation is governed by the SIA provisions, the IsolSuisse guidelines and the local regulations of the fire police and cantonal energy authorities.",
+    "kind": "scope",
+    "why": "Insulation must comply with these standards and local rules."
+   },
+   {
+    "rule_id": "r061",
+    "quote_de": "Die Dämmstärken und die Ausführungsart der Dämmungen sind in der Materialspezifikation aufgeführt.",
+    "text_en": "The insulation thicknesses and the method of execution are listed in the material specification.",
+    "kind": "scope",
+    "why": "Use the specified insulation thickness and build-up from the materials schedule."
+   }
+  ]
+ }
+}

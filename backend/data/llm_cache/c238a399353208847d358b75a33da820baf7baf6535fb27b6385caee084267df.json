@@ -1,0 +1,19 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "assist_command",
+ "created": "2026-10-10T12:10:03",
+ "api": "responses",
+ "input_tokens": 483,
+ "output_tokens": 212,
+ "response": {
+  "intent": "unsupported",
+  "lv_ids": [],
+  "product_id": null,
+  "quantity": null,
+  "status": null,
+  "field": null,
+  "condition": null,
+  "confirm": false,
+  "reply": "I can do that once the relevant line IDs or supplier reply lines are available."
+ }
+}

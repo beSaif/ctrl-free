@@ -1,0 +1,110 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T10:55:57",
+ "api": "responses",
+ "input_tokens": 4671,
+ "output_tokens": 1006,
+ "response": {
+  "LV0192": {
+   "title_en": "Actuator 5 Nm",
+   "description_en": "24 V AC/DC modulating damper actuator, IP54, 150 s runtime, mechanical angle limit and position indication."
+  },
+  "LV0193": {
+   "title_en": "Duct smoke detector",
+   "description_en": "VdS-approved duct smoke detector with contamination display, electronic airflow monitoring, external reset and RS485 bus interface."
+  },
+  "LV0194": {
+   "title_en": "Differential pressure switch",
+   "description_en": "Install the specified field device in the system."
+  },
+  "LV0195": {
+   "title_en": "Frost protection thermostat, 2-point",
+   "description_en": "Install the specified field device in the system."
+  },
+  "LV0196": {
+   "title_en": "Duct temperature and humidity sensor",
+   "description_en": "Install the specified field device in the system."
+  },
+  "LV0197": {
+   "title_en": "Differential pressure sensor",
+   "description_en": "Install the specified field device in the system."
+  },
+  "ST035": {
+   "title_en": "Total control D",
+   "description_en": "Total control D."
+  },
+  "LV0198": {
+   "title_en": "Installation and transport",
+   "description_en": "Install, test, commission and instruct the operational system, including transport of materials and use of lifting equipment up to 4.0 m height."
+  },
+  "LV0199": {
+   "title_en": "Installation of client-supplied field devices",
+   "description_en": "Install client-supplied field devices per specification, including hygiene documentation, first inspection, laboratory analyses, and required test openings."
+  },
+  "ST036": {
+   "title_en": "Total installation and transport",
+   "description_en": "Total installation and transport."
+  },
+  "ST037": {
+   "title_en": "Total services",
+   "description_en": "Total services."
+  },
+  "ST038": {
+   "title_en": "Total installation services E",
+   "description_en": "Total installation services E."
+  },
+  "LV0200": {
+   "title_en": "Thermal duct insulation 30 mm",
+   "description_en": "Thermal external insulation with 30 mm mineral wool boards and aluminium foil, pinned in place."
+  },
+  "LV0201": {
+   "title_en": "Thermal duct insulation 60 mm",
+   "description_en": "Thermal external insulation with 60 mm mineral wool boards and aluminium foil, pinned in place."
+  },
+  "LV0202": {
+   "title_en": "Thermal duct insulation 100 mm",
+   "description_en": "Thermal external insulation with 100 mm mineral wool boards and aluminium foil, pinned in place."
+  },
+  "LV0203": {
+   "title_en": "Thermal duct insulation 15 mm",
+   "description_en": "Abrasion-resistant external duct insulation with 15 mm mineral wool boards for wall and ceiling penetrations."
+  },
+  "LV0204": {
+   "title_en": "Weatherproof cladding 100 mm",
+   "description_en": "Double-wall sheet ducts with stainless steel weatherproof cladding and sealing, including 100 mm mineral wool external insulation."
+  },
+  "LV0205": {
+   "title_en": "Fire insulation EI30",
+   "description_en": "Fire insulation external duct insulation EI30 with current test and classification documents and VKF-certified system requirements."
+  },
+  "LV0206": {
+   "title_en": "Fire penetration seal 300x200 mm",
+   "description_en": "EI30 penetration seal for rectangular ventilation ducts, VKF-certified only, size 300 x 200 mm."
+  },
+  "LV0207": {
+   "title_en": "Fire penetration seal DN160",
+   "description_en": "EI30 penetration seal for circular pipes, VKF-certified only, size Ø 16 cm."
+  },
+  "LV0208": {
+   "title_en": "Connection angle set",
+   "description_en": "Connection angle set for wall or ceiling fixing, 8 pieces per penetration, for ventilation pipes of all sizes."
+  },
+  "LV0209": {
+   "title_en": "Inspection cover 400x200 mm",
+   "description_en": "Inspection cover for fire insulation systems, VKF-certified only, size 400 x 200 mm."
+  },
+  "ST039": {
+   "title_en": "Total insulation F",
+   "description_en": "Total insulation F."
+  },
+  "ST040": {
+   "title_en": "Total 244.04 LA 04 upper floor classroom",
+   "description_en": "Total 244.04 LA 04 upper floor classroom."
+  },
+  "LV0210": {
+   "title_en": "Air handling unit 5-1",
+   "description_en": "Supply air unit with 2,900 m3/h airflow, stainless steel casing, accessories, and filter section according to the specification."
+  }
+ }
+}

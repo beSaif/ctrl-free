@@ -1,0 +1,28 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:08",
+ "api": "responses",
+ "input_tokens": 2049,
+ "output_tokens": 181,
+ "response": {
+  "LV0253": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Thermal duct insulation, but the tender specifies 15 mm and the insulation candidates are 30 mm and 60 mm.",
+   "assumptions": []
+  },
+  "LV0254": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Mounting feet/support item, but none of the candidates are mounting feet.",
+   "assumptions": []
+  },
+  "LV0255": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Support/connection-angle item, but none of the candidates match that product type.",
+   "assumptions": []
+  }
+ }
+}

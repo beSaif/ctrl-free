@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:06",
+ "api": "responses",
+ "input_tokens": 6622,
+ "output_tokens": 501,
+ "response": {
+  "LV0163": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Colour coating, no matching product type in candidates",
+   "assumptions": []
+  },
+  "LV0164": {
+   "product_id": "P-AIR-003",
+   "confidence": "high",
+   "reason": "Exhaust air valve, DN100 = Ø 10 cm",
+   "assumptions": []
+  },
+  "LV0165": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Exhaust air valve, but the only exhaust candidate is DN100 and size is Ø 12.5 cm",
+   "assumptions": []
+  },
+  "LV0166": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Transfer air element, but no candidate is that product type",
+   "assumptions": []
+  },
+  "LV0167": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Transfer air element, but no candidate is that product type",
+   "assumptions": []
+  },
+  "LV0168": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Transfer air element, but no candidate is that product type",
+   "assumptions": []
+  },
+  "LV0169": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Transfer air element, but no candidate is that product type",
+   "assumptions": []
+  },
+  "LV0170": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Air diffuser, but no candidate is that product type",
+   "assumptions": []
+  },
+  "LV0171": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Air diffuser, but no candidate is that product type",
+   "assumptions": []
+  },
+  "LV0172": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Air diffuser, but no candidate is that product type",
+   "assumptions": []
+  }
+ }
+}

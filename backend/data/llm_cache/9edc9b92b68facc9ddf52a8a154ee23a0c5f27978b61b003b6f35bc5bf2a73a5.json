@@ -1,0 +1,72 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:07",
+ "api": "responses",
+ "input_tokens": 7363,
+ "output_tokens": 586,
+ "response": {
+  "LV0203": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Thermal duct insulation, but tender says 15 mm and the insulation candidates are 30/60 mm",
+   "assumptions": []
+  },
+  "LV0204": {
+   "product_id": "P-INS-003",
+   "confidence": "high",
+   "reason": "Weatherproof external insulation with cladding, 100 mm matches exactly",
+   "assumptions": []
+  },
+  "LV0205": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "EI30 fire insulation requested, but no fire-insulation candidate is offered",
+   "assumptions": []
+  },
+  "LV0206": {
+   "product_id": "P-FIR-002",
+   "confidence": "high",
+   "reason": "EI30 rectangular fire seal 300x200 mm matches the duct penetration size",
+   "assumptions": []
+  },
+  "LV0207": {
+   "product_id": "P-FIR-003",
+   "confidence": "high",
+   "reason": "EI30 circular fire seal DN160 matches Ø 16 cm",
+   "assumptions": []
+  },
+  "LV0208": {
+   "product_id": "P-SUP-001",
+   "confidence": "high",
+   "reason": "Connection-angle support set matches the requested mounting angles",
+   "assumptions": []
+  },
+  "LV0209": {
+   "product_id": "P-FIR-004",
+   "confidence": "high",
+   "reason": "Inspection cover 400x200 mm matches the stated opening size",
+   "assumptions": []
+  },
+  "LV0210": {
+   "product_id": "P-AHU-3500",
+   "confidence": "medium",
+   "reason": "Supply air AHU with 2'900 m3/h, closest matching unit is approx. 3'500 m3/h",
+   "assumptions": [
+    "Exact manufacturer/model not required; size/airflow matched by closest catalogue unit"
+   ]
+  },
+  "LV0211": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct leakage test requested, but no test-service product is offered",
+   "assumptions": []
+  },
+  "LV0212": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Weather louvre 100 x 40 cm requested, but no weather louvre candidate is offered",
+   "assumptions": []
+  }
+ }
+}

@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:09",
+ "api": "responses",
+ "input_tokens": 6554,
+ "output_tokens": 525,
+ "response": {
+  "LV0243": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "Actuator 24V, 20 Nm matches the control device.",
+   "assumptions": []
+  },
+  "LV0244": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "Actuator 24V, 5 Nm matches the control device.",
+   "assumptions": []
+  },
+  "LV0245": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Smoke detector requested, but no smoke detector candidate is offered.",
+   "assumptions": []
+  },
+  "LV0246": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter matches the pressure switch/t transmitter request.",
+   "assumptions": []
+  },
+  "LV0247": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Frost protection thermostat requested, but only fire protection and AHU items are offered.",
+   "assumptions": []
+  },
+  "LV0248": {
+   "product_id": "P-CTL-002",
+   "confidence": "high",
+   "reason": "Temperature sensor matches the duct temperature and humidity sensor request.",
+   "assumptions": []
+  },
+  "LV0249": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter matches the pressure differential sensor request.",
+   "assumptions": []
+  },
+  "LV0250": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour is a service, but no service candidate is offered.",
+   "assumptions": []
+  },
+  "LV0251": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour is a service, but no service candidate is offered.",
+   "assumptions": []
+  },
+  "LV0252": {
+   "product_id": "P-INS-003",
+   "confidence": "high",
+   "reason": "Weatherproof external insulation with cladding, 100 mm, matches the line.",
+   "assumptions": []
+  }
+ }
+}

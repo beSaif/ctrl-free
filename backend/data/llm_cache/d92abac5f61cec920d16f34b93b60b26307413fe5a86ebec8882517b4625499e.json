@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:06",
+ "api": "responses",
+ "input_tokens": 6602,
+ "output_tokens": 548,
+ "response": {
+  "LV0183": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "CAV circular flow controller, but Ø 8 cm does not match the only CAV candidate.",
+   "assumptions": []
+  },
+  "LV0184": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Manual circular balancing damper, but the only matching damper candidate is the wrong size.",
+   "assumptions": []
+  },
+  "LV0185": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular duct access door 40 x 20 cm, but no candidate is an access door.",
+   "assumptions": []
+  },
+  "LV0186": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular duct access door 40 x 20 cm, but no candidate is an access door.",
+   "assumptions": []
+  },
+  "LV0187": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Kanalmounted thermometer, but no candidate is a thermometer.",
+   "assumptions": []
+  },
+  "LV0188": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Mounting frame for insulated ducts, but no candidate is a mounting frame.",
+   "assumptions": []
+  },
+  "LV0189": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Equipment label 100 x 50 mm, but no candidate is a label.",
+   "assumptions": []
+  },
+  "LV0190": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour arrows, but no candidate is a labelling item.",
+   "assumptions": []
+  },
+  "LV0191": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "24V actuator, and the actuator candidate matches the product type.",
+   "assumptions": []
+  },
+  "LV0192": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "24V actuator, and the actuator candidate matches the product type.",
+   "assumptions": []
+  }
+ }
+}

@@ -1,0 +1,21 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "assist_command",
+ "created": "2026-10-10T11:18:04",
+ "api": "responses",
+ "input_tokens": 669,
+ "output_tokens": 84,
+ "response": {
+  "intent": "explain",
+  "lv_ids": [
+   "LV0010"
+  ],
+  "product_id": null,
+  "quantity": null,
+  "status": null,
+  "field": "labour",
+  "condition": null,
+  "confirm": false,
+  "reply": "Ik zal uitleggen waarom het arbeidsbedrag op deze lijn hoog is."
+ }
+}

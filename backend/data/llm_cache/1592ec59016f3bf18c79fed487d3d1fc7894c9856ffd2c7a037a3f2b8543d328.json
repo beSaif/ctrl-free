@@ -1,0 +1,110 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T11:18:48",
+ "api": "responses",
+ "input_tokens": 3934,
+ "output_tokens": 1082,
+ "response": {
+  "LV0024": {
+   "title_en": "Mounting frame, insulated ducts",
+   "description_en": "Mounting frame for insulated ducts."
+  },
+  "LV0025": {
+   "title_en": "Equipment labels, 100x50 mm",
+   "description_en": "Equipment labels sized 100 x 50 mm."
+  },
+  "LV0026": {
+   "title_en": "Colour arrows, 150x30 mm",
+   "description_en": "Glued colour arrows for duct marking, sized 150 x 30 mm."
+  },
+  "LV0027": {
+   "title_en": "Equipotential bonding",
+   "description_en": "Equipotential bonding connection."
+  },
+  "ST003": {
+   "title_en": "Total fittings and instruments C",
+   "description_en": "Total for fittings and instruments section C."
+  },
+  "LV0028": {
+   "title_en": "Actuator, 24 V, 20 Nm",
+   "description_en": "Rotary damper actuator with AC/DC 24 V, on/off and 3-point control, 150 s travel, IP54."
+  },
+  "LV0029": {
+   "title_en": "Actuator, 24 V, 5 Nm",
+   "description_en": "Rotary damper actuator with AC/DC 24 V, 2–10 V control, 150 s travel, IP54."
+  },
+  "LV0030": {
+   "title_en": "Duct smoke detector",
+   "description_en": "Duct smoke detector with VdS approval, contamination indication, electronic airflow monitoring, external reset, and RS485 interface."
+  },
+  "LV0031": {
+   "title_en": "Differential pressure transmitter",
+   "description_en": "Pressure monitor for installation in the system."
+  },
+  "LV0032": {
+   "title_en": "Frost protection thermostat, 2-point",
+   "description_en": "Frost protection thermostat for installation in the system."
+  },
+  "LV0033": {
+   "title_en": "Duct temperature sensor",
+   "description_en": "Duct temperature sensor for installation in the system."
+  },
+  "LV0034": {
+   "title_en": "Differential pressure transmitter",
+   "description_en": "Differential pressure transmitter for installation in the system."
+  },
+  "ST004": {
+   "title_en": "Total controls D",
+   "description_en": "Total for control section D."
+  },
+  "LV0035": {
+   "title_en": "Installation and transport",
+   "description_en": "Install, test, commission, instruct operating staff, transport materials and tools, and provide hygiene documentation and inspections."
+  },
+  "ST005": {
+   "title_en": "Total installation and transport",
+   "description_en": "Total for installation and transport."
+  },
+  "ST006": {
+   "title_en": "Total services",
+   "description_en": "Total for services."
+  },
+  "ST007": {
+   "title_en": "Total installation and services E",
+   "description_en": "Total for installation and services section E."
+  },
+  "LV0036": {
+   "title_en": "Thermal duct insulation, mineral wool 60 mm",
+   "description_en": "External thermal insulation with 60 mm mineral wool mats and aluminium foil, pinned."
+  },
+  "LV0037": {
+   "title_en": "Thermal duct insulation, mineral wool 100 mm",
+   "description_en": "External thermal insulation with 100 mm mineral wool boards and aluminium foil, pinned."
+  },
+  "LV0038": {
+   "title_en": "Thermal duct insulation, mineral wool 15 mm",
+   "description_en": "Abrasion-resistant external duct insulation for wall and ceiling penetrations."
+  },
+  "LV0039": {
+   "title_en": "Fire insulation, EI30",
+   "description_en": "Fire insulation for external duct insulation EI30, with required product documents and VKF-certified system."
+  },
+  "LV0040": {
+   "title_en": "Fire penetration seal, circular DN160",
+   "description_en": "Fire penetration seal for round pipes through fire compartments, EI30, VKF-certified system only."
+  },
+  "LV0041": {
+   "title_en": "Connection angle set, wall or ceiling",
+   "description_en": "Connection angles for fastening to wall or ceiling, 8 pieces per penetration, for ventilation ducts."
+  },
+  "ST008": {
+   "title_en": "Total insulation F",
+   "description_en": "Total for insulation section F."
+  },
+  "ST009": {
+   "title_en": "Total 244.01 LA01 ancillary rooms",
+   "description_en": "Total for 244.01 LA01 ancillary rooms."
+  }
+ }
+}

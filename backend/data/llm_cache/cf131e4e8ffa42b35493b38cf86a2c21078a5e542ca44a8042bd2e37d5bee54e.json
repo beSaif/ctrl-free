@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:55:59",
+ "api": "responses",
+ "input_tokens": 6618,
+ "output_tokens": 435,
+ "response": {
+  "LV0051": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Flexible connector / wall accessory, no matching candidate type",
+   "assumptions": []
+  },
+  "LV0052": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Wall sleeve seal, no matching candidate type",
+   "assumptions": []
+  },
+  "LV0053": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Wall sleeve seal, no matching candidate type",
+   "assumptions": []
+  },
+  "LV0054": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Engineering service, no matching product candidate",
+   "assumptions": []
+  },
+  "LV0055": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Shipping service, no matching product candidate",
+   "assumptions": []
+  },
+  "LV0056": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct leakage test, no matching product candidate",
+   "assumptions": []
+  },
+  "LV0057": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Air terminal but no candidate matches the rectangular 996x496 mm front plate",
+   "assumptions": []
+  },
+  "LV0058": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Air terminal but no candidate matches the rectangular 1000x500 mm decorative panel",
+   "assumptions": []
+  },
+  "LV0059": {
+   "product_id": "P-AIR-001",
+   "confidence": "high",
+   "reason": "Supply air valve, circular, Ø 10 cm = DN100",
+   "assumptions": []
+  },
+  "LV0060": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Supply air valve, but Ø 16 cm does not match any candidate size",
+   "assumptions": []
+  }
+ }
+}

@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:02",
+ "api": "responses",
+ "input_tokens": 6393,
+ "output_tokens": 442,
+ "response": {
+  "LV0101": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Ceiling cassette panel, but no candidate is a light cassette or matching panel type",
+   "assumptions": []
+  },
+  "LV0102": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour/support item, not circular ductwork",
+   "assumptions": []
+  },
+  "LV0103": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Support/angle set, but all candidates are rectangular ducts",
+   "assumptions": []
+  },
+  "LV0104": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Kitchen exhaust hood, but no candidate matches hood type or size",
+   "assumptions": []
+  },
+  "LV0105": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Supply valve, but the only valve candidates are DN100/DN125 and the tender size is 1500x500mm",
+   "assumptions": []
+  },
+  "LV0106": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Ceiling cassette panel, but no candidate is a cassette panel",
+   "assumptions": []
+  },
+  "LV0107": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Ceiling cassette panel, but no candidate is a cassette panel",
+   "assumptions": []
+  },
+  "LV0108": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Ceiling cassette panel, but no candidate is a cassette panel",
+   "assumptions": []
+  },
+  "LV0109": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour/support item, not circular ductwork",
+   "assumptions": []
+  },
+  "LV0110": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Support/angle set, but all candidates are rectangular ducts",
+   "assumptions": []
+  }
+ }
+}

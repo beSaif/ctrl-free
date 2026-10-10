@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:08",
+ "api": "responses",
+ "input_tokens": 7275,
+ "output_tokens": 597,
+ "response": {
+  "LV0223": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "CAV circular flow controller, but DN100 has no exact candidate",
+   "assumptions": []
+  },
+  "LV0224": {
+   "product_id": "P-VAV-004",
+   "confidence": "high",
+   "reason": "Variable circular flow controller DN160 matches Ø 16 cm",
+   "assumptions": []
+  },
+  "LV0225": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "CAV circular flow controller DN200 has no exact candidate",
+   "assumptions": []
+  },
+  "LV0226": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "CAV circular flow controller DN200 has no exact candidate",
+   "assumptions": []
+  },
+  "LV0227": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Manual circular balancing damper DN100 has no exact candidate",
+   "assumptions": []
+  },
+  "LV0228": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Compact circular silencer DN100 exists, but length 1000 mm does not match",
+   "assumptions": []
+  },
+  "LV0229": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Compact circular silencer DN100 exists, but length 1000 mm does not match",
+   "assumptions": []
+  },
+  "LV0230": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Compact circular silencer DN125 has no exact candidate",
+   "assumptions": []
+  },
+  "LV0231": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Compact circular silencer DN200 has no exact candidate",
+   "assumptions": []
+  },
+  "LV0232": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Compact circular silencer DN160 has no exact candidate",
+   "assumptions": []
+  }
+ }
+}

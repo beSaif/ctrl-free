@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:03",
+ "api": "responses",
+ "input_tokens": 6484,
+ "output_tokens": 544,
+ "response": {
+  "LV0133": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Frost protection thermostat is a sensor, but no sensor candidate matches.",
+   "assumptions": []
+  },
+  "LV0134": {
+   "product_id": "P-CTL-002",
+   "confidence": "high",
+   "reason": "Temperature sensor matches the duct temperature and humidity sensor line.",
+   "assumptions": []
+  },
+  "LV0135": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter matches Druckdifferenzfühler exactly.",
+   "assumptions": []
+  },
+  "LV0136": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour is a service, not a product candidate.",
+   "assumptions": []
+  },
+  "LV0137": {
+   "product_id": "P-INS-001",
+   "confidence": "high",
+   "reason": "Thermal duct insulation matches 30 mm mineral wool insulation exactly.",
+   "assumptions": []
+  },
+  "LV0138": {
+   "product_id": "P-INS-002",
+   "confidence": "high",
+   "reason": "Thermal duct insulation matches 60 mm mineral wool insulation exactly.",
+   "assumptions": []
+  },
+  "LV0139": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender needs 100 mm thermal mineral wool insulation, but no candidate matches that type and size.",
+   "assumptions": []
+  },
+  "LV0140": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender needs 15 mm duct insulation, but the insulation candidates are 30 mm or 60 mm.",
+   "assumptions": []
+  },
+  "LV0141": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender is EI30 fire insulation, but no fire insulation candidate is offered.",
+   "assumptions": []
+  },
+  "LV0142": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender is EI60 exhaust fire insulation, but no matching fire insulation candidate is offered.",
+   "assumptions": []
+  }
+ }
+}

@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:55:59",
+ "api": "responses",
+ "input_tokens": 7448,
+ "output_tokens": 493,
+ "response": {
+  "LV0001": {
+   "product_id": "P-AHU-1000",
+   "confidence": "medium",
+   "reason": "Supply AHU, and 700 m3/h is closest to the approx. 1000 m3/h unit.",
+   "assumptions": []
+  },
+  "LV0002": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Casing section of an AHU has no matching candidate product.",
+   "assumptions": []
+  },
+  "LV0003": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Exhaust casing section has no matching candidate product.",
+   "assumptions": []
+  },
+  "LV0004": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct leakage test is a service, not a listed product type.",
+   "assumptions": []
+  },
+  "LV0005": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rain cap has no matching candidate product.",
+   "assumptions": []
+  },
+  "LV0006": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour coating has no matching candidate product.",
+   "assumptions": []
+  },
+  "LV0007": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Weather louvre has no matching candidate product.",
+   "assumptions": []
+  },
+  "LV0008": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular duct has no matching candidate product.",
+   "assumptions": []
+  },
+  "LV0009": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour coating has no matching candidate product.",
+   "assumptions": []
+  },
+  "LV0010": {
+   "product_id": "P-AIR-001",
+   "confidence": "high",
+   "reason": "Supply air valve, DN100 matches Ø 10 cm.",
+   "assumptions": []
+  }
+ }
+}

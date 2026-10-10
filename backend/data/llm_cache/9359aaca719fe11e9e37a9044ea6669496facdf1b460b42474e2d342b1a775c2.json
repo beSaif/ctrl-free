@@ -1,0 +1,40 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "normalize_types",
+ "created": "2026-10-10T10:55:55",
+ "api": "responses",
+ "input_tokens": 998,
+ "output_tokens": 532,
+ "response": {
+  "LV0008": {
+   "type_en": "circular duct"
+  },
+  "LV0054": {
+   "type_en": "engineering service"
+  },
+  "LV0055": {
+   "type_en": "shipping service"
+  },
+  "LV0057": {
+   "type_en": "air terminal / supply valve"
+  },
+  "LV0058": {
+   "type_en": "air terminal / supply valve"
+  },
+  "LV0098": {
+   "type_en": "air terminal / supply valve"
+  },
+  "LV0103": {
+   "type_en": "support / angle set"
+  },
+  "LV0105": {
+   "type_en": "air terminal / supply valve"
+  },
+  "LV0110": {
+   "type_en": "support / angle set"
+  },
+  "LV0112": {
+   "type_en": "installation labour"
+  }
+ }
+}

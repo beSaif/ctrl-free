@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:55:59",
+ "api": "responses",
+ "input_tokens": 6361,
+ "output_tokens": 455,
+ "response": {
+  "LV0021": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct access door, but no candidate is an access cover",
+   "assumptions": []
+  },
+  "LV0022": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular duct access door, but no candidate is an access cover",
+   "assumptions": []
+  },
+  "LV0023": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Kanalmontage thermometer, but no candidate is a thermometer",
+   "assumptions": []
+  },
+  "LV0024": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Mounting frame for insulated ducts, but no candidate is a mounting frame",
+   "assumptions": []
+  },
+  "LV0025": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Equipment label, but all candidates are fans",
+   "assumptions": []
+  },
+  "LV0026": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour arrows, but no candidate is labelling material",
+   "assumptions": []
+  },
+  "LV0027": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Equipotential bonding, but no candidate is bonding hardware",
+   "assumptions": []
+  },
+  "LV0028": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "24V damper actuator with 20 Nm matches the actuator product",
+   "assumptions": []
+  },
+  "LV0029": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "24V continuous damper actuator with 5 Nm matches the actuator product",
+   "assumptions": []
+  },
+  "LV0030": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Smoke detector, but no candidate is a smoke detector",
+   "assumptions": []
+  }
+ }
+}

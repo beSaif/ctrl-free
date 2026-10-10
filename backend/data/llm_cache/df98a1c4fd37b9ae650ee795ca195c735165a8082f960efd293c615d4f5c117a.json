@@ -1,0 +1,110 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T11:18:47",
+ "api": "responses",
+ "input_tokens": 4341,
+ "output_tokens": 893,
+ "response": {
+  "LV0128": {
+   "title_en": "Equipotential bonding",
+   "description_en": "Equipotential bonding connection."
+  },
+  "ST024": {
+   "title_en": "Total valves and instruments C",
+   "description_en": "Total for valves and instruments in section C."
+  },
+  "LV0129": {
+   "title_en": "Damper actuator 20 Nm, 24V",
+   "description_en": "24 V actuator for on/off or 3-point damper control, IP54, 150 s running time."
+  },
+  "LV0130": {
+   "title_en": "Damper actuator 5 Nm, 24V",
+   "description_en": "24 V modulating actuator for continuous damper control, IP54, 150 s running time."
+  },
+  "LV0131": {
+   "title_en": "Duct smoke detector",
+   "description_en": "Duct smoke detector with VdS approval, airflow monitoring, external reset access, and RS485 bus interface on MOD/BAC versions."
+  },
+  "LV0132": {
+   "title_en": "Pressure switch",
+   "description_en": "Install the specified field device in the system."
+  },
+  "LV0133": {
+   "title_en": "Frost protection thermostat, 2-point",
+   "description_en": "Install the specified field device in the system."
+  },
+  "LV0134": {
+   "title_en": "Duct temperature and humidity sensor",
+   "description_en": "Install the specified field device in the system."
+  },
+  "LV0135": {
+   "title_en": "Differential pressure sensor",
+   "description_en": "Install the specified field device in the system."
+  },
+  "ST025": {
+   "title_en": "Total control D",
+   "description_en": "Total for control section D."
+  },
+  "LV0136": {
+   "title_en": "Installation and transport",
+   "description_en": "Install, test, commission, transport, instruct staff, and hand over the cleaned, operational system with hygiene documentation."
+  },
+  "ST026": {
+   "title_en": "Total installation and transport",
+   "description_en": "Total for installation and transport."
+  },
+  "ST027": {
+   "title_en": "Total services",
+   "description_en": "Total for services."
+  },
+  "ST028": {
+   "title_en": "Total installation and services E",
+   "description_en": "Total for installation and services in section E."
+  },
+  "LV0137": {
+   "title_en": "Thermal duct insulation mineral wool 30 mm",
+   "description_en": "Thermal external duct insulation with 30 mm mineral wool slabs and aluminium foil, pinned."
+  },
+  "LV0138": {
+   "title_en": "Thermal duct insulation mineral wool 60 mm",
+   "description_en": "Thermal external duct insulation with 60 mm mineral wool slabs and aluminium foil, pinned."
+  },
+  "LV0139": {
+   "title_en": "Thermal duct insulation mineral wool 100 mm",
+   "description_en": "Thermal external duct insulation with 100 mm mineral wool slabs and aluminium foil, pinned."
+  },
+  "LV0140": {
+   "title_en": "Thermal duct insulation mineral wool 15 mm",
+   "description_en": "Abrasion-resistant external duct insulation for wall and ceiling penetrations."
+  },
+  "LV0141": {
+   "title_en": "Fire insulation EI30 60 mm",
+   "description_en": "Fire insulation with EI30 classification and 60 mm thickness, according to supplier requirements and VKF-certified products."
+  },
+  "LV0142": {
+   "title_en": "Fire insulation EI60 60 mm",
+   "description_en": "Fire insulation with EI60 classification and 60 mm thickness, according to supplier requirements and VKF-certified products."
+  },
+  "LV0143": {
+   "title_en": "Fire insulation EI60 100 mm",
+   "description_en": "Fire insulation with EI60 classification and 100 mm thickness, according to supplier requirements and VKF-certified products."
+  },
+  "LV0144": {
+   "title_en": "Fire penetration seal EI30 350x200 mm",
+   "description_en": "Fire penetration seal for rectangular ventilation ducts through fire compartment walls, EI30, VKF-certified system only."
+  },
+  "LV0145": {
+   "title_en": "Fire penetration seal EI30 350x200 mm",
+   "description_en": "Fire penetration seal for rectangular ventilation ducts through fire compartment ceilings, EI30, VKF-certified system only."
+  },
+  "LV0146": {
+   "title_en": "Fire penetration seal EI30 500x350 mm",
+   "description_en": "Fire penetration seal for rectangular ventilation ducts through fire compartment ceilings, EI30, VKF-certified system only."
+  },
+  "LV0147": {
+   "title_en": "Connection angle set, galvanized steel",
+   "description_en": "Connection angle set for fastening to wall or ceiling, eight pieces per penetration, for ventilation pipes."
+  }
+ }
+}

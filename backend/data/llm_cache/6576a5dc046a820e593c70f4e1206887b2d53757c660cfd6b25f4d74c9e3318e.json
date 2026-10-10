@@ -1,0 +1,110 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T11:18:48",
+ "api": "responses",
+ "input_tokens": 5495,
+ "output_tokens": 940,
+ "response": {
+  "LV0001": {
+   "title_en": "Air handling unit, plastic",
+   "description_en": "Air handling unit with 700 m3/h airflow, partially preassembled, including listed accessories, dimensions 1x230 mm, and specified sound levels."
+  },
+  "LV0002": {
+   "title_en": "Casing section, stainless steel",
+   "description_en": "Empty casing section for the ventilation unit."
+  },
+  "LV0003": {
+   "title_en": "Exhaust air unit, stainless steel",
+   "description_en": "Exhaust air unit with 700 m3/h airflow, filter section, heat exchanger section, and listed accessories."
+  },
+  "ST001": {
+   "title_en": "Total apparatus A",
+   "description_en": "Total for apparatus group A."
+  },
+  "LV0004": {
+   "title_en": "Duct leakage test",
+   "description_en": "Leakage test for the duct system, including smoke tracing, documentation, report, measures plan if required, and calibration certificates."
+  },
+  "ST002": {
+   "title_en": "Total ducts B",
+   "description_en": "Total for ductwork group B."
+  },
+  "LV0005": {
+   "title_en": "Rain cap, stainless steel, 1100x350 mm",
+   "description_en": "Rain cap in stainless steel with 100 cm extension."
+  },
+  "LV0006": {
+   "title_en": "Colour coating, NCS",
+   "description_en": "Colour coating to NCS, excluding special colour surcharge."
+  },
+  "LV0007": {
+   "title_en": "Weather louvre, stainless steel, DN1155",
+   "description_en": "Outdoor air column louvre with nine blades, 3000 mm standpipe, and welded connection flange."
+  },
+  "LV0008": {
+   "title_en": "Base pipe, stainless steel, DN1155",
+   "description_en": "Base pipe in stainless steel, 800 mm long, with connection and floor flanges."
+  },
+  "LV0009": {
+   "title_en": "Colour coating, NCS",
+   "description_en": "Colour coating to NCS, excluding special colour surcharge."
+  },
+  "LV0010": {
+   "title_en": "Supply air valve, plastic, DN100",
+   "description_en": "Supply air disc valve in plastic with airflow adjustment and color per architect's selection."
+  },
+  "LV0011": {
+   "title_en": "Supply air valve, plastic, DN125",
+   "description_en": "Supply air disc valve in plastic with airflow adjustment and color per architect's selection."
+  },
+  "LV0012": {
+   "title_en": "Exhaust air valve, plastic, DN100",
+   "description_en": "Exhaust air disc valve in plastic with airflow adjustment and color per architect's selection."
+  },
+  "LV0013": {
+   "title_en": "Exhaust air valve, plastic, DN125",
+   "description_en": "Exhaust air disc valve in plastic with airflow adjustment and color per architect's selection."
+  },
+  "LV0014": {
+   "title_en": "Fire damper, galvanized steel, DN100",
+   "description_en": "Fire damper for masonry installation, EI90-S rated, with actuator, spring return, interface, and thermal release."
+  },
+  "LV0015": {
+   "title_en": "Flexible connector, plastic, DN100",
+   "description_en": "Single-sided flexible connector with potential equalization, PVC-coated polyester fabric, and galvanized connection profile."
+  },
+  "LV0016": {
+   "title_en": "Manual balancing damper, galvanized steel, DN125",
+   "description_en": "Manual balancing damper with setting segment and lockable position."
+  },
+  "LV0017": {
+   "title_en": "Manual balancing damper, galvanized steel, DN160",
+   "description_en": "Manual balancing damper with setting segment and lockable position."
+  },
+  "LV0018": {
+   "title_en": "Rectangular silencer, 400x300x1250 mm",
+   "description_en": "Rectangular silencer for 700 m3/h airflow with specified octave-band attenuation and 30 Pa pressure loss."
+  },
+  "LV0019": {
+   "title_en": "Supply air grille, 250x100 mm",
+   "description_en": "Supply air grille with airflow regulation for duct installation."
+  },
+  "LV0020": {
+   "title_en": "Exhaust air grille, 250x100 mm",
+   "description_en": "Exhaust air grille with airflow regulation for duct installation."
+  },
+  "LV0021": {
+   "title_en": "Duct access door, galvanized steel, 400x200 mm",
+   "description_en": "Airtight access and cleaning door in galvanized steel with rubber seal, also suitable for insulated ducts."
+  },
+  "LV0022": {
+   "title_en": "Duct access door, galvanized steel, DN100",
+   "description_en": "Airtight access and cleaning door in galvanized steel for round ducts."
+  },
+  "LV0023": {
+   "title_en": "Dial thermometer for duct installation",
+   "description_en": "Dial thermometer for installation in ducts."
+  }
+ }
+}

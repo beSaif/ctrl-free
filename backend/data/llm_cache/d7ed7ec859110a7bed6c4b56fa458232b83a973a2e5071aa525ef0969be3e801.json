@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:05",
+ "api": "responses",
+ "input_tokens": 6792,
+ "output_tokens": 628,
+ "response": {
+  "LV0153": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Air-handler component, but no candidate is a matching coil section",
+   "assumptions": []
+  },
+  "LV0154": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Air-handler casing section, but no candidate matches a droplet separator section",
+   "assumptions": []
+  },
+  "LV0155": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Exhaust air unit with 10'500 m3/h, but no candidate is the same product type",
+   "assumptions": []
+  },
+  "LV0156": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Baffle silencer with 900 mm length, but no candidate matches the silencer type and size",
+   "assumptions": []
+  },
+  "LV0157": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Empty casing section, but no candidate matches this AHU component",
+   "assumptions": []
+  },
+  "LV0158": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Empty casing section, but no candidate matches this AHU component",
+   "assumptions": []
+  },
+  "LV0159": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Empty casing section, but no candidate matches this AHU component",
+   "assumptions": []
+  },
+  "LV0160": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Duct leakage test, but no candidate is a test service",
+   "assumptions": []
+  },
+  "LV0161": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Weather louvre 140 x 100 cm, but no candidate is a matching louvre",
+   "assumptions": []
+  },
+  "LV0162": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Rain cap 100 x 70 cm, but no candidate is a matching roof cowl",
+   "assumptions": []
+  }
+ }
+}

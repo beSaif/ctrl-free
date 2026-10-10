@@ -1,0 +1,110 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T10:55:58",
+ "api": "responses",
+ "input_tokens": 5439,
+ "output_tokens": 1135,
+ "response": {
+  "LV0169": {
+   "title_en": "Transfer air element installation kit",
+   "description_en": "Installation kit for transfer air elements for high airflow rates, type example EBS-D-3-1."
+  },
+  "LV0170": {
+   "title_en": "Air diffuser, black polystyrene, 2xDN124",
+   "description_en": "Swirl air diffuser for offices and group rooms, rear connection, concealed behind front panel, black polystyrene, 200 m3/h."
+  },
+  "LV0171": {
+   "title_en": "Air diffuser, black polystyrene, 2xDN179",
+   "description_en": "Swirl air diffuser for classrooms, rear connection, concealed behind front panel, black polystyrene, 600 m3/h."
+  },
+  "LV0172": {
+   "title_en": "Air diffuser, black polystyrene, 2xDN179",
+   "description_en": "Swirl air diffuser for team rooms, rear connection, concealed behind front panel, black polystyrene, 400 m3/h."
+  },
+  "LV0173": {
+   "title_en": "Compact silencer, DN100, L900 mm",
+   "description_en": "Compact silencer for 100 to 600 m3/h, 90 cm baffles, 27 dB at 250 Hz."
+  },
+  "LV0174": {
+   "title_en": "Compact silencer, DN125, L900 mm",
+   "description_en": "Compact silencer for 100 to 600 m3/h, 90 cm baffles, 27 dB at 250 Hz."
+  },
+  "LV0175": {
+   "title_en": "Compact silencer, DN160, L900 mm",
+   "description_en": "Compact silencer for 100 to 600 m3/h, 90 cm baffles, 27 dB at 250 Hz."
+  },
+  "LV0176": {
+   "title_en": "Compact silencer, DN200, L900 mm",
+   "description_en": "Compact silencer for 100 to 600 m3/h, 90 cm baffles, 25 dB at 250 Hz."
+  },
+  "LV0177": {
+   "title_en": "Rectangular silencer 1200x900x1750 mm",
+   "description_en": "Rectangular silencer for 10,500 m3/h, three baffles, 20 cm baffle thickness, 25 Pa pressure loss."
+  },
+  "LV0178": {
+   "title_en": "Rectangular silencer 540x400x1250 mm",
+   "description_en": "Rectangular silencer for 1,600 m3/h, two baffles, 20 cm baffle thickness, 33 Pa pressure loss."
+  },
+  "LV0179": {
+   "title_en": "VAV controller rectangular 300x200 mm",
+   "description_en": "Double-wall rectangular VAV controller for supply and extract air, galvanized steel, with actuator and Modbus-compatible controller."
+  },
+  "LV0180": {
+   "title_en": "VAV controller circular DN125",
+   "description_en": "Circular VAV controller for supply and extract air, DN125, with minimum 60 m3/h, maximum 200 m3/h, 150 Pa."
+  },
+  "LV0181": {
+   "title_en": "VAV controller circular DN160",
+   "description_en": "Circular VAV controller for supply and extract air, DN160, with minimum 120 m3/h, maximum 400 m3/h, 150 Pa."
+  },
+  "LV0182": {
+   "title_en": "VAV controller circular DN200",
+   "description_en": "Circular VAV controller for supply and extract air, DN200, with minimum 180 m3/h, maximum 600 m3/h, 150 Pa."
+  },
+  "ST033": {
+   "title_en": "Total VAV controllers, commissioning",
+   "description_en": "Total for all single-duct VAV controllers including commissioning and balancing, excluding installation."
+  },
+  "LV0183": {
+   "title_en": "CAV controller circular DN80",
+   "description_en": "Constant-volume controller for airflows with connection spigots, mechanically controlled, pressure-independent, single-wall or double-wall."
+  },
+  "LV0184": {
+   "title_en": "Balancing damper circular DN100",
+   "description_en": "Round manual balancing damper for supply or extract air, suitable for duct pressures up to 1000 Pa."
+  },
+  "LV0185": {
+   "title_en": "Duct access door galvanized steel 400x200 mm",
+   "description_en": "Airtight inspection and cleaning door in galvanized steel with rubber gasket, for insulated ducts."
+  },
+  "LV0186": {
+   "title_en": "Duct access door galvanized steel 400x200 mm",
+   "description_en": "Airtight inspection and cleaning door in galvanized steel, size 400x200 mm."
+  },
+  "LV0187": {
+   "title_en": "Dial thermometer for duct installation",
+   "description_en": "Dial thermometer for installation in ductwork."
+  },
+  "LV0188": {
+   "title_en": "Dial thermometer mounting frame",
+   "description_en": "Mounting frame for dial thermometer in insulated ducts."
+  },
+  "LV0189": {
+   "title_en": "Equipment label 100x50 mm",
+   "description_en": "Equipment labels, 100x50 mm."
+  },
+  "LV0190": {
+   "title_en": "Colour arrows",
+   "description_en": "Colour arrows for identification marking."
+  },
+  "ST034": {
+   "title_en": "Total valves and instruments C",
+   "description_en": "Total for valves and instruments category C."
+  },
+  "LV0191": {
+   "title_en": "Actuator 20 Nm, 24V",
+   "description_en": "24 V rotary actuator for damper control, 20 Nm torque, open/close or 3-point control, 150 s, IP54."
+  }
+ }
+}

@@ -1,0 +1,110 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T11:14:57",
+ "api": "responses",
+ "input_tokens": 4984,
+ "output_tokens": 1016,
+ "response": {
+  "ST019": {
+   "title_en": "Installation labour",
+   "description_en": "General installation services as specified in the tender."
+  },
+  "LV0083": {
+   "title_en": "Thermal duct insulation, mineral wool 30 mm",
+   "description_en": "30 mm mineral wool boards with aluminium foil and stainless-steel wire mesh for external duct insulation."
+  },
+  "LV0084": {
+   "title_en": "Thermal duct insulation, mineral wool 60 mm",
+   "description_en": "60 mm mineral wool boards with aluminium foil, pinned in place for external duct insulation."
+  },
+  "LV0085": {
+   "title_en": "Thermal duct insulation, mineral wool 100 mm",
+   "description_en": "100 mm mineral wool boards with aluminium foil and stainless-steel wire mesh for external duct insulation."
+  },
+  "LV0086": {
+   "title_en": "Thermal duct insulation, mineral wool 15 mm",
+   "description_en": "15 mm abrasion-resistant mineral wool insulation for duct wall and ceiling penetrations."
+  },
+  "LV0087": {
+   "title_en": "Fire insulation EI30",
+   "description_en": "Fire insulation and cladding EI30 with valid SN EN 1366-1 and SN EN 13501-2 documentation and VKF certification."
+  },
+  "LV0088": {
+   "title_en": "Fire penetration seal, rectangular 500x350 mm",
+   "description_en": "EI30 penetration seal for rectangular duct penetrations through fire compartments, using VKF-certified systems only."
+  },
+  "LV0089": {
+   "title_en": "Fire penetration seal, rectangular 400x400 mm",
+   "description_en": "EI30 penetration seal for rectangular duct penetrations through fire compartments, using VKF-certified systems only."
+  },
+  "LV0090": {
+   "title_en": "Fire penetration seal, rectangular 400x350 mm",
+   "description_en": "EI30 penetration seal for rectangular duct penetrations through fire compartments, using VKF-certified systems only."
+  },
+  "LV0091": {
+   "title_en": "Fire penetration seal, rectangular 400x200 mm",
+   "description_en": "EI30 penetration seal for rectangular duct penetrations through fire compartment ceilings, using VKF-certified systems only."
+  },
+  "LV0092": {
+   "title_en": "Fire penetration seal, circular DN250",
+   "description_en": "EI30 penetration seal for circular pipe penetrations through fire compartment walls and ceilings, using VKF-certified systems only."
+  },
+  "LV0093": {
+   "title_en": "Connection angle set",
+   "description_en": "Angle set for fixing to wall or ceiling, including eight pieces per penetration for ventilation pipes."
+  },
+  "LV0094": {
+   "title_en": "Inspection cover for fire insulation 400x300 mm",
+   "description_en": "Inspection cover for fire insulation with VKF-certified system components for rectangular duct access."
+  },
+  "ST020": {
+   "title_en": "Insulation total",
+   "description_en": "Overall insulation package."
+  },
+  "ST021": {
+   "title_en": "Total 244.02 LA02 Essenräume EG",
+   "description_en": "Total line for 244.02 LA02 dining rooms, ground floor."
+  },
+  "LV0095": {
+   "title_en": "Air handling unit 3-1",
+   "description_en": "Supply air unit with 3500 m3/h airflow, partial dismantling for delivery, and accessories including damper, flexible connector, and bag filter section."
+  },
+  "ST022": {
+   "title_en": "Equipment total",
+   "description_en": "Overall equipment package."
+  },
+  "LV0096": {
+   "title_en": "Duct leakage test",
+   "description_en": "Duct leakage testing with smoke tracing, documentation, evaluation, report, and calibration certificates attached."
+  },
+  "ST023": {
+   "title_en": "Ducts total",
+   "description_en": "Overall rectangular galvanized duct package."
+  },
+  "LV0097": {
+   "title_en": "Kitchen exhaust hood 3600x1300x420 mm",
+   "description_en": "Stainless-steel kitchen exhaust hood with aerosol separators, LED lights, grease drains, covers, hangers, spigots, and exhaust dampers."
+  },
+  "LV0098": {
+   "title_en": "Aluminium 4DQA 1000x500 mm top",
+   "description_en": "Aluminium 4DQA component for top installation, size 1000 by 500 mm."
+  },
+  "LV0099": {
+   "title_en": "Ceiling cassette panel, aluminium 1000x500 mm",
+   "description_en": "Aluminium ceiling cassette panel, size 1000 by 500 mm."
+  },
+  "LV0100": {
+   "title_en": "Ceiling cassette panel, aluminium 2000x290 mm",
+   "description_en": "Aluminium ceiling cassette panel with integrated LED light, size 2000 by 290 mm."
+  },
+  "LV0101": {
+   "title_en": "Ceiling cassette panel, aluminium 1500x290 mm",
+   "description_en": "Aluminium ceiling cassette panel with integrated LED light, size 1500 by 290 mm."
+  },
+  "LV0102": {
+   "title_en": "L-profile installation",
+   "description_en": "L-profile including installation to wall."
+  }
+ }
+}

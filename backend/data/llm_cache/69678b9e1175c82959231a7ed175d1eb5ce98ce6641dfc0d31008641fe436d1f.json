@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:55:59",
+ "api": "responses",
+ "input_tokens": 8097,
+ "output_tokens": 500,
+ "response": {
+  "LV0041": {
+   "product_id": "P-SUP-001",
+   "confidence": "high",
+   "reason": "Connection-angle set for wall or ceiling fixing, matches the support set",
+   "assumptions": []
+  },
+  "LV0042": {
+   "product_id": "P-AHU-6200",
+   "confidence": "high",
+   "reason": "Supply air AHU with 6'200 m3/h, matches airflow and unit type",
+   "assumptions": []
+  },
+  "LV0043": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Heating/cooling coil, but no candidate is a coil or AHU component",
+   "assumptions": []
+  },
+  "LV0044": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Exhaust casing section, but no candidate matches this AHU section type",
+   "assumptions": []
+  },
+  "LV0045": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct leakage test service, no matching product candidate",
+   "assumptions": []
+  },
+  "LV0046": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Straight circular duct DN250, but candidates are not straight ducts",
+   "assumptions": []
+  },
+  "LV0047": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Straight circular duct DN250, but candidates are not straight ducts",
+   "assumptions": []
+  },
+  "LV0048": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Straight circular duct DN250, but candidates are not straight ducts",
+   "assumptions": []
+  },
+  "LV0049": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular bend 45° DN250, but no candidate has DN250 and 45°",
+   "assumptions": []
+  },
+  "LV0050": {
+   "product_id": "P-FTG-B-250-90",
+   "confidence": "high",
+   "reason": "Circular bend 90° DN250, exact type, size and angle match",
+   "assumptions": []
+  }
+ }
+}

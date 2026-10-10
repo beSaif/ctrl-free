@@ -924,7 +924,9 @@ DISAGREE_CAP = 0.72  # a Strong code match the LLM disputes drops to Close (pric
 def combine_picks(rules: dict, llm_pick: dict, candidates: list[dict]) -> dict:
     """Merge the rules pick and the LLM pick so the LLM can never make a line worse than rules-only.
 
-    - Both agree: the LLM's answer, with the higher of the two confidences (LLM assumptions still cap it).
+    - Both agree: the code keeps its confidence, label and assumptions; the LLM adds its reason. The LLM's
+      own assumptions are kept as notes only (they don't change the status), so a confirmation can
+      neither upgrade a partial code match nor downgrade an exact one.
     - Rules have a Strong match and the LLM disagrees (another product or "none"): keep the rules
       product, label it Close and record the disagreement as an assumption, so the estimator checks it.
     - Rules have a product (not Strong) and the LLM says "none", or picks a product the code check
@@ -934,10 +936,8 @@ def combine_picks(rules: dict, llm_pick: dict, candidates: list[dict]) -> dict:
     """
     rp, lp = rules.get("product_id"), llm_pick.get("product_id")
     if rp and lp == rp:
-        conf = max(float(rules.get("confidence") or 0), float(llm_pick.get("confidence") or 0))
-        if llm_pick.get("assumptions"):
-            conf = min(conf, 0.74)
-        return {**llm_pick, "confidence": round(conf, 2), "label": _label(conf, lp)}
+        return {**rules, "reason": llm_pick.get("reason") or rules.get("reason"), "method": llm_pick.get("method"),
+                "llm_notes": list(llm_pick.get("assumptions") or [])}
     if not rp:
         return llm_pick
     by_id = {c["product_id"]: c for c in candidates}
@@ -1001,6 +1001,7 @@ def match_positions(positions: list[dict], catalog=None, progress: Callable[[int
             "method": pk["method"],
             "assumptions": pk.get("assumptions", []),
             **({"llm_disagreed": pk["llm_disagreed"]} if pk.get("llm_disagreed") else {}),
+            **({"llm_notes": pk["llm_notes"]} if pk.get("llm_notes") else {}),
             "candidates": public_candidates(cands[lv]),
             "attributes": {k2: v for k2, v in attrs[lv].items() if k2 != "type_source"},
         }

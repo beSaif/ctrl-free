@@ -1,0 +1,110 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T10:55:57",
+ "api": "responses",
+ "input_tokens": 5210,
+ "output_tokens": 1012,
+ "response": {
+  "ST041": {
+   "title_en": "Project total, apparatus A",
+   "description_en": "Overall total for apparatus group A."
+  },
+  "LV0211": {
+   "title_en": "Duct leakage test, report included",
+   "description_en": "Perform duct leakage testing to Eurovent 2/2, document leak locations, results, calibration certificates, and corrective measures."
+  },
+  "ST042": {
+   "title_en": "Project total, rectangular galvanized ducts",
+   "description_en": "Overall total for galvanized rectangular ductwork group B."
+  },
+  "LV0212": {
+   "title_en": "Weather louvre, aluminium, 1000x400 mm",
+   "description_en": "Weather louvre for ventilation unit with mesh grille, mounting frame, and removable maintenance access."
+  },
+  "LV0213": {
+   "title_en": "Rain cap, stainless steel, 550x250 mm",
+   "description_en": "Rain cap in stainless steel with 100 cm extension."
+  },
+  "LV0214": {
+   "title_en": "Colour coating, NCS",
+   "description_en": "Colour coating according to NCS, excluding surcharge for special colours."
+  },
+  "LV0215": {
+   "title_en": "Supply air valve, plastic, DN100",
+   "description_en": "Plastic supply air disc valve with airflow adjustment and NCS colour as specified by architect."
+  },
+  "LV0216": {
+   "title_en": "Exhaust air valve, plastic, DN100",
+   "description_en": "Plastic exhaust air disc valve with airflow adjustment and NCS colour as specified by architect."
+  },
+  "LV0217": {
+   "title_en": "Supply air grille, 400x100 mm",
+   "description_en": "Supply air grille with volume control for installation in ducts, colour per architect's choice."
+  },
+  "LV0218": {
+   "title_en": "Exhaust air grille, 500x100 mm",
+   "description_en": "Exhaust air grille with volume control for installation in ducts, colour as specified."
+  },
+  "LV0219": {
+   "title_en": "Air diffuser, 315x9000 mm",
+   "description_en": "Jet nozzle duct diffuser, upward discharge, two nozzle rows on the right, with one end piece and four intermediate sections."
+  },
+  "LV0220": {
+   "title_en": "Air diffuser, colour coating",
+   "description_en": "Air diffuser with NCS colour as specified by the architect."
+  },
+  "LV0221": {
+   "title_en": "Air diffuser, 315x9000 mm",
+   "description_en": "Jet nozzle duct diffuser, upward discharge, two nozzle rows on the left, with one end piece and four intermediate sections."
+  },
+  "LV0222": {
+   "title_en": "Air diffuser, colour coating",
+   "description_en": "Air diffuser with NCS colour as specified by the architect."
+  },
+  "LV0223": {
+   "title_en": "CAV controller, circular, DN100",
+   "description_en": "Single-duct constant volume flow controller with connector spigots, mechanical control, pressure independent."
+  },
+  "LV0224": {
+   "title_en": "CAV controller, circular, DN160",
+   "description_en": "Single-duct constant volume flow controller with connector spigots, mechanical control, pressure independent."
+  },
+  "LV0225": {
+   "title_en": "CAV controller, circular, DN200",
+   "description_en": "Single-duct constant volume flow controller with connector spigots, mechanical control, pressure independent."
+  },
+  "LV0226": {
+   "title_en": "CAV controller, circular, DN200",
+   "description_en": "Single-duct constant volume flow controller with connector spigots, mechanical control, pressure independent."
+  },
+  "LV0227": {
+   "title_en": "Balancing damper, circular, DN100",
+   "description_en": "Round balancing damper for supply or exhaust air, complete with casing, blade, handwheel, and lip-sealed spigots."
+  },
+  "LV0228": {
+   "title_en": "Compact silencer, galvanized steel, DN100",
+   "description_en": "Double-wall circular silencer with perforated inner tube and spigots suitable for spiral duct."
+  },
+  "LV0229": {
+   "title_en": "Compact silencer, galvanized steel, DN100",
+   "description_en": "Double-wall circular silencer with perforated inner tube and spigots suitable for spiral duct."
+  },
+  "LV0230": {
+   "title_en": "Compact silencer, galvanized steel, DN125",
+   "description_en": "Double-wall circular silencer with perforated inner tube and spigots suitable for spiral duct."
+  },
+  "LV0231": {
+   "title_en": "Compact silencer, galvanized steel, DN200",
+   "description_en": "Double-wall circular silencer with perforated inner tube and spigots suitable for spiral duct."
+  },
+  "LV0232": {
+   "title_en": "Compact silencer, galvanized steel, DN160",
+   "description_en": "Double-wall circular silencer with perforated inner tube and spigots suitable for spiral duct."
+  },
+  "LV0233": {
+   "title_en": "Rectangular silencer, 710x500x1750 mm",
+   "description_en": "Rectangular baffle silencer with two baffles, 2900 m3/h airflow, and 17 Pa pressure drop."
+  }
+ }
+}

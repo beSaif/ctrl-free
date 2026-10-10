@@ -1,0 +1,19 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "assist_command",
+ "created": "2026-10-10T11:18:08",
+ "api": "responses",
+ "input_tokens": 483,
+ "output_tokens": 174,
+ "response": {
+  "intent": "fill_quotes_from_reply",
+  "lv_ids": [],
+  "product_id": null,
+  "quantity": null,
+  "status": null,
+  "field": null,
+  "condition": "at_or_below_budget",
+  "confirm": true,
+  "reply": "I’ll fill the supplier reply prices for lines at or below budget and confirm them."
+ }
+}

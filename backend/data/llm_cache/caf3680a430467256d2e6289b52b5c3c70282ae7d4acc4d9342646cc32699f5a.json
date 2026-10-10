@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:00",
+ "api": "responses",
+ "input_tokens": 7186,
+ "output_tokens": 628,
+ "response": {
+  "LV0061": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Exhaust valve, but candidate is DN100 while tender is Ø 16 cm (DN160)",
+   "assumptions": []
+  },
+  "LV0062": {
+   "product_id": "P-VAV-001",
+   "confidence": "high",
+   "reason": "Rectangular VAV controller, 50x30 cm = 500x300 mm",
+   "assumptions": []
+  },
+  "LV0063": {
+   "product_id": "P-CAV-001",
+   "confidence": "high",
+   "reason": "Circular constant-volume controller, Ø 250 mm = DN250",
+   "assumptions": []
+  },
+  "LV0064": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Compact silencer, but candidate length is 900 mm while tender is 1000 mm",
+   "assumptions": []
+  },
+  "LV0065": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Compact silencer, but candidate length is 900 mm while tender is 500 mm",
+   "assumptions": []
+  },
+  "LV0066": {
+   "product_id": "P-SIL-003",
+   "confidence": "high",
+   "reason": "Rectangular silencer, 60 x 60 x 175 cm = 600x600x1750 mm",
+   "assumptions": []
+  },
+  "LV0067": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer size does not match any candidate",
+   "assumptions": []
+  },
+  "LV0068": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct access door, but no candidate is an inspection cover",
+   "assumptions": []
+  },
+  "LV0069": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct access door, but no candidate is an inspection cover",
+   "assumptions": []
+  },
+  "LV0070": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Thermometer, but no candidate is a thermometer",
+   "assumptions": []
+  }
+ }
+}

@@ -1,0 +1,21 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "assist_command",
+ "created": "2026-10-10T11:18:00",
+ "api": "responses",
+ "input_tokens": 642,
+ "output_tokens": 76,
+ "response": {
+  "intent": "set_status",
+  "lv_ids": [
+   "LV0204"
+  ],
+  "product_id": null,
+  "quantity": null,
+  "status": "confirmed",
+  "field": null,
+  "condition": null,
+  "confirm": false,
+  "reply": "Vou confirmer cette ligne."
+ }
+}

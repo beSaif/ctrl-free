@@ -1,0 +1,110 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T11:18:52",
+ "api": "responses",
+ "input_tokens": 4684,
+ "output_tokens": 1568,
+ "response": {
+  "LV0148": {
+   "title_en": "Inspection cover, fire insulation, 400x300 mm",
+   "description_en": "Inspection cover for fire-rated duct insulation, VKF-certified systems only, with frame parts and fixings for rectangular ducts."
+  },
+  "ST029": {
+   "title_en": "Total thermal insulation F",
+   "description_en": "Total for thermal duct insulation, mineral wool type F."
+  },
+  "ST030": {
+   "title_en": "Total 244.3 LA 03 kitchen/washing",
+   "description_en": "Total line for 244.3 LA 03 kitchen and washing area."
+  },
+  "LV0149": {
+   "title_en": "Supply air unit, 3000x1500x6600 mm",
+   "description_en": "Supply air unit with 10,500 m3/h airflow, sectional transport, insulated damper, bag filter section, and accessories as specified."
+  },
+  "LV0150": {
+   "title_en": "Ventilation unit casing section",
+   "description_en": "Empty casing section with one inspection door."
+  },
+  "LV0151": {
+   "title_en": "Ventilation unit casing section",
+   "description_en": "Empty casing section with one inspection door."
+  },
+  "LV0152": {
+   "title_en": "Ventilation unit casing section",
+   "description_en": "Empty casing section with one inspection door."
+  },
+  "LV0153": {
+   "title_en": "Heating/cooling coil section",
+   "description_en": "Change-over coil section for cooling or heating in the supply air unit."
+  },
+  "LV0154": {
+   "title_en": "Ventilation unit casing section",
+   "description_en": "Drip separator section for the supply air unit."
+  },
+  "LV0155": {
+   "title_en": "Exhaust air unit, stainless steel",
+   "description_en": "Exhaust air unit with 10,500 m3/h airflow, bag filter section, heat recovery section, silencer section, and inspection door."
+  },
+  "LV0156": {
+   "title_en": "Silencer, 13 Pa",
+   "description_en": "Silencer with four baffles, 900 mm long, 250 mm thick, 102 mm spacing, and 13 Pa pressure drop."
+  },
+  "LV0157": {
+   "title_en": "Ventilation unit casing section",
+   "description_en": "Empty casing section with one inspection door."
+  },
+  "LV0158": {
+   "title_en": "Ventilation unit casing section",
+   "description_en": "Empty casing section with one inspection door."
+  },
+  "LV0159": {
+   "title_en": "Ventilation unit casing section",
+   "description_en": "Empty casing section with one inspection door."
+  },
+  "ST031": {
+   "title_en": "Total units A",
+   "description_en": "Total for apparatus group A."
+  },
+  "LV0160": {
+   "title_en": "Duct leakage test",
+   "description_en": "Leakage test for duct systems to Eurovent 2/2, including smoke leak detection, documentation, report, and calibration certificates."
+  },
+  "ST032": {
+   "title_en": "Total ducts B",
+   "description_en": "Total for rectangular galvanized ducts group B."
+  },
+  "LV0161": {
+   "title_en": "Weather louvre, aluminium, 1400x1000 mm",
+   "description_en": "Weather louvre for ventilation unit with mesh grille, removable for maintenance, aluminium finish."
+  },
+  "LV0162": {
+   "title_en": "Rain cap, stainless steel, 1000x700 mm",
+   "description_en": "Rain cap in stainless steel with 100 cm extension."
+  },
+  "LV0163": {
+   "title_en": "Colour coating, NCS",
+   "description_en": "Colour coating according to NCS, excluding surcharge for special colours."
+  },
+  "LV0164": {
+   "title_en": "Exhaust air valve, plastic, DN100",
+   "description_en": "Plastic exhaust air disc valve with airflow adjustment and NCS colour as desired."
+  },
+  "LV0165": {
+   "title_en": "Exhaust air valve, plastic, DN125",
+   "description_en": "Plastic exhaust air disc valve with airflow adjustment and NCS colour as desired."
+  },
+  "LV0166": {
+   "title_en": "Transfer air element, 175x490x240 mm",
+   "description_en": "Transfer air element for classrooms, 300 m3/h airflow, size 175 x 490 x 240 mm."
+  },
+  "LV0167": {
+   "title_en": "Transfer air element installation kit",
+   "description_en": "Installation kit for transfer air elements for high air volumes, type EBS-D-3-1."
+  },
+  "LV0168": {
+   "title_en": "Transfer air element, 175x490x240 mm",
+   "description_en": "Transfer air element for offices and group rooms, 200 m3/h airflow, size 175 x 490 x 240 mm."
+  }
+ }
+}

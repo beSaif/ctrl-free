@@ -1,0 +1,110 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T11:18:47",
+ "api": "responses",
+ "input_tokens": 4443,
+ "output_tokens": 885,
+ "response": {
+  "ST014": {
+   "title_en": "Total single-duct VAV controllers",
+   "description_en": "Total for all single-duct variable air volume controllers including commissioning and balancing, excluding installation."
+  },
+  "LV0063": {
+   "title_en": "Constant volume controller, DN250",
+   "description_en": "Mechanical, pressure-independent constant air volume controller with connection spigots, single- or double-wall design."
+  },
+  "LV0064": {
+   "title_en": "Compact silencer, DN100",
+   "description_en": "Compact silencer for airflows 30 to 200 m3/h with minimum 27 dB attenuation at 250 Hz."
+  },
+  "LV0065": {
+   "title_en": "Compact silencer, DN100",
+   "description_en": "Compact silencer for airflows 30 to 200 m3/h with minimum 27 dB attenuation at 250 Hz."
+  },
+  "LV0066": {
+   "title_en": "Rectangular silencer, 600x600x1750 mm",
+   "description_en": "Rectangular duct silencer with two baffles, 21 Pa pressure loss, and minimum 25 dB attenuation at 250 Hz."
+  },
+  "LV0067": {
+   "title_en": "Rectangular silencer, 1080x800x1250 mm",
+   "description_en": "Rectangular duct silencer with 31 Pa pressure loss and minimum 25 dB attenuation at 250 Hz."
+  },
+  "LV0068": {
+   "title_en": "Duct access door, galvanized steel, 400x200 mm",
+   "description_en": "Airtight access door in galvanized steel sheet with rubber seal for insulated ducts."
+  },
+  "LV0069": {
+   "title_en": "Duct access door, galvanized steel, 400x200 mm",
+   "description_en": "Airtight access door in galvanized steel sheet with rubber seal for insulated ducts."
+  },
+  "LV0070": {
+   "title_en": "Dial thermometer, duct-mounted",
+   "description_en": "Dial thermometer for installation in ducts."
+  },
+  "LV0071": {
+   "title_en": "Dial thermometer mounting frame",
+   "description_en": "Mounting frame for dial thermometer on insulated ducts."
+  },
+  "LV0072": {
+   "title_en": "Equipment labels, 100x50 mm",
+   "description_en": "Equipment identification labels in 100 x 50 mm size."
+  },
+  "LV0073": {
+   "title_en": "Colour arrows",
+   "description_en": "Colour arrows for identification and marking."
+  },
+  "LV0074": {
+   "title_en": "Equipotential bonding",
+   "description_en": "Equipotential bonding connection."
+  },
+  "ST015": {
+   "title_en": "Total fittings and instruments C",
+   "description_en": "Total for fittings and instruments in section C."
+  },
+  "LV0075": {
+   "title_en": "Damper actuator, 20 Nm",
+   "description_en": "24 V AC/DC damper actuator with on/off and three-point control, 150 s runtime, IP54."
+  },
+  "LV0076": {
+   "title_en": "Damper actuator, 5 Nm",
+   "description_en": "24 V AC/DC modulating damper actuator with 2 to 10 V control, 150 s runtime, IP54."
+  },
+  "LV0077": {
+   "title_en": "Duct smoke detector",
+   "description_en": "Duct smoke detector with VdS approval, contamination indication, electronic airflow monitoring, and external reset option."
+  },
+  "LV0078": {
+   "title_en": "Pressure switch",
+   "description_en": "Install the specified field device in the installation."
+  },
+  "LV0079": {
+   "title_en": "Frost protection thermostat, 2-point",
+   "description_en": "Install the specified field device in the installation."
+  },
+  "LV0080": {
+   "title_en": "Duct temperature and humidity sensor",
+   "description_en": "Install the specified field device in the installation."
+  },
+  "LV0081": {
+   "title_en": "Differential pressure sensor",
+   "description_en": "Install the specified field device in the installation."
+  },
+  "ST016": {
+   "title_en": "Total control D",
+   "description_en": "Total for control section D."
+  },
+  "LV0082": {
+   "title_en": "Installation and transport",
+   "description_en": "Install, test run, commission, instruct operating staff, transport materials to site, and provide hygiene documentation and first inspection."
+  },
+  "ST017": {
+   "title_en": "Total installation and transport",
+   "description_en": "Total for installation and transport."
+  },
+  "ST018": {
+   "title_en": "Total services",
+   "description_en": "Total for services."
+  }
+ }
+}

@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:08",
+ "api": "responses",
+ "input_tokens": 6915,
+ "output_tokens": 408,
+ "response": {
+  "LV0233": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer, but all candidate sizes are wrong.",
+   "assumptions": []
+  },
+  "LV0234": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer, but all candidate sizes are wrong.",
+   "assumptions": []
+  },
+  "LV0235": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer, but all candidate sizes are wrong.",
+   "assumptions": []
+  },
+  "LV0236": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer, but all candidate sizes are wrong.",
+   "assumptions": []
+  },
+  "LV0237": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct access door, but no candidate is that product type.",
+   "assumptions": []
+  },
+  "LV0238": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct access door, but no candidate is that product type.",
+   "assumptions": []
+  },
+  "LV0239": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Thermometer, but no candidate is that product type.",
+   "assumptions": []
+  },
+  "LV0240": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Mounting frame, but no candidate is that product type.",
+   "assumptions": []
+  },
+  "LV0241": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Equipment label, but no candidate is that product type.",
+   "assumptions": []
+  },
+  "LV0242": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour arrows, but no candidate is that product type.",
+   "assumptions": []
+  }
+ }
+}

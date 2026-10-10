@@ -1,0 +1,25 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "tender_meta",
+ "created": "2026-10-10T11:18:06",
+ "api": "responses",
+ "input_tokens": 423,
+ "output_tokens": 200,
+ "response": {
+  "name": "Ausschreibung Lüftung",
+  "name_page": 1,
+  "client": "",
+  "client_page": 0,
+  "trade": "Lüftung",
+  "trade_page": 1,
+  "due_at": "2026-12-01T00:00:00",
+  "due_page": 1,
+  "submission_rule": {
+   "page": 0,
+   "heading": "",
+   "text_de": "",
+   "text_en": ""
+  },
+  "award_criteria": []
+ }
+}

@@ -1,0 +1,110 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T11:18:48",
+ "api": "responses",
+ "input_tokens": 4507,
+ "output_tokens": 933,
+ "response": {
+  "LV0103": {
+   "title_en": "Additional ceiling substructure, galvanized steel",
+   "description_en": "Additional ceiling substructure in galvanized steel, or replacement of existing hangers."
+  },
+  "LV0104": {
+   "title_en": "Kitchen exhaust hood, stainless steel, 1600x1200x420 mm",
+   "description_en": "Kitchen exhaust hood in stainless steel, including the listed internal components and supports."
+  },
+  "LV0105": {
+   "title_en": "Ceiling panel, aluminium, 1500x500 mm",
+   "description_en": "Aluminium ceiling panel DQA type, top version, size 1500x500 mm."
+  },
+  "LV0106": {
+   "title_en": "Ceiling cassette panel, aluminium, 1000x500 mm",
+   "description_en": "Aluminium DSD cassette panel, size 1000x500 mm."
+  },
+  "LV0107": {
+   "title_en": "Ceiling cassette panel, aluminium, 1500x290 mm",
+   "description_en": "Aluminium DSD lamp cassette with LED luminaire and Smart DALI system, size 1500x290 mm."
+  },
+  "LV0108": {
+   "title_en": "Ceiling cassette panel, aluminium, 1000x290 mm",
+   "description_en": "Aluminium DSD lamp cassette with LED luminaire and Smart DALI system, size 1000x290 mm."
+  },
+  "LV0109": {
+   "title_en": "L-profile, installation to wall",
+   "description_en": "L-profile including installation to wall."
+  },
+  "LV0110": {
+   "title_en": "Additional ceiling substructure, galvanized steel",
+   "description_en": "Additional ceiling substructure in galvanized steel, or replacement of existing hangers."
+  },
+  "LV0111": {
+   "title_en": "Installation labour, hourly",
+   "description_en": "Service and installation labour hour for монтаж/installation work."
+  },
+  "LV0112": {
+   "title_en": "Film removal and cleaning",
+   "description_en": "Remove protective film and clean where this is not possible at end of installation."
+  },
+  "LV0113": {
+   "title_en": "Commissioning and adjustment",
+   "description_en": "Commissioning and adjustment according to execution drawing, ceiling layout, and meetings."
+  },
+  "LV0114": {
+   "title_en": "Rain cap, stainless steel, 65x35 cm",
+   "description_en": "Rain cap in stainless steel, 65x35 cm, with 100 cm extension."
+  },
+  "LV0115": {
+   "title_en": "Colour coating, NCS",
+   "description_en": "Colour coating according to NCS, excluding surcharge for special colours."
+  },
+  "LV0116": {
+   "title_en": "Supply air valve, plastic, DN100",
+   "description_en": "Plastic supply air valve with air volume adjustment, colour as specified by architect."
+  },
+  "LV0117": {
+   "title_en": "Exhaust air valve, plastic, DN100",
+   "description_en": "Plastic exhaust air valve with air volume adjustment, colour as specified by architect."
+  },
+  "LV0118": {
+   "title_en": "CAV flow controller, circular, DN250",
+   "description_en": "Single-duct constant volume flow controller, mechanically regulated and pressure-independent, with connection spigot."
+  },
+  "LV0119": {
+   "title_en": "Compact silencer, DN100",
+   "description_en": "Compact silencer with the listed acoustic performance and dimensions for round duct connection."
+  },
+  "LV0120": {
+   "title_en": "Rectangular silencer, 900x600x1250 mm",
+   "description_en": "Rectangular silencer with the listed acoustic performance and 36 Pa pressure loss."
+  },
+  "LV0121": {
+   "title_en": "Rectangular silencer, 600x700x1250 mm",
+   "description_en": "Rectangular silencer with the listed acoustic performance and 20 Pa pressure loss."
+  },
+  "LV0122": {
+   "title_en": "Duct access door, galvanized steel, 40x20 cm",
+   "description_en": "Airtight duct access door in galvanized steel with rubber seal, for insulated ducts."
+  },
+  "LV0123": {
+   "title_en": "Duct access door, galvanized steel, 40x20 cm",
+   "description_en": "Airtight duct access door in galvanized steel with seal, size 40x20 cm."
+  },
+  "LV0124": {
+   "title_en": "Dial thermometer, duct mounting",
+   "description_en": "Dial thermometer for installation in ductwork."
+  },
+  "LV0125": {
+   "title_en": "Dial thermometer mounting frame",
+   "description_en": "Mounting frame for dial thermometer in insulated ducts."
+  },
+  "LV0126": {
+   "title_en": "Equipment labels, 100x50 mm",
+   "description_en": "Equipment labels, size 100x50 mm."
+  },
+  "LV0127": {
+   "title_en": "Colour arrows",
+   "description_en": "Colour arrows."
+  }
+ }
+}

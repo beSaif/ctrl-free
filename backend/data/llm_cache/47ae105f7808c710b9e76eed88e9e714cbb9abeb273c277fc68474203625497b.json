@@ -1,0 +1,110 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T11:18:38",
+ "api": "responses",
+ "input_tokens": 6054,
+ "output_tokens": 1204,
+ "response": {
+  "LV0042": {
+   "title_en": "Air handling unit, 1380x1960x4240 mm",
+   "description_en": "Supply air unit with filter section, insulated damper, flexible connector and acoustics as specified; complete with base, transport split and accessories."
+  },
+  "LV0043": {
+   "title_en": "Heating/cooling coil, Cu/Al, 6200 m3/h",
+   "description_en": "Change-over coil with copper tubes, aluminium fins, side insertion rails, leak-tight housing and stainless condensate tray."
+  },
+  "LV0044": {
+   "title_en": "Exhaust air section, aluminium, 3x400 mm",
+   "description_en": "Ventilation unit casing section with filter compartment, inspection door, heat recovery section and fan section as specified."
+  },
+  "ST010": {
+   "title_en": "Total apparatus A",
+   "description_en": "Summary total for apparatus group A."
+  },
+  "LV0045": {
+   "title_en": "Duct leakage test",
+   "description_en": "Overall duct leakage test including smoke testing, photo documentation, reporting, corrective measures and calibration certificates."
+  },
+  "ST011": {
+   "title_en": "Subtotal ducts and pipes",
+   "description_en": "Summary subtotal for ducts and pipes."
+  },
+  "LV0046": {
+   "title_en": "Ground duct pipe, DN250, 3 m",
+   "description_en": "Insulated underground air duct pipe, VDI 6022 compliant, smooth surface, easy to clean, airtightness class D."
+  },
+  "LV0047": {
+   "title_en": "Ground duct pipe, plastic, DN250, 2 m",
+   "description_en": "Underground ventilation pipe made of CFC-free polyurethane rigid foam, VDI 6022 compliant."
+  },
+  "LV0048": {
+   "title_en": "Ground duct pipe, plastic, DN250, 1 m",
+   "description_en": "Underground ventilation pipe made of CFC-free polyurethane rigid foam, VDI 6022 compliant."
+  },
+  "LV0049": {
+   "title_en": "Ground duct bend, plastic, DN250, 45°",
+   "description_en": "45-degree underground ventilation bend made of CFC-free polyurethane rigid foam, VDI 6022 compliant."
+  },
+  "LV0050": {
+   "title_en": "Ground duct bend, plastic, DN250, 90°",
+   "description_en": "90-degree underground ventilation bend made of CFC-free polyurethane rigid foam, VDI 6022 compliant."
+  },
+  "LV0051": {
+   "title_en": "Flexible connector, stainless steel, DN250",
+   "description_en": "Stainless steel connection sleeve with EPDM gasket, tightened to 10 Nm and installed per instructions."
+  },
+  "LV0052": {
+   "title_en": "Wall sleeve seal, plastic, DN250",
+   "description_en": "Seal for wall penetration against pressurised and non-pressurised water; install according to instructions."
+  },
+  "LV0053": {
+   "title_en": "Wall sleeve collar, plastic, DN250",
+   "description_en": "Collar for ventilation pipes through masonry, walls and slabs, including straps against moisture ingress."
+  },
+  "LV0054": {
+   "title_en": "Static calculation",
+   "description_en": "Static calculation for underground air ducts based on customer information."
+  },
+  "LV0055": {
+   "title_en": "Shipping, packing and handling",
+   "description_en": "Shipping costs, packing and handling."
+  },
+  "LV0056": {
+   "title_en": "Duct leakage test",
+   "description_en": "Overall duct leakage test including smoke testing, photo documentation, reporting, corrective measures and calibration certificates."
+  },
+  "ST012": {
+   "title_en": "Subtotal ground ducts",
+   "description_en": "Summary subtotal for ground duct pipes under slab."
+  },
+  "ST013": {
+   "title_en": "Total ducts B",
+   "description_en": "Summary total for ducts group B."
+  },
+  "LV0057": {
+   "title_en": "Face plate, 996x496 mm",
+   "description_en": "Black painted face plate with air guiding elements, fixing holes and gasket, including black fixing screws and caps."
+  },
+  "LV0058": {
+   "title_en": "Decorative perforated cover, 1000x500 mm",
+   "description_en": "Visible perforated metal cover on the air-guiding face plate, black painted, magnetically retained and matched to the selected flange."
+  },
+  "LV0059": {
+   "title_en": "Supply air valve, plastic, DN100",
+   "description_en": "Plastic supply air disc valve with airflow adjustment, colour as specified by the architect."
+  },
+  "LV0060": {
+   "title_en": "Supply air valve, plastic, DN160",
+   "description_en": "Plastic supply air disc valve with airflow adjustment, colour as specified by the architect."
+  },
+  "LV0061": {
+   "title_en": "Exhaust air valve, plastic, DN160",
+   "description_en": "Plastic exhaust air disc valve with airflow adjustment, colour as specified by the architect."
+  },
+  "LV0062": {
+   "title_en": "VAV controller, rectangular, 500x300 mm",
+   "description_en": "Rectangular variable airflow controller for supply or exhaust air, factory wired with actuator and controller, ready for commissioning."
+  }
+ }
+}

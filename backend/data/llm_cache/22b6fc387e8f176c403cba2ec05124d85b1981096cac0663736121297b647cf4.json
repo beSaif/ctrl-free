@@ -1,0 +1,54 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "tender_meta",
+ "created": "2026-10-10T11:17:55",
+ "api": "responses",
+ "input_tokens": 9956,
+ "output_tokens": 994,
+ "response": {
+  "name": "PEO_Neubau Primarschule Erlenstrasse, Oberglatt",
+  "name_page": 1,
+  "client": "Gemeinde Oberglatt",
+  "client_page": 1,
+  "trade": "BKP 244 Lüftungsanlagen",
+  "trade_page": 1,
+  "due_at": "2026-09-22T10:00:00",
+  "due_page": 9,
+  "submission_rule": {
+   "page": 9,
+   "heading": "1.14 Adresse und Frist für die Einreichung des Angebotes",
+   "text_de": "Das vollständige, unterzeichnete Angebot (1-fach Papier sowie 1 USB-Datenträger mit sämtlichen Dateien im pdf-Format und der SIA-Schnittstelle des Leistungsverzeichnisses) ist im verschlossenen Umschlag (Couvert / Schachtel) bei der Beschaffungsstelle  Gemeinde Oberglatt, Abteilung Immobilien,  Rümlangstrasse 8, 8145 Oberglatt  bis zum 22. September 2026, 10.00 Uhr einzureichen.  Der Umschlag ist mit der Aufschrift „Neubau Primarschule Erlenstrasse“ sowie der betroffenen BKP Nummer und \"Bitte nicht öffnen\" zu kennzeichnen.",
+   "text_en": "The complete, signed offer (1 paper copy as well as 1 USB data carrier with all files in PDF format and the SIA interface of the bill of quantities) must be submitted in a sealed envelope (envelope/box) to the contracting authority, Gemeinde Oberglatt, Abteilung Immobilien, Rümlangstrasse 8, 8145 Oberglatt, by 22 September 2026, 10:00 a.m. The envelope must be labeled with “Neubau Primarschule Erlenstrasse” as well as the relevant BKP number and “Bitte nicht öffnen” (Do not open)."
+  },
+  "award_criteria": [
+   {
+    "label": "Preis",
+    "points": 60,
+    "page": 9,
+    "rule_de": "Die Punkte werden gemäss einer linearen Interpolation berechnet, welche beim tiefsten Angebot mit 100 Punkten anfängt und bei 150 % des tiefsten Angebotes 0 Punkte erreicht. Es gibt keine Minuspunkte. Die so ermittelten Punkte werden anschliessend mit dem %-Faktor der Gewichtung multipliziert (Gewichtung 60 Pkt.).",
+    "rule_en": "Points are calculated by linear interpolation, starting at 100 points for the lowest offer and reaching 0 points at 150% of the lowest offer. There are no negative points. The points thus determined are then multiplied by the percentage factor of the weighting (weighting 60 points)."
+   },
+   {
+    "label": "Qualität",
+    "points": 25,
+    "page": 9,
+    "rule_de": "Zwei Referenzen des Anbieters für vergleichbare Projekte mit ähnlicher Komplexität, nicht älter als 5 Jahre (Gewichtung 20 Pkt.). Ein Referenzobjekt der zugewiesenen Schlüsselperson mit ähnlicher Komplexität, nicht älter als 5 Jahre (Gewichtung 5 Pkt.).",
+    "rule_en": "Two references of the bidder for comparable projects with similar complexity, not older than 5 years (weighting 20 points). One reference project of the assigned key person with similar complexity, not older than 5 years (weighting 5 points)."
+   },
+   {
+    "label": "Leistungsfähigkeit",
+    "points": 10,
+    "page": 9,
+    "rule_de": "Kapazitätsnachweis des Teams, Anzahl zugewiesener Mitarbeiterprozent sowie Einhaltung von Ausführungs-/Lieferfristen (Gewichtung 10 Pkt.).",
+    "rule_en": "Evidence of the team's capacity, number of assigned employee percentage and compliance with execution/delivery deadlines (weighting 10 points)."
+   },
+   {
+    "label": "Lehrbetrieb",
+    "points": 5,
+    "page": 9,
+    "rule_de": "Anbieter, die Lernende ausbilden, erhalten einen Zuschlag abhängig vom Verhältnis zu den Angestellten (Gewichtung 5 Pkt.).",
+    "rule_en": "Bidders who train apprentices receive a bonus depending on the ratio to employees (weighting 5 points)."
+   }
+  ]
+ }
+}

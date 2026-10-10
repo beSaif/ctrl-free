@@ -129,8 +129,11 @@ def test_llm_pick_is_enum_constrained_and_batched(fake_llm, ex):
     res = matcher.match_positions(ps)
     assert len(fake.calls) == 3  # 22 positions, 10 per call
     assert sorted(seen) == sorted(gt)
-    assert res["LV0001"]["method"] == "llm" and res["LV0001"]["label"] == "Strong" and res["LV0001"]["confidence"] == 0.92
-    assert res["LV0005"]["label"] == "Close" and res["LV0005"]["assumptions"]
+    # a confirmation keeps the code's confidence; LLM assumptions become notes, not a downgrade
+    rules_only = matcher.match_positions(ps, use_llm=False)
+    assert res["LV0001"]["method"] == "llm" and res["LV0001"]["confidence"] == rules_only["LV0001"]["confidence"]
+    assert res["LV0005"]["label"] == rules_only["LV0005"]["label"]
+    assert res["LV0005"]["llm_notes"] == ["Finish not specified, galvanised assumed"]
     # the LLM says "none" on a Strong code match: the code match is kept, labelled Close, disagreement noted
     assert res["LV0021"]["product_id"] == gt["LV0021"]["suggested_product_id"]
     assert res["LV0021"]["label"] == "Close" and res["LV0021"]["method"] == "rules"

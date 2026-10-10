@@ -1,0 +1,74 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:03",
+ "api": "responses",
+ "input_tokens": 6876,
+ "output_tokens": 511,
+ "response": {
+  "LV0112": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour, not a duct product.",
+   "assumptions": []
+  },
+  "LV0114": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rain cap, but no rain cap candidate is offered.",
+   "assumptions": []
+  },
+  "LV0115": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour coating service, not any listed equipment item.",
+   "assumptions": []
+  },
+  "LV0116": {
+   "product_id": "P-AIR-001",
+   "confidence": "high",
+   "reason": "Supply air valve DN100.",
+   "assumptions": [
+    "Colour not specified, architekt choice assumed."
+   ]
+  },
+  "LV0117": {
+   "product_id": "P-AIR-003",
+   "confidence": "high",
+   "reason": "Exhaust air valve DN100.",
+   "assumptions": [
+    "Colour not specified, architekt choice assumed."
+   ]
+  },
+  "LV0118": {
+   "product_id": "P-CAV-001",
+   "confidence": "high",
+   "reason": "CAV circular controller DN250.",
+   "assumptions": []
+  },
+  "LV0119": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Compact silencer, but the only matching type has the wrong length.",
+   "assumptions": []
+  },
+  "LV0120": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer, but all candidates have wrong dimensions.",
+   "assumptions": []
+  },
+  "LV0121": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Rectangular silencer, but all candidates have wrong dimensions.",
+   "assumptions": []
+  },
+  "LV0122": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct access door, but no matching candidate is listed.",
+   "assumptions": []
+  }
+ }
+}

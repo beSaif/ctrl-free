@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:03",
+ "api": "responses",
+ "input_tokens": 7440,
+ "output_tokens": 519,
+ "response": {
+  "LV0091": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "EI30 rectangular fire penetration seal, but candidate sizes do not match 400 x 200",
+   "assumptions": []
+  },
+  "LV0092": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "EI30 circular fire penetration seal, but no candidate matches Ø 25 cm / DN250",
+   "assumptions": []
+  },
+  "LV0093": {
+   "product_id": "P-SUP-001",
+   "confidence": "high",
+   "reason": "Connection-angle support set matches the specified mounting angle set",
+   "assumptions": []
+  },
+  "LV0094": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Inspection cover for fire insulation, but candidate size 400 x 200 does not match 400 x 300",
+   "assumptions": []
+  },
+  "LV0095": {
+   "product_id": "P-AHU-3500",
+   "confidence": "high",
+   "reason": "Supply air handling unit with 3500 m3/h matches the tender airflow",
+   "assumptions": []
+  },
+  "LV0096": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct leakage test service, but no candidate is a leak test",
+   "assumptions": []
+  },
+  "LV0097": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Kitchen exhaust hood, but no candidate matches this product type",
+   "assumptions": []
+  },
+  "LV0098": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Supply air valve / terminal, but candidate sizes are DN100/DN125, not 1000x500 mm",
+   "assumptions": []
+  },
+  "LV0099": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Ceiling cassette panel, but no candidate matches this product type",
+   "assumptions": []
+  },
+  "LV0100": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Ceiling lamp cassette, but no candidate matches this product type",
+   "assumptions": []
+  }
+ }
+}

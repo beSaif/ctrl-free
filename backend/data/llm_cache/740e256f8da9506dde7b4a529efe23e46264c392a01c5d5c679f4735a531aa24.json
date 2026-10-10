@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:07",
+ "api": "responses",
+ "input_tokens": 6563,
+ "output_tokens": 524,
+ "response": {
+  "LV0213": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Rain cap, but no candidate is a roof cowl or matching size/material",
+   "assumptions": []
+  },
+  "LV0214": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Colour coating, but no candidate is a coating product",
+   "assumptions": []
+  },
+  "LV0215": {
+   "product_id": "P-AIR-001",
+   "confidence": "high",
+   "reason": "Supply air valve DN100 matches Ø 10 cm",
+   "assumptions": []
+  },
+  "LV0216": {
+   "product_id": "P-AIR-003",
+   "confidence": "high",
+   "reason": "Exhaust air valve DN100 matches Ø 10 cm",
+   "assumptions": []
+  },
+  "LV0217": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Supply air grille, but no candidate is a grille",
+   "assumptions": []
+  },
+  "LV0218": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Exhaust air grille, but no candidate is a grille",
+   "assumptions": []
+  },
+  "LV0219": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Air diffuser, but no candidate is a diffuser",
+   "assumptions": []
+  },
+  "LV0220": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Air diffuser, but no candidate is a diffuser",
+   "assumptions": []
+  },
+  "LV0221": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Air diffuser, but no candidate is a diffuser",
+   "assumptions": []
+  },
+  "LV0222": {
+   "product_id": "none",
+   "confidence": "low",
+   "reason": "Air diffuser, but no candidate is a diffuser",
+   "assumptions": []
+  }
+ }
+}

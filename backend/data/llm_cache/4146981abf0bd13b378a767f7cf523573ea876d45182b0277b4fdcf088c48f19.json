@@ -1,0 +1,74 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:02",
+ "api": "responses",
+ "input_tokens": 6869,
+ "output_tokens": 474,
+ "response": {
+  "LV0081": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter matches the tender exactly.",
+   "assumptions": []
+  },
+  "LV0082": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Installation labour is a service, not an AHU or field device product.",
+   "assumptions": []
+  },
+  "LV0083": {
+   "product_id": "P-INS-001",
+   "confidence": "high",
+   "reason": "Thermal duct insulation, 30 mm mineral wool matches exactly.",
+   "assumptions": [
+    "Alu foil / stainless wire mesh finish assumed as specified in tender."
+   ]
+  },
+  "LV0084": {
+   "product_id": "P-INS-002",
+   "confidence": "high",
+   "reason": "Thermal duct insulation, 60 mm mineral wool matches exactly.",
+   "assumptions": [
+    "Alu foil finish assumed from tender."
+   ]
+  },
+  "LV0085": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender needs 100 mm thermal duct insulation, but no matching thermal 100 mm product is offered.",
+   "assumptions": []
+  },
+  "LV0086": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender needs 15 mm thermal duct insulation, but offered insulation products are 30 mm or 60 mm.",
+   "assumptions": []
+  },
+  "LV0087": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "EI30 fire insulation is a different product type and no fire-insulation candidate is offered.",
+   "assumptions": []
+  },
+  "LV0088": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "EI30 rectangular fire seal size 500 x 350 does not match the offered seal sizes.",
+   "assumptions": []
+  },
+  "LV0089": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "EI30 rectangular fire seal size 400 x 400 does not match the offered seal sizes.",
+   "assumptions": []
+  },
+  "LV0090": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "EI30 rectangular fire seal size 400 x 350 does not match the offered seal sizes.",
+   "assumptions": []
+  }
+ }
+}

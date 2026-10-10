@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T10:56:02",
+ "api": "responses",
+ "input_tokens": 6207,
+ "output_tokens": 480,
+ "response": {
+  "LV0123": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Duct access door, no matching candidate product kind",
+   "assumptions": []
+  },
+  "LV0124": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Thermometer for duct installation, no matching candidate product kind",
+   "assumptions": []
+  },
+  "LV0125": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Mounting frame for insulated ducts, no matching candidate product kind",
+   "assumptions": []
+  },
+  "LV0126": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Equipment labels 100 x 50 mm, no matching candidate product kind",
+   "assumptions": []
+  },
+  "LV0127": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Colour arrows, no matching candidate product kind",
+   "assumptions": []
+  },
+  "LV0128": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Equipotential bonding, no matching candidate product kind",
+   "assumptions": []
+  },
+  "LV0129": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "24V actuator, matches the described damper actuator",
+   "assumptions": []
+  },
+  "LV0130": {
+   "product_id": "P-CTL-003",
+   "confidence": "high",
+   "reason": "24V actuator, matches the continuous damper actuator",
+   "assumptions": []
+  },
+  "LV0131": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Smoke detector, no matching candidate product kind",
+   "assumptions": []
+  },
+  "LV0132": {
+   "product_id": "P-CTL-001",
+   "confidence": "high",
+   "reason": "Differential pressure transmitter, exact type match",
+   "assumptions": []
+  }
+ }
+}
