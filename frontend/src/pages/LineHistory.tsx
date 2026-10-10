@@ -160,7 +160,8 @@ export function LineHistory({
 
   const rows: Row[] = [
     ...originRows(p, readAt, cat, t),
-    ...[...log].reverse().map((e): Row => {
+    // a senior's revert is logged twice (the undo and the review); the undo row already says it
+    ...[...log].reverse().filter((e) => !(e.action === 'review' && rec(e).verdict === 'reverted')).map((e): Row => {
       const after = rec(e.after)
       const before = rec(e.before)
       // confirm / flag entries say it all in their title; edits list each value before → after
