@@ -188,7 +188,8 @@ export interface PositionPrice {
   factors: PriceFactor[]
   hours: number
   rate: number
-  role: string
+  /** null when the line has no install rule (e.g. a price typed on a line not in the catalogue) */
+  role: string | null
   labour: number
   direct: number
   explain?: Record<string, string>

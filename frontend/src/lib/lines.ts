@@ -315,8 +315,8 @@ export function factorLabel(key: string, t: T) {
   return t(FACTOR_LABELS[key] ?? key.replace(/_/g, ' '))
 }
 
-export function roleLabel(role: string, t: T) {
-  return t(role.replace(/_/g, ' '))
+export function roleLabel(role: string | null, t: T) {
+  return role ? t(role.replace(/_/g, ' ')) : t('no role')
 }
 
 export function factorsSentence(pr: PositionPrice, t: T): string {
