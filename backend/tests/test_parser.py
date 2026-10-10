@@ -52,6 +52,31 @@ def test_units_and_numbers():
     assert normalize_unit("RTU") is None
 
 
+# ----------------------------------------------------------------------------- column order
+
+def _header(gattg_x: float, betrag_x: float) -> list:
+    """Oberglatt LV column header as pymupdf words, with the Mass-Gattg. / Massbetrag columns at the given x."""
+    return [[(59.9, 40.6, 75.9, 49.5, "Pos."), (202.2, 40.6, 245.7, 49.5, "Gegenstand"),
+             (gattg_x, 40.5, gattg_x + 22, 49.4, "Mass-"), (betrag_x, 38.3, betrag_x + 20, 46.6, "Mass-"),
+             (448.7, 40.4, 479.8, 49.3, "Einheits-"), (513.5, 40.6, 537.0, 49.5, "Betrag")],
+            [(gattg_x, 52.5, gattg_x + 20, 61.4, "Gattg"), (betrag_x, 50.3, betrag_x + 21, 58.6, "betrag"),
+             (455.1, 52.4, 473.3, 61.3, "Preis"), (520.4, 52.6, 527.9, 61.5, "Fr")]]
+
+
+@pytest.mark.parametrize("gattg_x, betrag_x, unit_x, qty_x", [
+    (374.7, 409.4, 380.0, 426.8),   # as printed: unit, then quantity
+    (409.4, 374.7, 414.7, 392.1),   # columns swapped: quantity, then unit
+])
+def test_columns_in_either_order(gattg_x, betrag_x, unit_x, qty_x):
+    from app.parser import _find_columns, _make_line
+    cols = _find_columns(_header(gattg_x, betrag_x))
+    assert (cols.unit_x0, cols.qty_x0) == (gattg_x, betrag_x)
+    row = [(91.0, 181.6, 150.0, 192.8, "Regenhut"), (unit_x, 181.6, unit_x + 14.4, 192.8, "Stk"),
+           (qty_x, 181.6, qty_x + 5.6, 192.8, "5")]
+    line = _make_line(row, 78, cols)
+    assert (line.unit_raw, line.qty_raw, line.text) == ("Stk", "5", "Regenhut")
+
+
 # ----------------------------------------------------------------------------- document level
 
 def test_speed_and_progress(parsed):

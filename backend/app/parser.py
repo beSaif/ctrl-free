@@ -148,12 +148,13 @@ def _find_columns(rows) -> Columns | None:
         return None
     g = gattg[0]
     near = [w for w in flat if abs(w[1] - g[1]) < 25]
-    betrag = [w for w in near if w[4].lower().startswith("betrag") and w[0] > g[0] + 5]
+    # Massbetrag may stand left or right of Mass-Gattg.; only the "Betrag Fr." total column is excluded
+    betrag = [w for w in near if w[4].lower().startswith("betrag") and abs(w[0] - g[0]) > 5]
     preis = [w for w in near if w[4].lower().startswith(("einheits", "preis"))]
     pos = [w for w in near if w[4].lower().startswith("pos")]
-    mass = sorted([w for w in near if w[4].lower().startswith("mass")], key=lambda w: w[0])
+    mass = sorted([w for w in near if w[4].lower().startswith("mass") and abs(w[0] - g[0]) > 10], key=lambda w: w[0])
     betrag = [w for w in betrag if not preis or w[0] < min(x[0] for x in preis)]
-    qty_x0 = min(w[0] for w in betrag) if betrag else (mass[1][0] if len(mass) > 1 else g[0] + 34)
+    qty_x0 = min(w[0] for w in betrag) if betrag else (mass[0][0] if mass else g[0] + 34)
     price_x0 = min(w[0] for w in preis) if preis else qty_x0 + 40
     pos_x1 = (pos[0][0] + 22) if pos else min(w[0] for w in flat) + 22
     header_bottom = max(w[3] for w in near)
@@ -242,22 +243,27 @@ def _analyze_page(page, no: int) -> PageInfo:
 
 def _make_line(r, page_no: int, cols: Columns) -> Line:
     desc, pos, unit_w, qty_w, price = [], [], [], [], []
+    # Each column's zone runs to the next column, whichever of unit / quantity comes first.
+    unit_first = cols.unit_x0 <= cols.qty_x0
+    unit_end = cols.qty_x0 - 3 if unit_first else cols.price_x0 - 6
+    qty_end = cols.price_x0 - 6 if unit_first else cols.unit_x0 - 3
+    left_x0 = min(cols.unit_x0, cols.qty_x0)
     for w in r:
         x0, tok = w[0], w[4]
-        if x0 < cols.pos_x1 and x0 < cols.unit_x0 - 100:
+        if x0 < cols.pos_x1 and x0 < left_x0 - 100:
             pos.append(w)
         elif x0 >= cols.price_x0 - 6:
             price.append(w)
-        elif x0 >= cols.unit_x0 - 8 and x0 < cols.qty_x0 - 3 and is_unit_token(tok) and not unit_w:
+        elif cols.unit_x0 - 8 <= x0 < unit_end and is_unit_token(tok) and not unit_w:
             unit_w.append(w)
-        elif x0 >= cols.qty_x0 - 14 and is_number_token(tok) and not qty_w:
+        elif cols.qty_x0 - 14 <= x0 < qty_end and is_number_token(tok) and not qty_w:
             qty_w.append(w)
         else:
             desc.append(w)
-    # A unit printed slightly right (e.g. "m2@383") may land in the qty zone: accept it.
+    # A unit printed slightly off its column (e.g. "m2@383") may land in the qty zone: accept it.
     if not unit_w:
         for w in list(desc):
-            if w[0] >= cols.unit_x0 - 8 and is_unit_token(w[4]):
+            if w[0] >= left_x0 - 8 and is_unit_token(w[4]):
                 unit_w.append(w)
                 desc.remove(w)
                 break

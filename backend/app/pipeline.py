@@ -268,6 +268,11 @@ def _run_stages(tid: str, timings: dict) -> None:
     pages_text = parsed.get("pages_text") or {}
     store.save_pages_text(tid, pages_text)
     positions = parsed.get("positions") or []
+    items = [p for p in positions if p.get("kind") == "item"]
+    with_qty = sum(1 for p in items if p.get("quantity"))
+    if len(items) >= 10 and with_qty < 0.5 * len(items):
+        _warn(tid, "parse", f"Only {with_qty} of {len(items)} lines have a quantity: "
+                            "the quantity column was probably not recognised. Check the LV layout.")
     for p in positions:
         p.setdefault("overrides", {})
         p.setdefault("supplier_quote", None)
