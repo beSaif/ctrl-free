@@ -125,7 +125,8 @@ export function ComparisonPanel({ cmp, rule, defaultOpen, title }: { cmp: Compar
   const kind = makeKindLabel(cmp.summary.make_kind, t)
   const sentence = makeRuleSentence(rule ?? null, t, cmp.verdict === 'differs')
   return (
-    <div className="flex flex-col border border-rule" style={{ borderColor: cmp.verdict === 'differs' ? C.attn : undefined }}>
+    // the differing checks are already orange in the summary, so the box itself stays neutral
+    <div className="flex flex-col border border-rule">
       <button
         type="button"
         aria-expanded={open}
