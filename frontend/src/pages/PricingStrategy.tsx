@@ -5,7 +5,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useLang, useT, type T } from '../i18n'
 import type { AwardCriterion, PricingSettings, Scenario } from '../api/types'
-import { Button, SegmentedControl, Stepper } from '../components/ui'
+import { Button, Disclosure, SegmentedControl, Stepper } from '../components/ui'
+import { Source, SrcFoot } from '../components/Source'
 import { PageViewer } from '../components/PdfCrop'
 import { cx } from '../lib/cx'
 import { fmt0, fmtShortDate } from '../lib/format'
@@ -47,12 +48,12 @@ export function StrategyStep({ ctx }: { ctx: PricingCtx }) {
   return (
     <main className="flex-auto grid grid-cols-[minmax(420px,590px)_minmax(0,1fr)] max-[1100px]:grid-cols-1 items-start">
       <section aria-label={t('Your read on this tender')} className="min-w-0 px-6 pt-5 pb-8 flex flex-col gap-3.5 border-r border-rule">
-        <div className="flex flex-col gap-1">
-          <h1 className="m-0 text-[20px] font-semibold">{t('Your read on this tender')}</h1>
-          <p className="m-0 text-muted">
-            {t('Nobody knows the competitors before the award, so these three answers are your call. Each one moves the win chance on the right.')}
-          </p>
-        </div>
+        <h1
+          className="m-0 text-[20px] font-semibold"
+          title={t('Nobody knows the competitors before the award, so these three answers are your call. Each one moves the win chance on the right.')}
+        >
+          {t('Your read on this tender')}
+        </h1>
         <ReadGroup
           t={t}
           title={t('How strong is the competition?')}
@@ -93,12 +94,17 @@ export function StrategyStep({ ctx }: { ctx: PricingCtx }) {
           onNote={(v) => change({ notes: { sensitivity: v } }, 0)}
           extra={price && <AwardNote id={id} crit={price} pageCount={tender?.page_count} />}
         />
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5" title={ctx.server.sources?.ref_win ? t('Default from {src}', { src: ctx.server.sources.ref_win }) : undefined}>
+        <div
+          className="flex flex-wrap items-center gap-x-3 gap-y-1.5"
+          title={t('where the three answers start') + (ctx.server.sources?.ref_win ? ' · ' + t('Default from {src}', { src: ctx.server.sources.ref_win }) : '')}
+        >
           <span className="flex-auto flex flex-col">
             <span className="font-semibold">{t('Win chance at the standard price')}</span>
-            <span className="text-[12.5px]" style={{ color: refChanged ? C.accent : C.faint }}>
-              {refChanged ? t('default {v}', { v: pct(D.ref_win) }) : t('Default')} · {t('where the three answers start')}
-            </span>
+            {refChanged && (
+              <span className="text-[12.5px]" style={{ color: C.accent }}>
+                {t('default {v}', { v: pct(D.ref_win) })}
+              </span>
+            )}
           </span>
           <Stepper
             label={t('Win chance at the standard price')}
@@ -127,10 +133,12 @@ export function StrategyStep({ ctx }: { ctx: PricingCtx }) {
             <span className="flex flex-wrap items-baseline gap-x-3">
               <span className={cx('font-mono text-[30px] leading-[1.15] font-medium', ctx.busy && 'cf-pending')}>CHF {fmt0(shown.bid)}</span>
               <span>
-                <span className="font-semibold">{t('{w} win chance', { w: pct(shown.win) })}</span> · {t('CHF {p} profit if won', { p: fmt0(shown.profit) })}
+                <Source label={t('{w} win chance', { w: pct(shown.win) })} title={t('Win chance')} className="font-semibold" color={C.ink}>
+                  <p className="m-0">{winWords(s, shown, tot, t)}</p>
+                </Source>{' '}
+                · {t('CHF {p} profit if won', { p: fmt0(shown.profit) })}
               </span>
             </span>
-            <span className="text-[13px] text-muted">{winWords(s, shown, tot, t)}</span>
           </div>
           <div className="flex flex-col items-end gap-1.5">
             <Button variant="primary" onClick={useAndContinue}>
@@ -156,7 +164,9 @@ export function StrategyStep({ ctx }: { ctx: PricingCtx }) {
                 <span className="text-right">{t('Offer price')}</span>
                 <span className="text-right">{t('Win chance')}</span>
                 <span className="text-right">{t('Profit if won')}</span>
-                <span className="text-right">{t('Expected profit')}</span>
+                <span className="text-right" title={t('Expected profit = win chance × profit if won. Margins are set under Costs.')}>
+                  {t('Expected profit')}
+                </span>
               </div>
               {scen.map((o) => {
                 const on = o.name === s.chosen
@@ -192,7 +202,6 @@ export function StrategyStep({ ctx }: { ctx: PricingCtx }) {
               })}
             </div>
           </div>
-          <span className="text-[13px] text-muted">{t('Expected profit = win chance × profit if won. Margins are set under Costs.')}</span>
         </div>
       </section>
     </main>
@@ -212,9 +221,11 @@ function Recommendation({ ctx }: { ctx: PricingCtx }) {
   const chosen = scen.find((x) => x.name === s.chosen)
   const dPts = (a: Scenario, b: Scenario) => Math.abs(Math.round(a.win * 100) - Math.round(b.win * 100))
 
-  const lines: string[] = [
+  // the recommendation (and, when your offer is a fourth option, what it gives up) stays in view; the reasoning folds away
+  const head: string[] = [
     t('{name} maximises expected profit: CHF {e} ({w} win chance × CHF {p} if won).', { name: t(best.name), e: fmt0(best.expected), w: pct(best.win), p: fmt0(best.profit) }),
   ]
+  const lines: string[] = []
   if (cheaper)
     lines.push(
       t('{name} gains {n} points of win chance for CHF {x} less expected profit.', { name: t(cheaper.name), n: dPts(cheaper, best), x: fmt0(best.expected - cheaper.expected) }),
@@ -236,7 +247,7 @@ function Recommendation({ ctx }: { ctx: PricingCtx }) {
       }),
     )
   if (chosen && chosen !== best && chosen !== cheaper && chosen !== dearer)
-    lines.push(t('Your offer ({name}) gives up CHF {x} of expected profit against {best}.', { name: t(chosen.name), x: fmt0(best.expected - chosen.expected), best: t(best.name) }))
+    head.push(t('Your offer ({name}) gives up CHF {x} of expected profit against {best}.', { name: t(chosen.name), x: fmt0(best.expected - chosen.expected), best: t(best.name) }))
 
   // how the recommendation moves if the competition is one step stronger / lighter
   const what = (dir: -1 | 1) => {
@@ -251,13 +262,19 @@ function Recommendation({ ctx }: { ctx: PricingCtx }) {
   const sens = [what(-1), what(1)].filter(Boolean) as string[]
 
   return (
-    <div className="flex flex-col gap-1.5 pl-3.5 border-l-[3px] border-accent" aria-live="polite">
-      <h2 className="m-0 text-[15px] font-semibold">{t('What the numbers say')}</h2>
-      <p className="m-0 text-[13.5px]">{lines.join(' ')}</p>
-      {sens.length > 0 && (
-        <p className="m-0 text-[13px] text-muted">
-          <span className="font-medium text-ink">{t('If your read is off:')}</span> {sens.join(' ')}
-        </p>
+    <div className="flex flex-col gap-1 pl-3.5 border-l-[3px] border-accent" aria-live="polite">
+      <p className="m-0 text-[13.5px]">{head.join(' ')}</p>
+      {(lines.length > 0 || sens.length > 0) && (
+        <Disclosure label={t('Why this recommendation?')} className="text-[13.5px]">
+          <div className="flex flex-col gap-1.5 pb-1">
+            {lines.length > 0 && <p className="m-0">{lines.join(' ')}</p>}
+            {sens.length > 0 && (
+              <p className="m-0 text-[13px] text-muted">
+                <span className="font-medium text-ink">{t('If your read is off:')}</span> {sens.join(' ')}
+              </p>
+            )}
+          </div>
+        </Disclosure>
       )}
     </div>
   )
@@ -337,8 +354,9 @@ function WinChart({ ctx, onPick }: { ctx: PricingCtx; onPick: (name: string) => 
   return (
     <figure className="m-0 flex flex-col gap-1">
       <figcaption className="flex flex-wrap items-baseline justify-between gap-x-3">
-        <span className="text-[15px] font-semibold">{t('Win chance and expected profit by offer price')}</span>
-        <span className="text-[13px] text-muted">{t('Click a point to pick that option')}</span>
+        <span className="text-[15px] font-semibold" title={t('Click a point to pick that option') + ' · ' + t('Move over the chart to read any price.')}>
+          {t('Win chance and expected profit by offer price')}
+        </span>
       </figcaption>
       <div ref={box} className="w-full">
         <svg
@@ -426,8 +444,7 @@ function WinChart({ ctx, onPick }: { ctx: PricingCtx; onPick: (name: string) => 
           m: read.margin.toFixed(1) + '%',
           w: pct(read.win),
           e: fmt0(read.expected),
-        })}{' '}
-        {!hover && t('Move over the chart to read any price.')}
+        })}
       </span>
     </figure>
   )
@@ -449,18 +466,23 @@ function niceTicks(a: number, b: number, n: number) {
 
 // ---------------------------------------------------------------- your read
 
-/** "Price is worth 60 of 100 award points (p. 9). ..." built by code from the award criterion, with the page. */
+/** "Price: 60 of 100 award points", opening "Price is worth 60 of 100 award points (p. 9). ..." built by code
+ *  from the award criterion, with the page. */
 function AwardNote({ id, crit, pageCount }: { id: string; crit: AwardCriterion; pageCount?: number }) {
   const t = useT()
   const lang = useLang()
   const [open, setOpen] = useState(false)
   const text = (lang === 'de' ? crit.summary_de : crit.summary_en) ?? t('Price is worth {p} of 100 award points (p. {page}).', { p: crit.points, page: crit.page })
   return (
-    <span className="text-[13px] text-muted">
-      {text + ' '}
-      <button type="button" onClick={() => setOpen(true)} className="border-0 bg-transparent p-0 min-h-0 text-accent underline underline-offset-2">
-        {t('Show on page')}
-      </button>
+    <span className="text-[13px]">
+      <Source label={t('Price: {p} of 100 award points', { p: crit.points })} title={t('How the client scores price')} color={C.muted}>
+        <p className="m-0">{text}</p>
+        <SrcFoot>
+          <button type="button" onClick={() => setOpen(true)} className="border-0 bg-transparent p-0 min-h-0 text-accent underline underline-offset-2">
+            {t('Show on page')}
+          </button>
+        </SrcFoot>
+      </Source>
       <PageViewer
         open={open}
         onClose={() => setOpen(false)}
@@ -512,30 +534,32 @@ function ReadGroup({
         <SegmentedControl label={title} value={known ? value : NaN} onChange={onPick} options={opts.map((o) => ({ value: o.value, label: o.label, hint: o.hint }))} />
       </div>
       {extra}
-      <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 text-[13px]">
-        <span className="flex items-center gap-1.5" style={{ color: changed ? C.accent : C.faint }}>
-          <span className="w-2 h-2" style={{ background: changed ? C.accent : C.faint }} aria-hidden="true" />
-          {changed
-            ? t('Your call · {who} · {when}', { who: t(changedBy?.by ?? 'You'), when: changedBy?.at ? fmtShortDate(changedBy.at, lang) : t('today') }) +
-              (defLabel ? ' · ' + t('default {v}', { v: defLabel }) : '')
-            : t('Default')}
-          {!known && ` (${value})`}
-        </span>
-        {changed && (
-          <label className="flex-[1_1_220px] flex items-center gap-2">
-            <span className="text-muted">{t('Why')}</span>
-            <input
-              type="text"
-              key={note}
-              name={k + '-note'}
-              defaultValue={note}
-              onBlur={(e) => e.currentTarget.value !== note && onNote(e.currentTarget.value)}
-              placeholder={notePh}
-              className="flex-auto min-w-0 min-h-8 px-2.5 border border-rule rounded-[2px] text-ink placeholder:text-faint"
-            />
-          </label>
-        )}
-      </div>
+      {/* the default is silent; a changed answer says who made the call and asks why */}
+      {(changed || !known) && (
+        <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 text-[13px]">
+          <span className="flex items-center gap-1.5" style={{ color: C.accent }}>
+            <span className="w-2 h-2" style={{ background: C.accent }} aria-hidden="true" />
+            {changed &&
+              t('Your call · {who} · {when}', { who: t(changedBy?.by ?? 'You'), when: changedBy?.at ? fmtShortDate(changedBy.at, lang) : t('today') }) +
+                (defLabel ? ' · ' + t('default {v}', { v: defLabel }) : '')}
+            {!known && ` (${value})`}
+          </span>
+          {changed && (
+            <label className="flex-[1_1_220px] flex items-center gap-2">
+              <span className="text-muted">{t('Why')}</span>
+              <input
+                type="text"
+                key={note}
+                name={k + '-note'}
+                defaultValue={note}
+                onBlur={(e) => e.currentTarget.value !== note && onNote(e.currentTarget.value)}
+                placeholder={notePh}
+                className="flex-auto min-w-0 min-h-8 px-2.5 border border-rule rounded-[2px] text-ink placeholder:text-faint"
+              />
+            </label>
+          )}
+        </div>
+      )}
     </fieldset>
   )
 }

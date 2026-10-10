@@ -61,4 +61,12 @@ export const DE_PRICING: Record<string, string> = {
   'peak {p}': 'Maximum {p}',
   'At CHF {p} ({m} margin): {w} win chance, CHF {e} expected profit.': 'Bei CHF {p} ({m} Marge): {w} Zuschlagschance, CHF {e} erwarteter Gewinn.',
   'Move over the chart to read any price.': 'Fahren Sie über die Grafik, um jeden Preis abzulesen.',
+  '{n} changed': '{n} geändert',
+  'all defaults': 'alles Standard',
+  '{n} changed: {list}': '{n} geändert: {list}',
+  'Where the defaults come from': 'Woher die Standardwerte stammen',
+  Defaults: 'Standardwerte',
+  'Why this recommendation?': 'Warum diese Empfehlung?',
+  'Price: {p} of 100 award points': 'Preis: {p} von 100 Zuschlagspunkten',
+  'How the client scores price': 'Wie die Vergabestelle den Preis bewertet',
 }

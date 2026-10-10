@@ -7,7 +7,8 @@ import { Navigate, NavLink, useLocation, useNavigate, useParams } from 'react-ro
 import { useLang, useT, type T } from '../i18n'
 import { usePricing, usePutPricing, useResetPricing, useTender } from '../api/hooks'
 import type { PricingPut, PricingResponse, PricingSettings, Scenario, TenderDetail, Totals } from '../api/types'
-import { Button, ErrorBox, LinkButton, Loading, Stepper, Toggle } from '../components/ui'
+import { Button, Disclosure, ErrorBox, LinkButton, Loading, Stepper, Toggle } from '../components/ui'
+import { Source, SrcFoot } from '../components/Source'
 import { cx } from '../lib/cx'
 import { fmt0, fmt2, fmtShortDate } from '../lib/format'
 import { C } from '../lib/lines'
@@ -196,15 +197,10 @@ function PricingSteps({ id, step }: { id: string; step: Step }) {
 
 function StepBar({ ctx, step }: { ctx: PricingCtx; step: Step }) {
   const { id, t, changed, shown, s } = ctx
-  const items: { k: Step; n: number; label: string; sub: string; info: string }[] = [
+  // the step's question lives in the tooltip; the tab shows its number (the offer price only once chosen)
+  const items: { k: Step; n: number; label: string; sub: string; info: string | null }[] = [
     { k: 'costs', n: 1, label: t('Costs'), sub: t('what does this job cost us'), info: 'CHF ' + fmt0(ctx.tot.cost) },
-    {
-      k: 'strategy',
-      n: 2,
-      label: t('Strategy'),
-      sub: t('what price do we offer'),
-      info: s.chosen ? 'CHF ' + fmt0(shown.bid) : t('price not chosen'),
-    },
+    { k: 'strategy', n: 2, label: t('Strategy'), sub: t('what price do we offer'), info: s.chosen ? 'CHF ' + fmt0(shown.bid) : null },
   ]
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-3 border-b border-rule">
@@ -214,6 +210,7 @@ function StepBar({ ctx, step }: { ctx: PricingCtx; step: Step }) {
             key={it.k}
             to={`/t/${id}/pricing/${it.k}`}
             aria-current={it.k === step ? 'page' : undefined}
+            title={it.info === null ? `${it.sub} · ${t('price not chosen')}` : it.sub}
             className={cx(
               'inline-flex items-baseline gap-2 min-h-11 px-3 pt-2.5 border-b-2 no-underline',
               it.k === step ? 'border-ink text-ink!' : 'border-transparent text-muted! hover:text-ink!',
@@ -221,19 +218,23 @@ function StepBar({ ctx, step }: { ctx: PricingCtx; step: Step }) {
           >
             <span className="font-mono text-[12.5px]">{it.n}</span>
             <span className={cx(it.k === step && 'font-semibold')}>{it.label}</span>
-            <span className="text-[13px] text-muted max-[900px]:hidden">{it.sub}</span>
-            <span className={cx('font-mono text-[12.5px]', it.k === 'strategy' && !s.chosen ? 'text-attn' : 'text-muted')}>{it.info}</span>
+            {it.info !== null ? (
+              <span className="font-mono text-[12.5px] text-muted">{it.info}</span>
+            ) : (
+              <span role="img" aria-label={t('price not chosen')} className="relative bottom-[3px] w-1.5 h-1.5 rounded-full bg-attn" />
+            )}
           </NavLink>
         ))}
       </nav>
       <span className="flex-auto" />
-      <span className="text-[13px] text-muted max-[1560px]:hidden">{t('Your choices here apply to this tender only.')}</span>
-      <span className="text-[13px]" style={{ color: changed.length ? C.accent : C.faint }} title={t('Your choices here apply to this tender only.')}>
-        {changed.length ? t('{n} changed from defaults', { n: changed.length }) : t('All values are defaults')}
-      </span>
-      <Button size="xs" className="min-h-[34px]" onClick={() => ctx.resetKeys([])} disabled={!changed.length}>
-        {t('Reset all')}
-      </Button>
+      {changed.length > 0 && (
+        <>
+          <ChangesPopover ctx={ctx} />
+          <Button size="xs" className="min-h-[34px]" onClick={() => ctx.resetKeys([])}>
+            {t('Reset all')}
+          </Button>
+        </>
+      )}
     </div>
   )
 }
@@ -345,13 +346,39 @@ function EffectText({ e, ctx }: { e: Effect | null; ctx: PricingCtx }) {
 
 // ---------------------------------------------------------------- Costs step
 
+const SITE_KEYS = new Set(['material_waste_pct', 'small_material_pct', 'include_small_material', 'supplier_contingency_pct', 'include_supplier_contingency'])
+const inMargins = (k: string) => k.startsWith('margins.') || k === 'overhead_pct' || k === 'transport_pct'
+const inSite = (k: string) => k.startsWith('factors.') || SITE_KEYS.has(k)
+/** The section a deep link points into: #site-factors (from a line's hours), #set-overhead_pct (from "N changed"). */
+function hashGroup(hash: string): 'margins' | 'site' | null {
+  const target = decodeURIComponent(hash.slice(1))
+  const k = target.startsWith('set-') ? target.slice(4) : ''
+  if (target === 'site-factors' || inSite(k)) return 'site'
+  return inMargins(k) ? 'margins' : null
+}
+
 function CostsStep({ ctx }: { ctx: PricingCtx }) {
-  const { t, s, tot, change, busy, id } = ctx
+  const { t, s, tot, change, busy, id, changed } = ctx
   const loc = useLocation()
+  // the two settings sections start collapsed, open when one of their values is off its default or a deep link points in
+  const [open, setOpen] = useState(() => {
+    const g = hashGroup(loc.hash)
+    return { margins: g === 'margins' || changed.some(inMargins), site: g === 'site' || changed.some(inSite) }
+  })
+  const [seen, setSeen] = useState(loc.key)
+  if (seen !== loc.key) {
+    setSeen(loc.key)
+    const g = hashGroup(loc.hash)
+    if (g && !open[g]) setOpen({ ...open, [g]: true })
+  }
   useEffect(() => {
-    // deep links such as /pricing/costs#site-factors (from a line's hours)
-    if (loc.hash) document.getElementById(loc.hash.slice(1))?.scrollIntoView({ block: 'start' })
-  }, [loc.hash])
+    // scroll to the deep link once its section has rendered
+    const target = decodeURIComponent(loc.hash.slice(1))
+    if (!target) return
+    const row = target.startsWith('set-')
+    const tm = setTimeout(() => document.getElementById(target)?.scrollIntoView(row ? { block: 'center', behavior: 'smooth' } : { block: 'start' }), 30)
+    return () => clearTimeout(tm)
+  }, [loc.hash, loc.key])
 
   const r = (x: number, step: number) => Math.round(x / step) * step
   const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x))
@@ -379,16 +406,28 @@ function CostsStep({ ctx }: { ctx: PricingCtx }) {
   const pcSum = pcOn.reduce((a, i) => a + i.amount, 0)
   // what a project cost would add to the offer: amount + transport + overhead, then the shown margin
   const onOffer = (amount: number) => (amount * (1 + s.transport_pct / 100) * (1 + s.overhead_pct / 100)) / (1 - ctx.shown.margin_pct / 100)
+  const marginGroup = [...marginKeys.map((k) => 'margins.' + k), 'overhead_pct', 'transport_pct']
+  const siteGroup = [...SITE_KEYS, ...Object.keys(s.factors).map((k) => 'factors.' + k)]
+  // collapsed sections say only what is off its default: "2 changed: Overhead 9.0%, Material waste 5.0%"
+  const summary = (keys: string[]) => {
+    const ch = keys.filter((k) => changed.includes(k))
+    if (!ch.length) return t('all defaults')
+    return <span style={{ color: C.accent }}>{t('{n} changed: {list}', { n: ch.length, list: ch.map((k) => settingLabel(k, ctx) + ' ' + settingValue(k, flatGet(s, k), t)).join(', ') })}</span>
+  }
 
   return (
     <main className="flex-auto flex flex-wrap items-start">
-      <section aria-label={t('Costs')} className="flex-[1_1_600px] max-w-[880px] min-w-0 px-6 pt-5 pb-10 flex flex-col gap-6 border-r border-rule">
-        <div className="flex flex-col gap-1">
+      <section aria-label={t('Costs')} className="flex-[1_1_600px] max-w-[880px] min-w-0 px-6 pt-5 pb-10 flex flex-col gap-5 border-r border-rule">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <h1 className="m-0 text-[20px] font-semibold">{t('What does this job cost us?')}</h1>
-          <p className="m-0 text-muted">{t('Project costs, margins, allowances and site factors. The price on the right follows every change; each change shows what it does to the offer.')}</p>
+          <Source label={t('Where the defaults come from')} title={t('Defaults')} color={C.muted}>
+            <p className="m-0">
+              {t('All start from the default parameters in')} <a href="/reference?tab=params">{t('Reference data')}</a> (project_parameters.json).{' '}
+              {t('Hover a setting to see where its default comes from.')}
+            </p>
+            <p className="m-0 text-muted">{t('Your choices here apply to this tender only.')}</p>
+          </Source>
         </div>
-
-        <ChangesBox ctx={ctx} />
 
         <SettingsGroup
           title={t('Project costs')}
@@ -411,13 +450,26 @@ function CostsStep({ ctx }: { ctx: PricingCtx }) {
           ))}
         </SettingsGroup>
 
-        <SettingsGroup title={t('Margins and overhead')} note={t('A margin sets the price of its option; overhead and transport go on the cost.')}>
+        <CollapsedGroup
+          title={t('Margins and overhead')}
+          note={t('A margin sets the price of its option; overhead and transport go on the cost.')}
+          summary={summary(marginGroup)}
+          open={open.margins}
+          onToggle={(v) => setOpen((o) => ({ ...o, margins: v }))}
+        >
           {marginKeys.map((k) => num('margins.' + k, 0.5, 0, 15, (v) => ({ margins: { [k]: v } })))}
           {num('overhead_pct', 0.5, 0, 20, (v) => ({ overhead_pct: v }))}
           {num('transport_pct', 0.5, 0, 10, (v) => ({ transport_pct: v }))}
-        </SettingsGroup>
+        </CollapsedGroup>
 
-        <SettingsGroup id="site-factors" title={t('Allowances and site factors')} note={t('change one and all lines recalculate')}>
+        <CollapsedGroup
+          id="site-factors"
+          title={t('Allowances and site factors')}
+          note={t('change one and all lines recalculate')}
+          summary={summary(siteGroup)}
+          open={open.site}
+          onToggle={(v) => setOpen((o) => ({ ...o, site: v }))}
+        >
           {num('material_waste_pct', 0.5, 0, 20, (v) => ({ material_waste_pct: v }))}
           {num('small_material_pct', 0.5, 0, 20, (v) => ({ small_material_pct: v }))}
           <SettingRow k="include_small_material" ctx={ctx} toggle={{ on: s.include_small_material, set: (v) => change({ include_small_material: v }) }} />
@@ -428,12 +480,7 @@ function CostsStep({ ctx }: { ctx: PricingCtx }) {
             toggle={{ on: s.include_supplier_contingency, set: (v) => change({ include_supplier_contingency: v }) }}
           />
           {Object.keys(s.factors).map((k) => num('factors.' + k, 0.01, 0.5, 2, (v) => ({ factors: { [k]: v } })))}
-        </SettingsGroup>
-
-        <span className="text-[13px] text-muted">
-          {t('All start from the default parameters in')} <a href="/reference?tab=params">{t('Reference data')}</a> (project_parameters.json).{' '}
-          {t('Hover a setting to see where its default comes from.')}
-        </span>
+        </CollapsedGroup>
       </section>
 
       <aside aria-label={t('Price so far')} className="flex-[1_1_380px] max-w-[540px] min-w-[340px] px-6 pt-5 pb-6 sticky top-0 self-start flex flex-col gap-5">
@@ -457,6 +504,39 @@ function SettingsGroup({ id, title, note, aside, attn, children }: { id?: string
         {aside}
       </div>
       {children}
+    </section>
+  )
+}
+
+/** A settings section behind a toggle: the title with a one-line summary, its note in the tooltip. */
+function CollapsedGroup({
+  id,
+  title,
+  note,
+  summary,
+  open,
+  onToggle,
+  children,
+}: {
+  id?: string
+  title: string
+  note: string
+  summary: ReactNode
+  open: boolean
+  onToggle: (open: boolean) => void
+  children: ReactNode
+}) {
+  return (
+    <section id={id} className="border border-rule scroll-mt-4">
+      <Disclosure
+        label={<span title={note}>{title}</span>}
+        summary={summary}
+        open={open}
+        onToggle={onToggle}
+        className="[&>button]:w-full [&>button]:min-h-12 [&>button]:px-4 [&>button]:py-2 [&>button]:text-[15px]"
+      >
+        {children}
+      </Disclosure>
     </section>
   )
 }
@@ -527,56 +607,50 @@ function SettingRow({
   )
 }
 
-/** "What changed from defaults": setting, default → now, CHF effect, who. Obvious at a glance on coming back. */
-function ChangesBox({ ctx }: { ctx: PricingCtx }) {
+/** "N changed" in the step bar opens what changed from defaults: setting, default → now, CHF effect, who.
+ *  Only there when something changed; the changed rows themselves are marked where they live. */
+function ChangesPopover({ ctx }: { ctx: PricingCtx }) {
   const { t, s, D, changed, id } = ctx
   const lang = useLang()
   const nav = useNavigate()
-  if (!changed.length)
-    return (
-      <div className="flex items-center gap-2 px-4 py-3 border border-rule text-muted">
-        <span className="w-2 h-2" style={{ background: C.faint }} aria-hidden="true" />
-        {t('Every setting is at its default from project_parameters.json.')}
-      </div>
-    )
-  const go = (k: string) => {
-    if (STRATEGY_KEYS.has(k)) nav(`/t/${id}/pricing/strategy`)
-    else document.getElementById('set-' + k)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
-  }
+  // Costs settings open their (possibly collapsed) section and scroll there, see CostsStep
+  const go = (k: string) => nav(STRATEGY_KEYS.has(k) ? `/t/${id}/pricing/strategy` : `/t/${id}/pricing/costs#set-${k}`)
   return (
-    <section aria-label={t('What changed from defaults')} className="flex flex-col border border-accent">
-      <div className="flex flex-wrap items-baseline justify-between gap-2 px-4 pt-3 pb-2">
-        <h2 className="m-0 text-[15px] font-semibold">{t('What changed from defaults')}</h2>
-        <span className="text-[13px] text-muted">{t('Effect on the offer, against the default')}</span>
-      </div>
-      {changed.map((k) => {
-        const who = changedByOf(s, k)
-        return (
-          <div key={k} className="grid grid-cols-[minmax(0,1.3fr)_minmax(150px,1fr)_150px_minmax(0,0.8fr)_108px] gap-x-3 items-center min-h-10 pl-4 pr-3 border-t border-rowrule text-[13.5px]">
-            <button type="button" onClick={() => go(k)} className="p-0 border-0 bg-transparent text-left text-ink hover:text-accent truncate">
-              {settingLabel(k, ctx)}
-              {STRATEGY_KEYS.has(k) && <span className="text-muted"> · {t('Strategy')}</span>}
-            </button>
-            <span className="font-mono whitespace-nowrap">
-              <span className="text-muted">{settingValue(k, flatGet(D, k), t)}</span> → <span style={{ color: C.accent }}>{settingValue(k, flatGet(s, k), t)}</span>
-            </span>
-            <span className="text-right whitespace-nowrap" style={{ color: C.accent }}>
-              <EffectText e={effectOf(k, ctx)} ctx={ctx} />
-            </span>
-            <span className="text-muted truncate">{who ? `${t(who.by)} · ${who.at ? fmtShortDate(who.at, lang) : t('today')}` : ''}</span>
-            <span className="text-right">
+    <Source label={t('{n} changed', { n: changed.length })} title={t('What changed from defaults')} color={C.accent} width={680}>
+      <div className="flex flex-col -mx-3.5 -mt-3">
+        {changed.map((k) => {
+          const who = changedByOf(s, k)
+          return (
+            <div key={k} className="grid grid-cols-[minmax(0,1fr)_auto_96px_auto] gap-x-3 items-center min-h-11 px-3.5 py-1 border-b border-rowrule">
+              <span className="flex flex-col min-w-0">
+                <button type="button" onClick={() => go(k)} className="p-0 border-0 bg-transparent text-left text-ink hover:text-accent truncate">
+                  {settingLabel(k, ctx)}
+                  {STRATEGY_KEYS.has(k) && <span className="text-muted"> · {t('Strategy')}</span>}
+                </button>
+                {who && <span className="text-[12.5px] text-muted truncate">{`${t(who.by)} · ${who.at ? fmtShortDate(who.at, lang) : t('today')}`}</span>}
+              </span>
+              <span className="font-mono text-[12.5px] whitespace-nowrap">
+                <span className="text-muted">{settingValue(k, flatGet(D, k), t)}</span> → <span style={{ color: C.accent }}>{settingValue(k, flatGet(s, k), t)}</span>
+              </span>
+              <span className="text-right whitespace-nowrap" style={{ color: C.accent }}>
+                <EffectText e={effectOf(k, ctx)} ctx={ctx} />
+              </span>
               <Button size="xs" className="min-h-[28px] px-2" onClick={() => ctx.resetKeys([k])} aria-label={t('Reset {name} to default', { name: settingLabel(k, ctx) })}>
                 {t('Reset')}
               </Button>
-            </span>
-          </div>
-        )
-      })}
-    </section>
+            </div>
+          )
+        })}
+      </div>
+      <SrcFoot>
+        <span>{t('Effect on the offer, against the default')}</span>
+        <span>{t('Your choices here apply to this tender only.')}</span>
+      </SrcFoot>
+    </Source>
   )
 }
 
-/** Sticky: cost baseline and offer price, against the defaults, always in view while settings change. */
+/** Sticky: cost baseline and offer price, always in view while settings change; the difference to the defaults only when there is one. */
 function PriceSummary({ ctx }: { ctx: PricingCtx }) {
   const { t, tot, shown, s, busy, server } = ctx
   const dt = server.default_totals
@@ -584,26 +658,28 @@ function PriceSummary({ ctx }: { ctx: PricingCtx }) {
   const diff = (now: number, was: number | undefined) => {
     if (was === undefined) return null
     const d = now - was
-    if (Math.abs(d) < 0.5) return <span className="text-faint">{t('same as with defaults')}</span>
+    if (Math.abs(d) < 0.5) return null
     return (
       <span style={{ color: C.accent }}>
         {t('{d} against defaults (CHF {was})', { d: (d > 0 ? '+ CHF ' : '− CHF ') + fmt0(Math.abs(d)), was: fmt0(was) })}
       </span>
     )
   }
+  const dCost = diff(tot.cost, dt?.cost)
+  const dBid = diff(shown.bid, dShown?.bid)
   return (
     <div className="flex flex-col gap-3 px-[18px] py-4 border border-ink" aria-live="polite">
       <div className="flex flex-col gap-0.5">
         <span className="text-[13px] text-muted">{t('Cost baseline (before margin)')}</span>
         <span className={cx('font-mono text-[22px] leading-[1.2] font-medium', busy && 'cf-pending')}>CHF {fmt0(tot.cost)}</span>
-        <span className="text-[13px]">{diff(tot.cost, dt?.cost)}</span>
+        {dCost && <span className="text-[13px]">{dCost}</span>}
       </div>
       <div className="flex flex-col gap-0.5 pt-3 border-t border-rowrule">
         <span className="text-[13px] text-muted">
           {s.chosen ? t('Offer price') : t('Offer price · not chosen yet, showing {name}', { name: t(shown.name) })} · {t('{m} margin', { m: shown.margin_pct.toFixed(1) + '%' })}
         </span>
         <span className={cx('font-mono text-[30px] leading-[1.15] font-medium', busy && 'cf-pending')}>CHF {fmt0(shown.bid)}</span>
-        <span className="text-[13px]">{diff(shown.bid, dShown?.bid)}</span>
+        {dBid && <span className="text-[13px]">{dBid}</span>}
         <span className="text-[13px] text-muted">
           {t('{w} win chance', { w: Math.round(shown.win * 100) + '%' })} · {t('CHF {p} profit if won', { p: fmt0(shown.profit) })}
         </span>
