@@ -8,6 +8,7 @@ import { ErrorBox, FilterTabs, Loading, SearchBox, Td, Th } from '../components/
 import { fmt2, fmtShortDate, fmtUnit } from '../lib/format'
 import { cx } from '../lib/cx'
 import { PriceLists } from './PriceLists'
+import { TABLE_ACCEPT } from '../lib/files'
 import { useLearned } from '../api/learned'
 import { LearnedMatches } from './LearnedMatches'
 
@@ -21,6 +22,8 @@ const FACTOR_SHORT: Record<string, string> = {
   school_logistics: 'logistics',
   timber_interface: 'timber',
 }
+
+const IMPORT_HINT = 'Import a new version as Excel, CSV, ODS, JSON or a PDF with a table. German or English column names are recognised.'
 
 function num(v: unknown, d = 2) {
   return typeof v === 'number' ? v.toFixed(d) : String(v ?? '–')
@@ -143,7 +146,7 @@ export function Reference() {
           <input
             ref={fileRef}
             type="file"
-            accept={tab === 'params' ? '.json,application/json' : '.csv,text/csv'}
+            accept={tab === 'params' ? '.json,application/json' : TABLE_ACCEPT}
             className="sr-only"
             onChange={async (e) => {
               const f = e.target.files?.[0]
@@ -194,7 +197,7 @@ export function Reference() {
                     const on = hit === c.product_id
                     return (
                       <tr key={c.product_id} data-ref-hit={on || undefined} className={on ? 'bg-sel' : undefined}>
-                        <Td className={cx('py-[7px] font-mono text-[13px]', on && 'pl-2! shadow-[inset_3px_0_0_#1F4FD8]')}>{c.product_id}</Td>
+                        <Td className={cx('py-[7px] font-mono text-[13px]', on && 'pl-2! shadow-[inset_3px_0_0_var(--color-accent)]')}>{c.product_id}</Td>
                         <Td className="py-[7px]">{c.description}</Td>
                         <Td className="py-[7px] text-muted">{c.category}</Td>
                         <Td className="py-[7px] text-muted">{[c.manufacturer, c.model].filter(Boolean).join(' ')}</Td>
@@ -220,7 +223,8 @@ export function Reference() {
             </div>
             <p className="mt-2.5 mb-0 text-[13px] text-muted">
               {q.trim() && t('Showing {a} of {b} products.', { a: cat.length, b: data.catalog.length }) + ' '}
-              {t('{n} "Supplier package" prices are budget figures: lines using them go to Review until a quote is entered.', { n: supplierN })}
+              {t('{n} "Supplier package" prices are budget figures: lines using them go to Review until a quote is entered.', { n: supplierN })}{' '}
+              {t(IMPORT_HINT)}
             </p>
           </>
         )}
@@ -245,7 +249,7 @@ export function Reference() {
                   const on = hit === r.install_code
                   return (
                     <tr key={r.install_code} data-ref-hit={on || undefined} className={on ? 'bg-sel' : undefined}>
-                      <Td className={cx('py-[7px] font-mono text-[13px]', on && 'pl-2! shadow-[inset_3px_0_0_#1F4FD8]')}>{r.install_code}</Td>
+                      <Td className={cx('py-[7px] font-mono text-[13px]', on && 'pl-2! shadow-[inset_3px_0_0_var(--color-accent)]')}>{r.install_code}</Td>
                       <Td className="py-[7px]">{r.work_type}</Td>
                       <Td className="py-[7px]">{fmtUnit(r.unit)}</Td>
                       <Td className="py-[7px] text-right font-mono">{fmt2(r.base_hours_per_unit)}</Td>
@@ -257,6 +261,7 @@ export function Reference() {
                 })}
               </tbody>
             </table>
+            <p className="mt-2.5 mb-0 text-[13px] text-muted">{t(IMPORT_HINT)}</p>
           </div>
         )}
 
@@ -270,7 +275,7 @@ export function Reference() {
                     <div
                       key={k}
                       data-ref-hit={(key && hit === key) || undefined}
-                      className={cx('flex justify-between gap-3 py-[7px] border-b border-rowrule', key && hit === key && 'px-2 bg-sel shadow-[inset_3px_0_0_#1F4FD8]')}
+                      className={cx('flex justify-between gap-3 py-[7px] border-b border-rowrule', key && hit === key && 'px-2 bg-sel shadow-[inset_3px_0_0_var(--color-accent)]')}
                     >
                       <span>{k}</span>
                       <span className="font-mono">{v}</span>

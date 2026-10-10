@@ -18,8 +18,8 @@ export const DE_PRICING: Record<string, string> = {
   'Project costs, margins, allowances and site factors. The price on the right follows every change; each change shows what it does to the offer.':
     'Projektkosten, Margen, Zuschläge und Baustellenfaktoren. Der Preis rechts folgt jeder Änderung; jede Änderung zeigt, was sie am Angebot bewirkt.',
   'would add CHF {a}': 'würde CHF {a} hinzufügen',
-  'A margin sets the price of its option; overhead and transport go on the cost.':
-    'Eine Marge bestimmt den Preis ihrer Variante; Gemeinkosten und Transport kommen auf die Kosten.',
+  'Both go on the cost. The margin of each price option is set under Strategy, next to its price.':
+    'Beide kommen auf die Kosten. Die Marge jeder Preisvariante stellen Sie unter Strategie ein, direkt neben ihrem Preis.',
   'Hover a setting to see where its default comes from.': 'Fahren Sie über eine Einstellung, um zu sehen, woher ihr Standardwert stammt.',
   'Next: choose the offer price': 'Weiter: Offertpreis wählen',
   'default {v}': 'Standard {v}',
@@ -33,8 +33,13 @@ export const DE_PRICING: Record<string, string> = {
   'Cost baseline (before margin)': 'Selbstkosten (vor Marge)',
   'Price so far': 'Preis bisher',
   'where the three answers start': 'Ausgangspunkt der drei Antworten',
-  'Expected profit = win chance × profit if won. Margins are set under Costs.':
-    'Erwarteter Gewinn = Zuschlagschance × Gewinn bei Zuschlag. Die Margen stellen Sie unter Kosten ein.',
+  'Expected profit = win chance × profit if won.': 'Erwarteter Gewinn = Zuschlagschance × Gewinn bei Zuschlag.',
+  'The margin sets the option’s offer price: cost ÷ (1 − margin), rounded up to 1’000.':
+    'Die Marge bestimmt den Offertpreis der Variante: Kosten ÷ (1 − Marge), aufgerundet auf 1’000.',
+  '{name} margin': 'Marge {name}',
+  'higher than {name}': 'höher als {name}',
+  'lower than {name}': 'tiefer als {name}',
+  'same margin as {name}': 'gleiche Marge wie {name}',
   '{name} maximises expected profit: CHF {e} ({w} win chance × CHF {p} if won).':
     '{name} bringt den höchsten erwarteten Gewinn: CHF {e} ({w} Zuschlagschance × CHF {p} bei Zuschlag).',
   '{name} gains {n} points of win chance for CHF {x} less expected profit.':

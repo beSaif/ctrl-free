@@ -481,7 +481,7 @@ export function ErrorBox({ error, label }: { error: unknown; label?: string }) {
 
 export function IconSearch() {
   return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#5A5A57" strokeWidth="1.6" aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--color-muted)" strokeWidth="1.6" aria-hidden="true">
       <circle cx="7" cy="7" r="4.5" />
       <path d="M10.5 10.5l3.5 3.5" />
     </svg>
@@ -490,7 +490,7 @@ export function IconSearch() {
 
 export function IconClose() {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#121212" strokeWidth="1.6" aria-hidden="true">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--color-ink)" strokeWidth="1.6" aria-hidden="true">
       <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
     </svg>
   )
@@ -511,7 +511,7 @@ export function IconChevron({ open }: { open?: boolean }) {
       height="12"
       viewBox="0 0 12 12"
       fill="none"
-      stroke="#121212"
+      stroke="var(--color-ink)"
       strokeWidth="1.6"
       aria-hidden="true"
       style={{ transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 120ms' }}
@@ -523,7 +523,7 @@ export function IconChevron({ open }: { open?: boolean }) {
 
 export function IconFile() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5A5A57" strokeWidth="1.4" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--color-muted)" strokeWidth="1.4" aria-hidden="true">
       <path d="M4 1.5h5l3 3v10H4z" />
       <path d="M9 1.5v3h3" />
     </svg>
@@ -532,7 +532,7 @@ export function IconFile() {
 
 export function IconUpload() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5A5A57" strokeWidth="1.4" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--color-muted)" strokeWidth="1.4" aria-hidden="true">
       <path d="M8 11V2.5M4.5 6L8 2.5 11.5 6M2.5 11v2.5h11V11" />
     </svg>
   )

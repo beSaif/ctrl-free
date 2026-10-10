@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T16:29:33",
+ "api": "responses",
+ "input_tokens": 6669,
+ "output_tokens": 522,
+ "response": {
+  "LV0001": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Exhaust fan, but the tender size/power supply 1 x 230 does not match any candidate fan size",
+   "assumptions": []
+  },
+  "LV0004": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "90° circular bend, but tender size Ø 80 does not match any candidate DN",
+   "assumptions": []
+  },
+  "LV0005": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Flexible duct, and none of the candidates is a flexible duct",
+   "assumptions": []
+  },
+  "LV0008": {
+   "product_id": "P-FTG-B-100-90",
+   "confidence": "high",
+   "reason": "90° circular bend, DN100 matches Ø 100",
+   "assumptions": []
+  },
+  "LV0009": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular galvanized duct, but all candidates are circular bends instead of straight duct",
+   "assumptions": []
+  },
+  "LV0010": {
+   "product_id": "P-FTG-B-100-90",
+   "confidence": "high",
+   "reason": "90° circular bend, DN100 matches Ø 100",
+   "assumptions": []
+  },
+  "LV0011": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular galvanized duct, but all candidates are circular bends instead of straight duct",
+   "assumptions": []
+  },
+  "LV0012": {
+   "product_id": "P-FTG-B-100-90",
+   "confidence": "high",
+   "reason": "90° circular bend, DN100 matches Ø 100",
+   "assumptions": []
+  },
+  "LV0013": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular galvanized duct, but all candidates are circular bends instead of straight duct",
+   "assumptions": []
+  },
+  "LV0014": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular galvanized duct, but all candidates are circular bends instead of straight duct",
+   "assumptions": []
+  }
+ }
+}

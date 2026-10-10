@@ -103,6 +103,16 @@ class QuoteApply(BaseModel):
     proposal_id: str | None = None  # the tray proposal these came from, closed when applied
 
 
+class QuoteChoose(BaseModel):
+    """Pick among competing supplier offers: one line (lv_id + proposal_id), or a request (group) with
+    one supplier for all its lines, or the cheapest offer for each line."""
+    lv_id: str | None = None
+    proposal_id: str | None = None
+    group: str | None = None
+    supplier: str | None = None
+    cheapest: bool = False
+
+
 class TenderPatch(BaseModel):
     """Edit tender meta (N02 fields). Fields set here are never overwritten by the pipeline."""
 

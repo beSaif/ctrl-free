@@ -1,0 +1,62 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T16:29:37",
+ "api": "responses",
+ "input_tokens": 5231,
+ "output_tokens": 1080,
+ "response": {
+  "LV0049": {
+   "product_id": "P-SIL-002",
+   "confidence": "medium",
+   "reason": "Rohr-Schalldämpfer, and the only matching round duct silencer is DN100 compact",
+   "assumptions": [
+    "Size not specified in the line, DN100 assumed"
+   ]
+  },
+  "LV0050": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tellerventil size 100 mm is given, but flow direction is not specified and candidates are supply vs exhaust valves",
+   "assumptions": []
+  },
+  "LV0052": {
+   "product_id": "none",
+   "confidence": "medium",
+   "reason": "Supply air diffuser is not the same product kind as the listed supply valves",
+   "assumptions": []
+  },
+  "LV0053": {
+   "product_id": "none",
+   "confidence": "medium",
+   "reason": "Air diffuser is not the same product kind as the listed supply/exhaust valves",
+   "assumptions": []
+  },
+  "LV0063": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender asks for circular duct insulation, but all candidates are circular bends",
+   "assumptions": []
+  },
+  "LV0064": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender asks for circular duct, but all candidates are circular bends",
+   "assumptions": []
+  },
+  "LV0065": {
+   "product_id": "P-DCT-X-200x200",
+   "confidence": "low",
+   "reason": "Rectangular galvanized duct matches the product kind, but the line gives no size",
+   "assumptions": [
+    "Size not specified, 200x200 mm assumed"
+   ]
+  },
+  "LV0066": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender asks for round ducts, but all candidates are rectangular ducts",
+   "assumptions": []
+  }
+ }
+}

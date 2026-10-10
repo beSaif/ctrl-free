@@ -45,9 +45,9 @@ const KINDS: [Kind, string][] = [
   ['none', 'Not priced'],
 ]
 
-function rgba(hex: string, a: number) {
-  const n = parseInt(hex.slice(1), 16)
-  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`
+/** A theme colour (CSS variable or hex) at opacity a. */
+function rgba(color: string, a: number) {
+  return `color-mix(in srgb, ${color} ${Math.round(a * 1000) / 10}%, transparent)`
 }
 
 /** Hit area per line on one page, in PDF points. A block that lists several sizes is split at each
@@ -832,7 +832,7 @@ function Arrow({ place }: { place: Place }) {
 
 function IconDown({ open }: { open: boolean }) {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#121212" strokeWidth="1.6" aria-hidden="true" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 120ms' }}>
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--color-ink)" strokeWidth="1.6" aria-hidden="true" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 120ms' }}>
       <path d="M2.5 4.25L6 7.75l3.5-3.5" />
     </svg>
   )

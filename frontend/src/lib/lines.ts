@@ -4,12 +4,12 @@ import type { CatalogRow, Position, PositionPrice, QuoteGroup } from '../api/typ
 import { fmt2, fmtNum, fmtQty, fmtUnit } from './format'
 
 export const C = {
-  ink: '#121212',
-  muted: '#5A5A57',
-  faint: '#8A8A86',
-  stone: '#B5B5B0',
-  accent: '#1F4FD8',
-  attn: '#C2410C',
+  ink: 'var(--color-ink)',
+  muted: 'var(--color-muted)',
+  faint: 'var(--color-faint)',
+  stone: 'var(--color-stone)',
+  accent: 'var(--color-accent)',
+  attn: 'var(--color-attn)',
 }
 
 export function isSupplier(p: Position): boolean {

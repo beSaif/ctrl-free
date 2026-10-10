@@ -19,6 +19,59 @@
   --color-hl: #fce9dc;
 }
 
+/* Equans brand style (brand centre: Roboto; Dark blue #002439, Turquoise green #70BD95, Dark green
+   #008163 for digital use, white). Same tokens as above, so every screen follows; toggled in the
+   person menu (src/theme.ts). The dialog rule re-applies the light tokens inside the dark header. */
+:root[data-theme="equans"],
+:root[data-theme="equans"] .cf-header [role="dialog"] {
+  --font-sans: "Roboto", system-ui, sans-serif;
+  /* numbers in Roboto with tabular figures (below): Roboto Mono spreads Swiss 1'234.50 too wide */
+  --font-mono: "Roboto", ui-monospace, monospace;
+
+  --color-ink: #002439;
+  --color-body: #1d3b4c;
+  --color-muted: #4d6571;
+  --color-faint: #7c8f99;
+  --color-stone: #b0c0c6;
+  --color-rule: #d3e0dd;
+  --color-rowrule: #e6eeec;
+  --color-panel: #f2f7f5;
+  --color-accent: #008163;
+  --color-accent-hover: #002439;
+  --color-sel: #e6f4ec;
+  --color-attn: #c2410c;
+  --color-hl: #fce9dc;
+}
+
+/* the top bar in Dark blue: text turns white, marks turn Turquoise green */
+:root[data-theme="equans"] .cf-header {
+  background: #002439;
+  border-bottom-color: #002439;
+  --color-ink: #ffffff;
+  --color-muted: rgb(255 255 255 / 0.74);
+  --color-faint: rgb(255 255 255 / 0.56);
+  --color-stone: rgb(255 255 255 / 0.4);
+  --color-rule: rgb(255 255 255 / 0.24);
+  --color-accent: #70bd95;
+  --color-accent-hover: #a6d8bd;
+  --color-attn: #fdba74;
+}
+:root[data-theme="equans"] .cf-header .bg-white {
+  background-color: transparent;
+}
+:root[data-theme="equans"] .cf-header [role="dialog"].bg-white,
+:root[data-theme="equans"] .cf-header [role="dialog"] .bg-white {
+  background-color: #ffffff;
+}
+:root[data-theme="equans"] .font-mono {
+  font-variant-numeric: tabular-nums;
+}
+:root[data-theme="equans"] h1 {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;

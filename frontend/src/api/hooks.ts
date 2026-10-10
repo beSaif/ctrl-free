@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { api, useActor } from './client'
 import type {
+  ChooseOfferBody,
   InstructionPatch,
   Outcome,
   PositionPatch,
@@ -158,7 +159,12 @@ export function useMarkSent(id: string) {
 }
 
 export function useReadQuote(id: string) {
-  return useTenderMutation(id, ({ input, lv }: { input: File | string; lv?: string }) => api.readQuote(id, input, lv))
+  return useTenderMutation(id, ({ input, lv }: { input: File | string | (File | string)[]; lv?: string }) => api.readQuote(id, input, lv))
+}
+
+/** "Use this" offer for a line, "Use {supplier} for all N lines", "Use the cheapest for each line". */
+export function useChooseOffer(id: string) {
+  return useTenderMutation(id, (body: ChooseOfferBody) => api.chooseOffer(id, body))
 }
 
 export function useApplyQuotes(id: string) {

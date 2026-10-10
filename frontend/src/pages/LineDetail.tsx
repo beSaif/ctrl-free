@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
 import { useInstructions, useLineLog, useMarkSent, useMyName, usePatchPosition, usePosition, usePricing, useReference, useTender, useVerification } from '../api/hooks'
-import type { Instruction, Position, PositionPatch, QuoteGroup } from '../api/types'
+import type { Instruction, Position, PositionDetail, PositionPatch, QuoteGroup } from '../api/types'
 import { Button, Disclosure, ErrorBox, IconBack, IconCheck, Kbd, LinkButton, Loading } from '../components/ui'
 import { Source, SrcRows } from '../components/Source'
 import { cx } from '../lib/cx'
@@ -12,7 +12,7 @@ import { PdfCrop } from '../components/PdfCrop'
 import { ProductEquivalence } from '../components/Equivalence'
 import { FooterTotals } from '../components/FooterTotals'
 import { useAssistCtx } from '../assist/context'
-import { DropZone, FilledNote, ProposalCard, ReplyCrop } from '../assist/InlineAssist'
+import { DropZone, FilledNote, OfferComparison, ProposalCard, ReplyCrop } from '../assist/InlineAssist'
 import { useLineProposal } from '../assist/hooks'
 import { fmt2, fmtQty, fmtShortDate, fmtSigned, fmtUnit, parseNum, deUnit } from '../lib/format'
 import {
@@ -151,6 +151,10 @@ export function LineDetail() {
   const sysName = p.system.replace(/^\d+(\.\d+)*\s+/, '')
   const showProposal = lp && !lp.dismissed && lp.line.state !== 'filled' && sup && !p.confirmed
   const filledByAssist = p.supplier_quote?.by === 'Assist'
+  // several suppliers answered: one comparison card replaces the single proposal, the reply crop and the filled note
+  const offers = (dq.data as PositionDetail | undefined)?.offers ?? []
+  const compare = sup && offers.length >= 2
+  const firstReply = sup && !compare && !showProposal && quoted === null && !p.confirmed
   const groupFilled = group ? group.lv_ids.filter((x) => positions.find((y) => y.lv_id === x)?.supplier_quote?.by === 'Assist').length : 0
 
   return (
@@ -210,7 +214,7 @@ export function LineDetail() {
                   <pre className="m-0 p-4 border border-rule font-mono text-[12.5px] whitespace-pre-wrap">{p.text_de}</pre>
                 </section>
               )}
-              {lp && sup && (showProposal || filledByAssist) && <ReplyCrop proposal={lp.proposal} lv={lv} />}
+              {lp && sup && !compare && (showProposal || filledByAssist) && <ReplyCrop proposal={lp.proposal} lv={lv} />}
               {rules.length === 1 && (
                 <section className="flex flex-col gap-2">
                   <h2 className="m-0 text-[15px] font-semibold">{t('Tender rule for this line')}</h2>
@@ -243,9 +247,11 @@ export function LineDetail() {
                 />
               )}
 
-              {sup && showProposal && lp && <ProposalCard tenderId={id} p={p} proposal={lp.proposal} line={lp.line} groupTitle={group ? (lang === 'de' && group.title_de ? group.title_de : t(group.title)) : undefined} />}
-              {sup && filledByAssist && <FilledNote tenderId={id} p={p} allFilled={groupFilled} />}
-              {sup && !showProposal && quoted === null && !p.confirmed && <DropZone tenderId={id} lv={lv} />}
+              {compare && <OfferComparison tenderId={id} p={p} offers={offers} groupId={group?.id} groupOffers={group?.offers} />}
+              {sup && !compare && showProposal && lp && <ProposalCard tenderId={id} p={p} proposal={lp.proposal} line={lp.line} groupTitle={group ? (lang === 'de' && group.title_de ? group.title_de : t(group.title)) : undefined} />}
+              {sup && !compare && filledByAssist && <FilledNote tenderId={id} p={p} allFilled={groupFilled} />}
+              {firstReply && <DropZone tenderId={id} lv={lv} />}
+              {sup && !firstReply && !p.confirmed && <DropZone tenderId={id} lv={lv} compact />}
 
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                 {open && (
@@ -638,9 +644,16 @@ function SupplierSection({
   const budget = p.product?.net_cost_chf ?? p.pricing?.calculated?.net_unit_cost ?? p.pricing?.net_unit_cost ?? null
   const unit = fmtUnit(p.unit)
   const sent = !!group?.sent
-  const border = quoted !== null && !p.confirmed ? C.accent : '#DEDEDB'
+  const border = quoted !== null && !p.confirmed ? C.accent : 'var(--color-rule)'
   const mail = group ? emailParts(group, positions, tenderName) : null
-  const mailto = mail ? `mailto:${encodeURIComponent(to || mail.to)}?subject=${encodeURIComponent(mail.subject)}&body=${encodeURIComponent(mail.body)}` : ''
+  // several suppliers: "a@x.ch, b@y.ch" (comma or semicolon) -> one mailto with every address
+  const toList = (to || mail?.to || '')
+    .split(/[,;]/)
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .map(encodeURIComponent)
+    .join(',')
+  const mailto = mail ? `mailto:${toList}?subject=${encodeURIComponent(mail.subject)}&body=${encodeURIComponent(mail.body)}` : ''
   const copy = async () => {
     if (!mail) return
     try {
@@ -687,10 +700,20 @@ function SupplierSection({
           </div>
           {mailOpen && mail && (
             <div className="border border-rule flex flex-col">
-              <label className="grid grid-cols-[64px_minmax(0,1fr)] gap-3 items-center px-3 py-2 border-b border-rowrule">
+              <label className="grid grid-cols-[64px_minmax(0,1fr)] gap-3 items-center px-3 pt-2 pb-1.5">
                 <span className="text-muted">{t('To')}</span>
-                <input type="email" value={to} onChange={(e) => setTo(e.target.value)} placeholder={t('Supplier email')} className="min-h-[30px] border-0 outline-none bg-transparent" />
+                <input
+                  type="email"
+                  multiple
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  placeholder={t('Supplier emails, separated by commas')}
+                  className="min-h-[30px] border-0 outline-none bg-transparent"
+                />
               </label>
+              <span className="px-3 pb-2 pl-[88px] -mt-1 border-b border-rowrule text-[12.5px] text-muted">
+                {t('Send it to several suppliers to compare: drop each reply on the line.')}
+              </span>
               <div className="grid grid-cols-[64px_minmax(0,1fr)] gap-3 px-3 py-2 border-b border-rowrule">
                 <span className="text-muted">{t('Subject')}</span>
                 <span>{mail.subject}</span>
@@ -742,7 +765,7 @@ function GroupLines({ ids, current, positions, lineHref }: { ids: string[]; curr
             const st = status(s)
             return (
               <tr key={x} className={cx(on && 'bg-sel')} aria-current={on ? 'true' : undefined}>
-                <td className={cx('py-1 pl-2 pr-2 border-b border-rowrule font-mono text-[12.5px]', on && 'shadow-[inset_3px_0_0_#1F4FD8]')}>{x}</td>
+                <td className={cx('py-1 pl-2 pr-2 border-b border-rowrule font-mono text-[12.5px]', on && 'shadow-[inset_3px_0_0_var(--color-accent)]')}>{x}</td>
                 <td className="py-1 pr-2 border-b border-rowrule font-mono text-[12.5px] text-muted">{s ? t('p. {page}', { page: s.page }) : ''}</td>
                 <td className="py-1 pr-2 border-b border-rowrule font-mono text-[12.5px] text-right whitespace-nowrap">{s ? `${fmtQty(s.quantity)} ${fmtUnit(s.unit)}` : ''}</td>
                 <td className="py-1 pr-2 border-b border-rowrule">

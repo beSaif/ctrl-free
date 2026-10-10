@@ -7,10 +7,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Roboto:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <title>ctrl-free</title>
+    <script>
+      // pick the saved look before the first paint (src/theme.ts owns it after that)
+      try {
+        var q = new URLSearchParams(location.search).get('theme')
+        document.documentElement.dataset.theme = q === 'equans' || q === 'ctrlfree' ? q : localStorage.getItem('ctrlfree.theme') === 'equans' ? 'equans' : 'ctrlfree'
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

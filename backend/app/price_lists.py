@@ -28,8 +28,6 @@ from __future__ import annotations
 
 import contextlib
 import contextvars
-import csv
-import io
 import json
 import re
 import secrets
@@ -39,6 +37,8 @@ from pathlib import Path
 
 from app import config
 from app import reference as ref
+from app import tables
+from app.tables import cell_text as _cell_text, fold as _fold, num as _num  # noqa: F401  (used here and in tests)
 from app.units import normalize_unit
 
 KINDS = ("negotiated", "supplier")
@@ -75,18 +75,11 @@ ALIASES = {
     "net_price": ["netto", "nettopreis", "nettochf", "netprice", "net", "netcost", "netcostchf", "preisnetto",
                   "einkaufspreis", "ekpreis", "preis", "price", "unitprice"],
 }
-MAX_ROWS = 20000
+MAX_ROWS = tables.MAX_ROWS
 
 
 class _NoList(KeyError):
     pass
-
-
-def _fold(s) -> str:
-    s = str(s or "").lower()
-    for a, b in (("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss")):
-        s = s.replace(a, b)
-    return re.sub(r"[^a-z0-9]", "", s)
 
 
 def _today() -> date:
@@ -116,73 +109,14 @@ def fmt_date(v) -> str:
 
 # ---------------------------------------------------------------- reading files
 
-def _num(v, pct_cell: bool = False) -> float | None:
-    """Prices as suppliers write them: 1'234.50, 1.234,50, 74,80, CHF 74.80, 12 %."""
-    if v is None or v == "":
-        return None
-    if isinstance(v, bool):
-        return None
-    if isinstance(v, (int, float)):
-        return round(float(v) * (100 if pct_cell else 1), 6)
-    s = re.sub(r"(?i)chf|fr\.|sfr\.?|%|\s", "", str(v)).replace("’", "'").replace("'", "").replace("`", "")
-    if not s or s in ("-", "–"):
-        return None
-    if "," in s and "." in s:
-        s = s.replace(".", "").replace(",", ".") if s.rfind(",") > s.rfind(".") else s.replace(",", "")
-    elif s.count(",") == 1:
-        s = s.replace(",", ".")
-    elif s.count(",") > 1:
-        s = s.replace(",", "")
-    try:
-        return float(s)
-    except ValueError:
-        return None
-
-
-def _cell_text(v) -> str:
-    if v is None:
-        return ""
-    if isinstance(v, float) and v.is_integer():
-        return str(int(v))
-    if isinstance(v, (datetime, date)):
-        return v.strftime("%Y-%m-%d")
-    return str(v).strip()
-
-
 def read_table(data: bytes, filename: str) -> list[list]:
-    """All rows of the first sheet (xlsx) or the CSV, as lists of cell values.
+    """The sheet (or PDF table) with the most recognised headers, as lists of cell values.
+    Any format app.tables reads: CSV/TSV, xlsx, xls, ods, JSON or a PDF with a table."""
+    return tables.read_table(data, filename, score=_table_score, what="price list")
 
-    xlsx percentage cells come back as percent numbers (0.12 formatted 12% -> 12.0)."""
-    name = (filename or "").lower()
-    if name.endswith((".xlsx", ".xlsm")) or data[:2] == b"PK":
-        try:
-            from openpyxl import load_workbook
-            wb = load_workbook(io.BytesIO(data), read_only=True, data_only=True)
-        except Exception as e:  # not a readable workbook
-            raise ValueError(f"Could not read the Excel file: {e}") from None
-        ws = wb.worksheets[0]
-        rows = []
-        for r in ws.iter_rows():
-            rows.append([(round(c.value * 100, 6) if isinstance(c.value, (int, float)) and not isinstance(c.value, bool)
-                          and "%" in str(getattr(c, "number_format", "") or "") else c.value) for c in r])
-            if len(rows) > MAX_ROWS + 20:
-                break
-        wb.close()
-        return rows
-    if name.endswith(".xls"):
-        raise ValueError("Old .xls files are not supported: save the list as .xlsx or .csv")
-    for enc in ("utf-8-sig", "cp1252"):
-        try:
-            text = data.decode(enc)
-            break
-        except UnicodeDecodeError:
-            continue
-    else:
-        raise ValueError("Could not read the file: use CSV (UTF-8 or Windows) or XLSX")
-    sample = "\n".join(text.splitlines()[:20])
-    counts = {d: sample.count(d) for d in (";", ",", "\t", "|")}
-    delim = max(counts, key=counts.get) if any(counts.values()) else ","
-    return [r for r in csv.reader(io.StringIO(text), delimiter=delim)]
+
+def _table_score(rows: list[list]) -> int:
+    return max((sum(1 for c in r if isinstance(c, str) and _field_for(c)) for r in rows[:15]), default=0)
 
 
 def _field_for(header: str, exact_only: bool = False) -> str | None:
@@ -660,7 +594,9 @@ def create(data: bytes, filename: str, mapping: dict | None, meta: dict | None, 
     (_dir() / f"{lid}.json").write_text(json.dumps({"mapping": parsed["mapping"], "rows": parsed["rows"]},
                                                    ensure_ascii=False), "utf-8")
     rows = match_rows(parsed["rows"], ref.load_catalog(), clean["supplier"])
-    entry = {"id": lid, **clean, "file": f"{lid}{ext}", "original_name": filename, "active": False,
+    fmt = tables.detect_format(data, filename)
+    entry = {"id": lid, **clean, "file": f"{lid}{ext}", "original_name": filename,
+             "format": "csv" if fmt == "text" else fmt, "active": False,
              "created_at": datetime.now().isoformat(timespec="seconds"), "created_by": by,
              "rows": len(rows), "matched": _counts(rows)["matched"], "mapping": parsed["mapping"]}
     before = registry()

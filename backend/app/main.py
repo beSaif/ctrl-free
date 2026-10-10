@@ -18,8 +18,8 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 
 from . import assist, config, pipeline, review, store
 from . import instructions as instructions_mod
-from .models import (AssistCommand, InstructionPatch, Outcome, PositionPatch, PricingUpdate, QuoteApply, ReviewBody,
-                     ReviewMany, TenderPatch)
+from .models import (AssistCommand, InstructionPatch, Outcome, PositionPatch, PricingUpdate, QuoteApply, QuoteChoose,
+                     ReviewBody, ReviewMany, TenderPatch)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("ctrlfree.api")
@@ -666,7 +666,9 @@ def _quote_group_view(t: dict, g: dict) -> dict:
                       "budget_unit_price": prod.get("net_cost_chf"), "unit_price": pr.get("net_unit_cost"),
                       "unit_price_source": pr.get("unit_price_source"),
                       "quote": p.get("supplier_quote"), "status": p["status"], "needs_review": p["needs_review"]})
-    return {**g, "lines": lines, "quotes_entered": sum(1 for x in lines if x["quote"])}
+    # several suppliers answered: per-supplier lines covered and totals, the cheapest one (None: no reply yet)
+    offers = assist.group_offers(t, [x["lv_id"] for x in lines], v)
+    return {**g, "lines": lines, "quotes_entered": sum(1 for x in lines if x["quote"]), "offers": offers}
 
 
 def position_detail(t: dict, lv_id: str) -> dict:
@@ -710,6 +712,7 @@ def position_detail(t: dict, lv_id: str) -> dict:
         if e:
             out["supplier_quote"] = {**sq, "log_id": e["id"]}
     out["assist"] = assist.line_proposals(t, lv_id)
+    out["offers"] = assist.line_offers(t, lv_id, v)  # every supplier's offer for this line, cheapest first
     out["explain_steps"] = {}
     pricing = mod("pricing")
     for f in ("material", "hours", "labour", "direct"):
@@ -1217,15 +1220,49 @@ def mark_sent(tid: str, group: str, sent: bool = True):
 
 
 @app.post("/api/tenders/{tid}/quotes/read")
-async def read_quote(tid: str, file: UploadFile | None = File(None), text: str | None = Form(None)):
+async def read_quote(tid: str, file: UploadFile | None = File(None), files: list[UploadFile] | None = File(None),
+                     text: str | None = Form(None)):
+    """One or several supplier replies (`files`, or the older single `file`, and/or pasted `text`). Each reply
+    becomes its own proposal. With several, a reply that cannot be read is reported in `replies` and the
+    others are still read; a single unreadable reply is a 400 as before."""
     _tender(tid)
-    if file is None and not text:
+    inputs: list[tuple[bytes, str]] = []
+    for f in ([file] if file is not None else []) + list(files or []):
+        # pasted text goes in as bytes: a str is also taken as a file path by the reader, which must never
+        # happen for text typed into the browser
+        inputs.append((await f.read(), f.filename or "Reply"))
+    if text and text.strip():
+        inputs.append((text.encode("utf-8"), "Pasted text"))
+    if not inputs:
         raise HTTPException(400, "Send a file or text")
-    # pasted text goes in as bytes: a str is also taken as a file path by the reader, which must never
-    # happen for text typed into the browser
-    data: bytes = await file.read() if file is not None else (text or "").encode("utf-8")
-    filename = (file.filename if file is not None else None) or "Pasted text"
-    return assist.read_supplier_reply(tid, data, filename)
+    if len(inputs) == 1:
+        r = assist.read_supplier_reply(tid, *inputs[0])
+        return {**r, "replies": [{k: r.get(k) for k in ("source", "supplier", "proposal_id", "title")}
+                                 | {"count": len(r.get("proposals") or []), "error": None}]}
+    replies, items = [], []
+    for data, filename in inputs:
+        try:
+            r = assist.read_supplier_reply(tid, data, filename)
+        except (HTTPException, ValueError) as e:
+            replies.append({"source": filename, "supplier": None, "proposal_id": None, "title": None, "count": 0,
+                            "error": e.detail if isinstance(e, HTTPException) else str(e)})
+            continue
+        items += [{**x, "proposal_id": r.get("proposal_id")} for x in r.get("proposals") or []]
+        replies.append({k: r.get(k) for k in ("source", "supplier", "proposal_id", "title")}
+                       | {"count": len(r.get("proposals") or []), "error": None})
+    found = [x for x in replies if x["count"]]
+    return {"proposal_id": found[0]["proposal_id"] if found else None, "proposals": items, "replies": replies,
+            "source": ", ".join(x["source"] for x in replies),
+            "title": (f"Read {len(inputs)} replies: {len(found)} with prices for this tender" if found
+                      else "No prices for this tender's lines found in the replies")}
+
+
+@app.post("/api/tenders/{tid}/quotes/choose")
+def choose_quote(tid: str, body: QuoteChoose):
+    """Use one supplier's offer: for one line (lv_id + proposal_id), or for a request (group) with one supplier
+    for all its lines or the cheapest offer for each line. Undoable, logged by the current person."""
+    _tender(tid)
+    return assist.choose_offers(tid, body.lv_id, body.proposal_id, body.group, body.supplier, body.cheapest)
 
 
 @app.post("/api/tenders/{tid}/quotes/apply")
@@ -1492,7 +1529,7 @@ def _pl_upload(file: UploadFile | None, demo: str | None) -> tuple[bytes, str]:
     if demo:
         return _pl().demo_file(demo)
     if file is None:
-        raise HTTPException(400, "Upload a price list file (CSV or XLSX)")
+        raise HTTPException(400, "Upload a price list file (Excel, CSV, ODS, JSON or a PDF with a table)")
     return file.file.read(), file.filename or "price_list.csv"
 
 
@@ -1522,7 +1559,7 @@ def price_lists_overview():
 @app.post("/api/reference/price-lists/preview")
 def price_list_preview(file: UploadFile | None = File(None), demo: str | None = Form(None),
                        mapping: str | None = Form(None), meta: str | None = Form(None)):
-    """Read a CSV/XLSX price list: detected columns, rows matched / not matched, effect on open tenders. Saves nothing."""
+    """Read a price list (CSV, Excel, ODS, JSON or PDF): detected columns, rows matched / not matched, effect on open tenders. Saves nothing."""
     data, name = _pl_upload(file, demo)
     return _pl().preview(data, name, _json_form(mapping, "mapping"), _json_form(meta, "meta"))
 
@@ -1589,7 +1626,7 @@ def get_reference():
 @app.post("/api/reference/{kind}")
 async def import_reference(kind: str, file: UploadFile = File(...)):
     ref = mod("reference")
-    entry = ref.import_reference(kind, await file.read(), by=store.me())
+    entry = ref.import_reference(kind, await file.read(), by=store.me(), filename=file.filename)
     return {"ok": True, "version": entry, "reference": get_reference()}
 
 

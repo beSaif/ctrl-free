@@ -150,7 +150,7 @@ export function ChangeProduct() {
                           className={cx(GRID, 'items-center w-full min-h-[52px] py-1.5 border-0 border-b border-rowrule text-left text-ink', on ? 'bg-sel' : 'bg-white hover:bg-panel')}
                         >
                           <span className="inline-flex w-4 h-4 ml-1.5 border-[1.5px] border-ink rounded-full items-center justify-center" aria-hidden="true">
-                            <span className="w-2 h-2 rounded-full" style={{ background: on ? '#121212' : 'transparent' }} />
+                            <span className="w-2 h-2 rounded-full" style={{ background: on ? 'var(--color-ink)' : 'transparent' }} />
                           </span>
                           <span className="flex flex-col min-w-0">
                             <span className="font-medium">

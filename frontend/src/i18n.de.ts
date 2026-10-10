@@ -244,6 +244,8 @@ export const DE: Record<string, string> = {
     'Falls der Gewinner auch das tiefste Angebot hatte, erhielt unser Preis etwa {p} von 60 Preispunkten.',
   Impact: 'Wirkung',
   'Import failed: {e}': 'Import fehlgeschlagen: {e}',
+  'Import a new version as Excel, CSV, ODS, JSON or a PDF with a table. German or English column names are recognised.':
+    'Neue Version als Excel, CSV, ODS, JSON oder PDF mit Tabelle importieren. Deutsche und englische Spaltennamen werden erkannt.',
   'Import new version': 'Neue Version importieren',
   'Imported {f}. New tenders start from this version.': '{f} importiert. Neue Ausschreibungen starten mit dieser Version.',
   'Importing…': 'Wird importiert…',
@@ -269,7 +271,7 @@ export const DE: Record<string, string> = {
   'Machine translation:': 'Maschinelle Übersetzung:',
   Main: 'Hauptnavigation',
   Margin: 'Marge',
-  'Margins and overhead': 'Margen und Gemeinkosten',
+  'Overhead and transport': 'Gemeinkosten und Transport',
   'Mark as not sent': 'Als nicht gesendet markieren',
   'Mark as submitted': 'Als eingereicht markieren',
   'Mark request as sent': 'Anfrage als gesendet markieren',

@@ -186,8 +186,11 @@ PUT    /api/tenders/{id}/pricing                     body: partial PricingSettin
 POST   /api/tenders/{id}/pricing/reset
 GET    /api/tenders/{id}/quotes                      -> quote groups (same product type across systems) with draft email (DE)
 POST   /api/tenders/{id}/quotes/{group}/sent         -> mark request sent
-POST   /api/tenders/{id}/quotes/read  (multipart file | text)  -> Assist proposals [{lv_id, unit_price, budget, source, delta}] (does NOT apply)
+POST   /api/tenders/{id}/quotes/read  (multipart files[] | file | text)  -> {proposals: [{lv_id, unit_price, budget, source, delta, supplier}], replies: [{source, supplier, proposal_id, count, error}]} (does NOT apply; one proposal per reply, every supplier-quote line incl. quoted ones)
 POST   /api/tenders/{id}/quotes/apply body: {proposals:[{lv_id, unit_price, source}]}  -> applies + logs (undoable)
+POST   /api/tenders/{id}/quotes/choose body: {lv_id, proposal_id} | {group, supplier} | {group, cheapest: true}  -> uses that offer, logged by the person (undoable)
+       position detail `offers`: [{supplier, unit_price, line_total, delta_vs_budget, source, proposal_id, received_at, notes, best, chosen}]
+       quote group `offers`: {lines, suppliers: [{supplier, lines, total, covers_all, cheapest}], cheapest_supplier, cheapest_each_total}
 GET    /api/tenders/{id}/export/xlsx                 -> offer workbook with live formulas
 GET    /api/tenders/{id}/export/report.pdf           -> pricing report
 GET    /api/tenders/{id}/export/sia                  -> SIA-style interface file (simplified, documented as "planned format")
@@ -223,7 +226,7 @@ Screens (routes):
 - `/t/:id/lines/:lv` N04b Line detail (full screen pattern): left = tender PDF crop of the page with the block highlighted (qty row in #FCE9DC) + "Open full page"; tender rule for this line (from instructions); right = "Price for this line" editable quantity/product/unit price/hours with sentence explain, material/labour/line total, "Reset to calculated values"; Supplier quote section (group request draft email in German, copy, mark sent, enter quote); Confirm (Enter) / Flag for review / Undo.
 - `/t/:id/lines/:lv/product` N05 Change product: PDF crop + the 5 closest products (radio rows with why, unit price, line total, diff), search all, variant warning with the tender's Varianten rule and reason input, Use this product.
 - `/t/:id/instructions` (+ `/:iid`) N06/N06b Instructions & norms: tabs To confirm / All / Adds cost / Risk / Scope / Covered; table; detail with verbatim German, machine translation, suggested impact/applies to/why, Confirm / Change / Not relevant / Undo.
-- `/t/:id/pricing` N07 Pricing: your read (competition, appetite, sensitivity segmented controls with effect text and note), project costs toggles, More settings (margins/overhead steppers, allowances and site factors -> all lines recalc), offer price card, Pick a price table (4 options, best expected profit tag), cost build-up, "Use CHF X and continue to export".
+- `/t/:id/pricing` N07 Pricing: your read (competition, appetite, sensitivity segmented controls with effect text and note), project costs toggles, More settings (overhead/transport steppers, allowances and site factors -> all lines recalc), offer price card, Pick a price table (4 options, each with its margin stepper, best expected profit tag, a note when the margins are out of order), cost build-up, "Use CHF X and continue to export".
 - `/t/:id/export` N08 Export: before-you-submit checklist (not blocking), submission rule quote from the tender, files (xlsx, SIA, report.pdf), Mark as submitted.
 - `/t/:id/outcome` N09 Outcome: submitted snapshot, record the award form, comparison.
 - `/results` N10 Results history. `/reference` N11 Reference data (catalog, install rules, parameters tabs; import).

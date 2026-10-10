@@ -1,0 +1,86 @@
+[
+  {
+    "name": "upload",
+    "who": "Junior",
+    "from": 0,
+    "until": 16.167
+  },
+  {
+    "name": "overview",
+    "who": "Junior",
+    "from": 16.167,
+    "until": 28.133
+  },
+  {
+    "name": "trace-qty",
+    "who": "Junior",
+    "from": 28.133,
+    "until": 38.5
+  },
+  {
+    "name": "trace-hours",
+    "who": "Junior",
+    "from": 38.5,
+    "until": 47.267
+  },
+  {
+    "name": "equivalent",
+    "who": "Junior",
+    "from": 47.267,
+    "until": 56.867
+  },
+  {
+    "name": "teach",
+    "who": "Junior",
+    "from": 56.867,
+    "until": 65.7
+  },
+  {
+    "name": "similar",
+    "who": "Junior",
+    "from": 65.7,
+    "until": 70.167
+  },
+  {
+    "name": "learned",
+    "who": "Junior",
+    "from": 70.167,
+    "until": 79.6
+  },
+  {
+    "name": "pricelist",
+    "who": "Junior",
+    "from": 79.6,
+    "until": 93.2
+  },
+  {
+    "name": "quote",
+    "who": "Junior",
+    "from": 93.2,
+    "until": 105.967
+  },
+  {
+    "name": "instructions",
+    "who": "Junior",
+    "from": 105.967,
+    "until": 122.2
+  },
+  {
+    "name": "strategy",
+    "who": "Junior",
+    "from": 122.2,
+    "until": 134.467
+  },
+  {
+    "name": "review",
+    "who": "Senior",
+    "from": 134.467,
+    "until": 147.633
+  },
+  {
+    "name": "pdfcheck",
+    "who": "Senior",
+    "from": 147.633,
+    "until": 157.967
+  }
+]

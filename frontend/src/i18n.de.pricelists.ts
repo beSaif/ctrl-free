@@ -46,8 +46,8 @@ export const DE_PRICELISTS: Record<string, string> = {
   'used when no list has the product': 'gilt, wenn keine Liste das Produkt führt',
   Fallback: 'Rückfallebene',
   'No price lists yet: every line uses the standard catalogue.': 'Noch keine Preislisten: Alle Positionen verwenden den Standardkatalog.',
-  "Import a supplier's price list or Equans' negotiated prices as CSV or XLSX. Headers in German or English are recognised.":
-    'Importieren Sie die Preisliste eines Lieferanten oder die Equans-Konditionen als CSV oder XLSX. Deutsche und englische Spaltennamen werden erkannt.',
+  "Import a supplier's price list or Equans' negotiated prices as Excel, CSV, ODS, JSON or PDF. Headers in German or English are recognised.":
+    'Importieren Sie die Preisliste eines Lieferanten oder die Equans-Konditionen als Excel, CSV, ODS, JSON oder PDF. Deutsche und englische Spaltennamen werden erkannt.',
   'Try a demo file:': 'Demodatei verwenden:',
   'Price lists need the backend. Start it and reload.': 'Preislisten brauchen das Backend. Starten Sie es und laden Sie neu.',
   'Could not load the price list.': 'Die Preisliste konnte nicht geladen werden.',
@@ -79,8 +79,8 @@ export const DE_PRICELISTS: Record<string, string> = {
   '{n} imported and on. Tenders are re-priced.': '{n} importiert und aktiv. Die Ausschreibungen sind neu kalkuliert.',
   '{n} imported, not active yet.': '{n} importiert, noch nicht aktiv.',
   'Drop the price list here or choose a file': 'Preisliste hierher ziehen oder Datei wählen',
-  'CSV or XLSX from the supplier, or Equans’ own negotiated prices. Rows are matched to the catalogue by product id, or by manufacturer and model.':
-    'CSV oder XLSX vom Lieferanten oder die eigenen Equans-Konditionen. Zeilen werden über die Produkt-ID oder über Hersteller und Typ dem Katalog zugeordnet.',
+  'Excel, CSV, ODS, JSON or a PDF with a table, from the supplier or Equans’ own negotiated prices. Rows are matched to the catalogue by product id, or by manufacturer and model.':
+    'Excel, CSV, ODS, JSON oder ein PDF mit Tabelle, vom Lieferanten oder die eigenen Equans-Konditionen. Zeilen werden über die Produkt-ID oder über Hersteller und Typ dem Katalog zugeordnet.',
   'Choose another file': 'Andere Datei wählen',
   'Reading the price list…': 'Preisliste wird gelesen…',
   Name: 'Name',

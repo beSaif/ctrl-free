@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T16:29:33",
+ "api": "responses",
+ "input_tokens": 6226,
+ "output_tokens": 466,
+ "response": {
+  "LV0037": {
+   "product_id": "P-FTG-B-160-90",
+   "confidence": "high",
+   "reason": "90° circular bend, DN160 matches the tender size.",
+   "assumptions": []
+  },
+  "LV0038": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular duct requested, but all candidates are bends.",
+   "assumptions": []
+  },
+  "LV0039": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "T-piece duct fitting requested, but no candidate is that product type.",
+   "assumptions": []
+  },
+  "LV0040": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular duct requested, but all candidates are bends.",
+   "assumptions": []
+  },
+  "LV0042": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular duct DN100 requested, but all candidates are bends.",
+   "assumptions": []
+  },
+  "LV0043": {
+   "product_id": "P-FTG-B-100-90",
+   "confidence": "high",
+   "reason": "90° circular bend, DN100 matches the tender size.",
+   "assumptions": []
+  },
+  "LV0044": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular duct requested, but all candidates are bends.",
+   "assumptions": []
+  },
+  "LV0045": {
+   "product_id": "P-FTG-B-100-90",
+   "confidence": "high",
+   "reason": "90° circular bend, DN100 matches the tender size.",
+   "assumptions": []
+  },
+  "LV0046": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular duct requested, but all candidates are bends.",
+   "assumptions": []
+  },
+  "LV0047": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular weather louvre requested, but no candidate matches that product type.",
+   "assumptions": []
+  }
+ }
+}

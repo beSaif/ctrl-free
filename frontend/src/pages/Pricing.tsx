@@ -120,17 +120,27 @@ function PricingSteps({ id, step }: { id: string; step: Step }) {
     }
   }, [id, step])
 
-  const flush = useCallback(async () => {
-    const body = pending.current
-    pending.current = {}
-    if (!Object.keys(body).length) return
-    try {
-      await put.mutateAsync(body)
-    } catch {
-      /* rejected: the controls fall back to the server's values */
-    } finally {
-      if (!Object.keys(pending.current).length) setDraft({})
-    }
+  // one save at a time, in click order: two PUTs in flight could answer out of order, and the first
+  // answer would drop the draft while the second is still on its way (the value steps back, the
+  // next click builds on the old value and is lost)
+  const queue = useRef<Promise<void>>(Promise.resolve())
+  const flush = useCallback(() => {
+    if (timer.current) clearTimeout(timer.current)
+    timer.current = null
+    queue.current = queue.current.then(async () => {
+      const body = pending.current
+      pending.current = {}
+      if (Object.keys(body).length) {
+        try {
+          await put.mutateAsync(body)
+        } catch {
+          /* rejected: the controls fall back to the server's values */
+        }
+      }
+      // the draft stays until everything changed has been saved
+      if (!Object.keys(pending.current).length && !timer.current) setDraft({})
+    })
+    return queue.current
   }, [put])
 
   const change = useCallback(
@@ -180,9 +190,14 @@ function PricingSteps({ id, step }: { id: string; step: Step }) {
     change,
     resetKeys: (keys) => {
       if (timer.current) clearTimeout(timer.current)
+      timer.current = null
       pending.current = {}
       setDraft({})
-      reset.mutate(keys.length ? keys : undefined)
+      // after any save still on its way, so its answer cannot land on top of the reset
+      queue.current = queue.current.then(() => reset.mutateAsync(keys.length ? keys : undefined).then(
+        () => undefined,
+        () => undefined,
+      ))
     },
     flush,
   }
@@ -267,8 +282,9 @@ const KEY_LABEL: Record<string, string> = {
   include_small_material: 'Add small material to the price',
   include_supplier_contingency: 'Add the contingency on supplier packages',
 }
-/** Settings that live on the Strategy step (they move the win chance, not the cost). */
+/** Settings that live on the Strategy step: the read moves the win chance, a margin sets its option's price; neither moves the cost. */
 const STRATEGY_KEYS = new Set(['competition', 'appetite', 'sensitivity', 'ref_win'])
+const onStrategy = (k: string) => STRATEGY_KEYS.has(k) || k.startsWith('margins.')
 
 function settingLabel(key: string, ctx: PricingCtx): string {
   const { t } = ctx
@@ -347,14 +363,14 @@ function EffectText({ e, ctx }: { e: Effect | null; ctx: PricingCtx }) {
 // ---------------------------------------------------------------- Costs step
 
 const SITE_KEYS = new Set(['material_waste_pct', 'small_material_pct', 'include_small_material', 'supplier_contingency_pct', 'include_supplier_contingency'])
-const inMargins = (k: string) => k.startsWith('margins.') || k === 'overhead_pct' || k === 'transport_pct'
+const inOverhead = (k: string) => k === 'overhead_pct' || k === 'transport_pct'
 const inSite = (k: string) => k.startsWith('factors.') || SITE_KEYS.has(k)
 /** The section a deep link points into: #site-factors (from a line's hours), #set-overhead_pct (from "N changed"). */
-function hashGroup(hash: string): 'margins' | 'site' | null {
+function hashGroup(hash: string): 'overhead' | 'site' | null {
   const target = decodeURIComponent(hash.slice(1))
   const k = target.startsWith('set-') ? target.slice(4) : ''
   if (target === 'site-factors' || inSite(k)) return 'site'
-  return inMargins(k) ? 'margins' : null
+  return inOverhead(k) ? 'overhead' : null
 }
 
 function CostsStep({ ctx }: { ctx: PricingCtx }) {
@@ -363,7 +379,7 @@ function CostsStep({ ctx }: { ctx: PricingCtx }) {
   // the two settings sections start collapsed, open when one of their values is off its default or a deep link points in
   const [open, setOpen] = useState(() => {
     const g = hashGroup(loc.hash)
-    return { margins: g === 'margins' || changed.some(inMargins), site: g === 'site' || changed.some(inSite) }
+    return { overhead: g === 'overhead' || changed.some(inOverhead), site: g === 'site' || changed.some(inSite) }
   })
   const [seen, setSeen] = useState(loc.key)
   if (seen !== loc.key) {
@@ -399,14 +415,13 @@ function CostsStep({ ctx }: { ctx: PricingCtx }) {
       </SettingRow>
     )
   }
-  const marginKeys = ['Aggressive', 'Target', 'Standard', 'Conservative'].filter((k) => s.margins[k] !== undefined)
   const pcItems = projectCostItems(tot, s, t)
   const pcOn = pcItems.filter((i) => i.on)
   const pcAll = pcItems.reduce((a, i) => a + i.amount, 0)
   const pcSum = pcOn.reduce((a, i) => a + i.amount, 0)
   // what a project cost would add to the offer: amount + transport + overhead, then the shown margin
   const onOffer = (amount: number) => (amount * (1 + s.transport_pct / 100) * (1 + s.overhead_pct / 100)) / (1 - ctx.shown.margin_pct / 100)
-  const marginGroup = [...marginKeys.map((k) => 'margins.' + k), 'overhead_pct', 'transport_pct']
+  const overheadGroup = ['overhead_pct', 'transport_pct']
   const siteGroup = [...SITE_KEYS, ...Object.keys(s.factors).map((k) => 'factors.' + k)]
   // collapsed sections say only what is off its default: "2 changed: Overhead 9.0%, Material waste 5.0%"
   const summary = (keys: string[]) => {
@@ -451,13 +466,12 @@ function CostsStep({ ctx }: { ctx: PricingCtx }) {
         </SettingsGroup>
 
         <CollapsedGroup
-          title={t('Margins and overhead')}
-          note={t('A margin sets the price of its option; overhead and transport go on the cost.')}
-          summary={summary(marginGroup)}
-          open={open.margins}
-          onToggle={(v) => setOpen((o) => ({ ...o, margins: v }))}
+          title={t('Overhead and transport')}
+          note={t('Both go on the cost. The margin of each price option is set under Strategy, next to its price.')}
+          summary={summary(overheadGroup)}
+          open={open.overhead}
+          onToggle={(v) => setOpen((o) => ({ ...o, overhead: v }))}
         >
-          {marginKeys.map((k) => num('margins.' + k, 0.5, 0, 15, (v) => ({ margins: { [k]: v } })))}
           {num('overhead_pct', 0.5, 0, 20, (v) => ({ overhead_pct: v }))}
           {num('transport_pct', 0.5, 0, 10, (v) => ({ transport_pct: v }))}
         </CollapsedGroup>
@@ -614,7 +628,7 @@ function ChangesPopover({ ctx }: { ctx: PricingCtx }) {
   const lang = useLang()
   const nav = useNavigate()
   // Costs settings open their (possibly collapsed) section and scroll there, see CostsStep
-  const go = (k: string) => nav(STRATEGY_KEYS.has(k) ? `/t/${id}/pricing/strategy` : `/t/${id}/pricing/costs#set-${k}`)
+  const go = (k: string) => nav(onStrategy(k) ? `/t/${id}/pricing/strategy` : `/t/${id}/pricing/costs#set-${k}`)
   return (
     <Source label={t('{n} changed', { n: changed.length })} title={t('What changed from defaults')} color={C.accent} width={680}>
       <div className="flex flex-col -mx-3.5 -mt-3">
@@ -625,7 +639,7 @@ function ChangesPopover({ ctx }: { ctx: PricingCtx }) {
               <span className="flex flex-col min-w-0">
                 <button type="button" onClick={() => go(k)} className="p-0 border-0 bg-transparent text-left text-ink hover:text-accent truncate">
                   {settingLabel(k, ctx)}
-                  {STRATEGY_KEYS.has(k) && <span className="text-muted"> · {t('Strategy')}</span>}
+                  {onStrategy(k) && <span className="text-muted"> · {t('Strategy')}</span>}
                 </button>
                 {who && <span className="text-[12.5px] text-muted truncate">{`${t(who.by)} · ${who.at ? fmtShortDate(who.at, lang) : t('today')}`}</span>}
               </span>

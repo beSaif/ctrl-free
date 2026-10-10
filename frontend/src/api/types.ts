@@ -169,6 +169,88 @@ export interface SupplierQuote {
   request_id?: string
   by?: 'You' | 'Assist' | string
   log_id?: string
+  /** the reply proposal (offer) the price came from, and who sent it */
+  proposal_id?: string
+  supplier?: string
+}
+
+/** One supplier's offer for one line (GET position detail `offers`, cheapest first). */
+export interface SupplierOffer {
+  lv_id: string
+  supplier: string
+  unit_price: number
+  quantity: number
+  /** unit price × quantity, as the supplier would charge it */
+  line_total: number
+  /** the line's unit price without any quote (catalogue / price list) */
+  budget?: number | null
+  /** (unit price − budget) × quantity; null when the line has no budget price */
+  delta_vs_budget: number | null
+  source: string
+  quoted_text?: string | null
+  page?: number | null
+  pos?: string | null
+  proposal_id: string
+  received_at?: string | null
+  /** delivery time, validity, terms as written in the reply */
+  notes: string[]
+  state?: 'open' | 'filled' | 'alternative' | string
+  /** lowest unit price of the offers for this line */
+  best: boolean
+  /** this offer is the line's supplier quote */
+  chosen: boolean
+}
+
+/** Per supplier, for one request: the lines it offered and their total. */
+export interface SupplierSummary {
+  supplier: string
+  lv_ids: string[]
+  lines: number
+  total: number
+  /** offered every line that has an offer */
+  covers_all: boolean
+  /** lowest total among the suppliers that cover every line */
+  cheapest: boolean
+  /** lines where this supplier's offer is in use */
+  chosen: number
+}
+
+export interface GroupOffers {
+  /** lines of the request with at least one offer */
+  lines: number
+  lv_ids: string[]
+  suppliers: SupplierSummary[]
+  cheapest_supplier: string | null
+  /** sum of the cheapest offer of each line */
+  cheapest_each_total: number
+  /** lv_id -> proposal id of the cheapest offer */
+  best: Record<string, string>
+  /** lv_id -> number of offers */
+  offers: Record<string, number>
+}
+
+/** One reply read by POST /quotes/read (several files can be sent at once). */
+export interface QuoteReply {
+  source: string
+  supplier: string | null
+  proposal_id: string | null
+  title?: string | null
+  count: number
+  error: string | null
+}
+
+export interface QuoteReadResult {
+  proposals: QuoteProposal[]
+  replies: QuoteReply[]
+  title?: string
+}
+
+export interface ChooseOfferBody {
+  lv_id?: string
+  proposal_id?: string
+  group?: string
+  supplier?: string
+  cheapest?: boolean
 }
 
 export interface PriceFactor {
@@ -284,6 +366,8 @@ export interface PositionDetail extends Position {
   candidates?: Candidate[]
   instructions?: Instruction[]
   quote_group?: QuoteGroup | null
+  /** every supplier's offer for this line, cheapest first (several suppliers can answer one request) */
+  offers?: SupplierOffer[]
 }
 
 export interface PositionPatch {
@@ -450,6 +534,8 @@ export interface QuoteGroup {
   body?: string
   email?: { to?: string; subject: string; body: string }
   rule?: { text_de: string; ref: string; page?: number } | null
+  /** replies of several suppliers for this request; null/absent until one came in */
+  offers?: GroupOffers | null
 }
 
 export interface QuoteProposal {
@@ -461,6 +547,7 @@ export interface QuoteProposal {
   pos_no?: string
   text_de?: string
   quantity?: number
+  supplier?: string
 }
 
 export interface LogEntry {

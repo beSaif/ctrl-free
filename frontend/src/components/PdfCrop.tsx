@@ -15,8 +15,8 @@ export interface CropSource {
   lines?: SourceLine[]
 }
 
-const DESC_BG = '#F6F6F4'
-const QTY_BG = '#FCE9DC'
+const DESC_BG = 'var(--color-panel)'
+const QTY_BG = 'var(--color-hl)'
 const PAD = 10
 
 type Box = [number, number, number, number]

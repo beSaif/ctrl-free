@@ -13,7 +13,7 @@ import {
   TENDER_META,
   type RawLine,
 } from './mockdata/oberglatt'
-import { DEFAULT_PEOPLE, type Api, type ExportKind } from './client'
+import { DEFAULT_PEOPLE, getActor, type Api, type ExportKind } from './client'
 import type {
   AssistApplyResult,
   AssistDone,
@@ -38,12 +38,15 @@ import type {
   PricingPut,
   PricingResponse,
   PricingSettings,
+  GroupOffers,
   QuoteGroup,
   QuoteProposal,
+  QuoteReply,
   ReferenceResponse,
   RuleRow,
   Scenario,
   Snapshot,
+  SupplierOffer,
   SupplierQuote,
   TenderDetail,
   TenderSummary,
@@ -157,6 +160,8 @@ interface MockInstr {
 interface Reply {
   id: string
   file: string
+  /** who sent it (file name without extension in the mock) */
+  supplier?: string
   received_at: string
   group: string
   lines: { lv_id: string; pos_no: string; unit_price: number }[]
@@ -658,6 +663,7 @@ function quoteGroups(t: MockTender): QuoteGroup[] {
       subject,
       body,
       rule: g.rule,
+      offers: groupOffersOf(t, g.lv_ids),
     }
   })
 }
@@ -759,7 +765,8 @@ function replyLines(t: MockTender, r: Reply) {
   return r.lines.map((l) => {
     const budget = CAT[RAW[l.lv_id].product].net_cost_chf
     const q = t.positions[l.lv_id].supplier_quote
-    const filled = !!q && Math.abs(q.unit_price - l.unit_price) < 0.005
+    // another supplier's offer is in the line: this one stays as an alternative, not waiting in the tray
+    const filled = !!q && (Math.abs(q.unit_price - l.unit_price) < 0.005 || (!!q.proposal_id && q.proposal_id !== r.id))
     const before = pricePos(t, l.lv_id, {}, true).direct
     const after = pricePos(t, l.lv_id, { unit_price: l.unit_price }, true).direct
     return {
@@ -771,9 +778,72 @@ function replyLines(t: MockTender, r: Reply) {
       pos_no: l.pos_no,
       text_de: RAW[l.lv_id].de,
       quantity: RAW[l.lv_id].qty,
+      supplier: supplierOf(r),
       state: filled ? 'filled' : l.unit_price > budget ? 'above budget' : 'below budget',
     }
   })
+}
+
+const supplierOf = (r: Reply) => r.supplier ?? r.file.replace(/\.[a-z0-9]{2,4}$/i, '').replace(/[_-]+/g, ' ')
+
+/** Every reply's offer for one line, cheapest first (several suppliers can answer one request). */
+function offersOf(t: MockTender, lv: string): SupplierOffer[] {
+  const q = t.positions[lv].supplier_quote
+  const budget = CAT[RAW[lv].product].net_cost_chf
+  const qty = RAW[lv].qty
+  const rows: SupplierOffer[] = t.replies.flatMap((r) =>
+    r.lines
+      .filter((l) => l.lv_id === lv)
+      .map((l) => ({
+        lv_id: lv,
+        supplier: supplierOf(r),
+        unit_price: l.unit_price,
+        quantity: qty,
+        line_total: r2(l.unit_price * qty),
+        budget,
+        delta_vs_budget: r2((l.unit_price - budget) * qty),
+        source: `${r.file}, p. 1, Pos. ${l.pos_no}`,
+        proposal_id: r.id,
+        received_at: r.received_at,
+        notes: ['Lieferzeit: 4-6 Wochen', 'Gültigkeit: 60 Tage'],
+        best: false,
+        chosen: !!q && Math.abs(q.unit_price - l.unit_price) < 0.005 && (!q.proposal_id || q.proposal_id === r.id),
+      })),
+  )
+  const low = Math.min(...rows.map((o) => o.unit_price))
+  rows.forEach((o) => (o.best = Math.abs(o.unit_price - low) < 0.005))
+  return rows.sort((a, b) => a.unit_price - b.unit_price)
+}
+
+function groupOffersOf(t: MockTender, lvIds: string[]): GroupOffers | null {
+  const per = Object.fromEntries(lvIds.map((lv) => [lv, offersOf(t, lv)]).filter(([, o]) => (o as SupplierOffer[]).length)) as Record<string, SupplierOffer[]>
+  const ids = Object.keys(per)
+  if (!ids.length) return null
+  const sup = new Map<string, GroupOffers['suppliers'][number]>()
+  for (const lv of ids)
+    for (const o of per[lv]) {
+      const s = sup.get(o.supplier) ?? { supplier: o.supplier, lv_ids: [], lines: 0, total: 0, covers_all: false, cheapest: false, chosen: 0 }
+      if (s.lv_ids.includes(lv)) continue
+      s.lv_ids.push(lv)
+      s.lines += 1
+      s.total = r2(s.total + o.line_total)
+      s.chosen += o.chosen ? 1 : 0
+      sup.set(o.supplier, s)
+    }
+  const rows = [...sup.values()]
+  rows.forEach((s) => (s.covers_all = s.lines === ids.length))
+  const full = rows.filter((s) => s.covers_all).sort((a, b) => a.total - b.total)
+  if (full[0]) full[0].cheapest = true
+  rows.sort((a, b) => Number(!a.covers_all) - Number(!b.covers_all) || a.total - b.total)
+  return {
+    lines: ids.length,
+    lv_ids: ids,
+    suppliers: rows,
+    cheapest_supplier: full[0]?.supplier ?? null,
+    cheapest_each_total: r2(ids.reduce((a, lv) => a + per[lv][0].line_total, 0)),
+    best: Object.fromEntries(ids.map((lv) => [lv, per[lv][0].proposal_id])),
+    offers: Object.fromEntries(ids.map((lv) => [lv, per[lv].length])),
+  }
 }
 
 const SAFE_KINDS = ['scope', 'covered']
@@ -1011,6 +1081,7 @@ function detailOf(t: MockTender, lv: string): PositionDetail {
     candidates: candidatesOf(t, lv),
     instructions: INSTRUCTIONS.filter((i) => t.instructions[i.id].applies_to.includes(lv)).map((i) => instructionOf(t, i.id)),
     quote_group: quoteGroups(t).find((g) => g.lv_ids.includes(lv)) ?? null,
+    offers: offersOf(t, lv),
   }
 }
 
@@ -1250,8 +1321,9 @@ export const mockApi: Api = {
   },
   async readQuote(id, input, lvHint) {
     const t = tender(id)
-    const name = typeof input === 'string' ? 'Pasted email' : input.name
-    const work = { id: uid('w'), text: `Reading ${name}`, page: 1, pages: 1, until: Date.now() + 1500 }
+    const inputs = Array.isArray(input) ? input : [input]
+    const names = inputs.map((x) => (typeof x === 'string' ? 'Pasted email' : x.name))
+    const work = { id: uid('w'), text: `Reading ${names.join(', ')}`, page: 1, pages: 1, until: Date.now() + 1500 }
     t.working.push(work)
     await delay(1400)
     t.working = t.working.filter((w) => w.id !== work.id)
@@ -1259,30 +1331,74 @@ export const mockApi: Api = {
       QUOTE_GROUPS.find((g) => lvHint && g.lv_ids.includes(lvHint)) ??
       QUOTE_GROUPS.find((g) => g.lv_ids.some((lv) => !t.positions[lv].supplier_quote)) ??
       QUOTE_GROUPS[0]
-    const factors = [0.96, 1.03, 0.98, 0.95]
-    const reply: Reply = {
-      id: uid('r'),
-      file: name,
-      received_at: nowIso(),
-      group: group.id,
-      lines: group.lv_ids.map((lv, i) => ({
-        lv_id: lv,
-        pos_no: String(i + 1),
-        unit_price: Math.round(CAT[RAW[lv].product].net_cost_chf * factors[i % factors.length] * 100) / 100,
-      })),
-    }
-    t.replies = t.replies.filter((r) => r.group !== group.id)
-    t.replies.push(reply)
-    t.done.unshift({ text: `Read ${name}: ${reply.lines.length} prices found`, at: nowIso() })
+    // each file is another supplier: different prices, the second one skips the last line
+    const FACTORS = [
+      [0.96, 1.03, 0.98, 0.95],
+      [0.93, 1.07, 1.01, 0.99],
+      [0.99, 0.97, 1.04, 1.02],
+    ]
+    const proposals: QuoteProposal[] = []
+    const replies: QuoteReply[] = []
+    names.forEach((name, n) => {
+      const factors = FACTORS[(t.replies.filter((r) => r.group === group.id).length + n) % FACTORS.length]
+      const ids = n % 2 === 1 && group.lv_ids.length > 1 ? group.lv_ids.slice(0, -1) : group.lv_ids
+      const reply: Reply = {
+        id: uid('r'),
+        file: name,
+        received_at: nowIso(),
+        group: group.id,
+        lines: ids.map((lv, i) => ({
+          lv_id: lv,
+          pos_no: String(i + 1),
+          unit_price: Math.round(CAT[RAW[lv].product].net_cost_chf * factors[i % factors.length] * 100) / 100,
+        })),
+      }
+      t.replies = t.replies.filter((r) => !(r.group === group.id && r.file === name)) // a newer reply of the same sender replaces it
+      t.replies.push(reply)
+      t.done.unshift({ text: `Read ${name}: ${reply.lines.length} prices found`, at: nowIso() })
+      const lines = replyLines(t, reply)
+      proposals.push(...lines)
+      replies.push({ source: name, supplier: supplierOf(reply), proposal_id: reply.id, count: lines.length, error: null })
+    })
     save()
-    return replyLines(t, reply)
+    return { proposals, replies, title: `Read ${names.length} replies` }
   },
-  async applyQuotes(id, proposals: QuoteProposal[], _proposalId?: string) {
+  async chooseOffer(id, body) {
+    await delay(150)
+    const t = tender(id)
+    const snap = snapshot(t)
+    const picks: { lv: string; o: SupplierOffer }[] = []
+    if (body.lv_id && body.proposal_id) {
+      const o = offersOf(t, body.lv_id).find((x) => x.proposal_id === body.proposal_id)
+      if (!o) throw new NotFound('No such offer')
+      picks.push({ lv: body.lv_id, o })
+    } else {
+      const g = QUOTE_GROUPS.find((x) => x.id === body.group)
+      if (!g) throw new NotFound(`Quote group ${body.group} not found`)
+      for (const lv of g.lv_ids) {
+        const os = offersOf(t, lv).filter((x) => !body.supplier || x.supplier.toLowerCase() === body.supplier.toLowerCase())
+        if (os[0]) picks.push({ lv, o: os[0] })
+      }
+    }
+    const by = DEFAULT_PEOPLE.find((x) => x.id === getActor())?.name ?? 'You'
+    for (const { lv, o } of picks)
+      t.positions[lv].supplier_quote = { unit_price: o.unit_price, source: `${o.supplier} · ${o.source}`, received_at: nowIso(), by, proposal_id: o.proposal_id, supplier: o.supplier }
+    const n = picks.length
+    const e = addLog(t, by, 'fill_quote', `Used ${n === 1 ? `${picks[0].o.supplier} for ${picks[0].lv}` : `${n} supplier offers`}`, picks[0]?.lv, snap)
+    for (const { lv } of picks) t.positions[lv].supplier_quote!.log_id = e.id
+    touch(t)
+    save()
+    return { log_id: e.id, message: e.text, applied: n }
+  },
+  async applyQuotes(id, proposals: QuoteProposal[], proposalId?: string) {
     await delay(150)
     const t = tender(id)
     const snap = snapshot(t)
     const ops: Op[] = proposals.map((p) => ({ op: 'fill', lv_id: p.lv_id, unit_price: p.unit_price, source: p.source }))
     applyOps(t, ops)
+    const reply = t.replies.find((r) => r.id === proposalId)
+    if (reply)
+      for (const o of ops) Object.assign(t.positions[o.lv_id!].supplier_quote!, { proposal_id: reply.id, supplier: supplierOf(reply) })
     const n = ops.length
     const file = proposals[0]?.source?.split(',')[0] ?? 'the reply'
     const e = addLog(t, 'Assist', 'fill quotes', `Filled ${n} ${n === 1 ? 'quote' : 'quotes'} from ${file}`, proposals[0]?.lv_id, snap)

@@ -157,54 +157,95 @@ export function StrategyStep({ ctx }: { ctx: PricingCtx }) {
         <div className="flex flex-col gap-1.5">
           <h2 className="m-0 text-[15px] font-semibold">{t('Pick a price')}</h2>
           <div className="overflow-x-auto">
-            <div className="min-w-[580px]" role="radiogroup" aria-label={t('Pick a price')}>
-              <div className="grid grid-cols-[minmax(0,1.3fr)_56px_88px_112px_88px_112px] gap-x-2.5 py-1.5 border-b border-ink text-[13px] text-muted font-medium">
+            <div className="min-w-[680px]" role="radiogroup" aria-label={t('Pick a price')}>
+              <div className={cx(OPTION_GRID, 'py-1.5 border-b border-ink text-[13px] text-muted font-medium')}>
                 <span className="pl-2.5">{t('Option')}</span>
-                <span className="text-right">{t('Margin')}</span>
+                <span className="text-center" title={t('The margin sets the option’s offer price: cost ÷ (1 − margin), rounded up to 1’000.')}>
+                  {t('Margin')}
+                </span>
                 <span className="text-right">{t('Offer price')}</span>
                 <span className="text-right">{t('Win chance')}</span>
                 <span className="text-right">{t('Profit if won')}</span>
-                <span className="text-right" title={t('Expected profit = win chance × profit if won. Margins are set under Costs.')}>
+                <span className="text-right" title={t('Expected profit = win chance × profit if won.')}>
                   {t('Expected profit')}
                 </span>
               </div>
-              {scen.map((o) => {
-                const on = o.name === s.chosen
-                const tags = [o === ctx.best ? t('best expected profit') : null, on ? t('your offer') : null].filter(Boolean)
-                return (
-                  <button
-                    key={o.name}
-                    type="button"
-                    role="radio"
-                    aria-checked={on}
-                    onClick={() => choose(o.name)}
-                    className={cx(
-                      'grid grid-cols-[minmax(0,1.3fr)_56px_88px_112px_88px_112px] gap-x-2.5 items-center w-full min-h-10 p-0 border-0 border-b border-rowrule text-left text-ink',
-                      on ? 'row-selected' : 'bg-white hover:bg-panel',
-                    )}
-                  >
-                    <span className={cx('pl-2.5', on && 'font-semibold')}>
-                      {t(o.name)}
-                      {tags.length > 0 && <span className="text-muted text-[12.5px] font-normal">{'  · ' + tags.join(' · ')}</span>}
-                    </span>
-                    <span className="text-right font-mono">{o.margin_pct.toFixed(1)}%</span>
-                    <span className="text-right font-mono font-medium">{fmt0(o.bid)}</span>
-                    <span className="flex items-center justify-end gap-2">
-                      <span aria-hidden="true" className="w-14 h-1.5 bg-rowrule">
-                        <span className="block h-1.5 bg-ink" style={{ width: Math.round(o.win * 100) + '%' }} />
-                      </span>
-                      <span className="font-mono min-w-[34px] text-right">{pct(o.win)}</span>
-                    </span>
-                    <span className="text-right font-mono">{fmt0(o.profit)}</span>
-                    <span className="text-right font-mono">{fmt0(o.expected)}</span>
-                  </button>
-                )
-              })}
+              {scen.map((o) => (
+                <OptionRow key={o.name} ctx={ctx} o={o} onPick={choose} />
+              ))}
             </div>
           </div>
         </div>
       </section>
     </main>
+  )
+}
+
+// ---------------------------------------------------------------- options
+
+const OPTION_GRID = 'grid grid-cols-[minmax(0,1.3fr)_150px_88px_112px_88px_112px] gap-x-2.5 items-center'
+
+/** Two neighbouring options whose margins are not in order (Aggressive below Target below Standard ...):
+ *  the words for the row that was changed (the first of the two when both or neither were). */
+function orderNote(ctx: PricingCtx, o: Scenario): string | null {
+  const { t, s, D, scen } = ctx
+  const i = scen.indexOf(o)
+  const isChanged = (x: Scenario) => Math.abs(s.margins[x.name] - (D.margins[x.name] ?? s.margins[x.name])) > 1e-9
+  const words = (other: Scenario, higher: boolean) =>
+    Math.abs(o.margin_pct - other.margin_pct) < 1e-9 ? t('same margin as {name}', { name: t(other.name) }) : t(higher ? 'higher than {name}' : 'lower than {name}', { name: t(other.name) })
+  const next = scen[i + 1]
+  if (next && o.margin_pct >= next.margin_pct - 1e-9 && (isChanged(o) || !isChanged(next))) return words(next, true)
+  const prev = scen[i - 1]
+  if (prev && prev.margin_pct >= o.margin_pct - 1e-9 && isChanged(o) && !isChanged(prev)) return words(prev, false)
+  return null
+}
+
+/** One price option: pick it, or change its margin right next to the price it sets. */
+function OptionRow({ ctx, o, onPick }: { ctx: PricingCtx; o: Scenario; onPick: (name: string) => void }) {
+  const { t, s, D, change } = ctx
+  const on = o.name === s.chosen
+  const tags = [o === ctx.best ? t('best expected profit') : null, on ? t('your offer') : null].filter(Boolean)
+  const m = s.margins[o.name]
+  const md = D.margins[o.name]
+  const changed = md !== undefined && Math.abs(m - md) > 1e-9
+  const order = orderNote(ctx, o)
+  const set = (v: number) => change({ margins: { [o.name]: Math.min(15, Math.max(0, Number((Math.round(v / 0.5) * 0.5).toFixed(4)))) } })
+  const label = t('{name} margin', { name: t(o.name) })
+  return (
+    <div onClick={() => onPick(o.name)} className={cx(OPTION_GRID, 'min-h-11 border-b border-rowrule cursor-pointer', on ? 'row-selected' : 'bg-white hover:bg-panel')}>
+      <span className="pl-2.5 flex flex-col">
+        <button type="button" role="radio" aria-checked={on} className={cx('p-0 border-0 bg-transparent text-left text-ink min-h-0', on && 'font-semibold')}>
+          {t(o.name)}
+          {tags.length > 0 && <span className="text-muted text-[12.5px] font-normal">{'  · ' + tags.join(' · ')}</span>}
+        </button>
+        {order && <span className="text-[12.5px] text-attn">{order}</span>}
+      </span>
+      {/* the margin stepper changes the option without picking it */}
+      <span className="flex justify-center" onClick={(e) => e.stopPropagation()}>
+        <Stepper
+          label={label}
+          value={
+            <span style={changed ? { color: C.accent } : undefined} title={changed ? t('default {v}', { v: md.toFixed(1) + '%' }) : undefined}>
+              {m.toFixed(1)}%
+            </span>
+          }
+          pending={ctx.busy}
+          onDec={() => set(m - 0.5)}
+          onInc={() => set(m + 0.5)}
+          decDisabled={m <= 1e-9}
+          incDisabled={m >= 15 - 1e-9}
+        />
+      </span>
+      <span className={cx('text-right font-mono font-medium', ctx.busy && 'cf-pending')}>{fmt0(o.bid)}</span>
+      <span className="flex items-center justify-end gap-2">
+        <span aria-hidden="true" className="w-14 h-1.5 bg-rowrule">
+          <span className="block h-1.5 bg-ink" style={{ width: Math.round(o.win * 100) + '%' }} />
+        </span>
+        <span className="font-mono min-w-[34px] text-right">{pct(o.win)}</span>
+      </span>
+      <span className="text-right font-mono">{fmt0(o.profit)}</span>
+      <span className="text-right font-mono">{fmt0(o.expected)}</span>
+    </div>
   )
 }
 
@@ -234,7 +275,7 @@ function Recommendation({ ctx }: { ctx: PricingCtx }) {
     lines.push(
       t('{name} earns CHF {x} more if won, but loses {n} points of win chance.', { name: t(dearer.name), n: dPts(dearer, best), x: fmt0(dearer.profit - best.profit) }),
     )
-  // where the continuous curve peaks, when that is outside the options (a margin worth adding under Costs)
+  // where the continuous curve peaks, when that is outside the options (a margin worth setting in the table)
   const ms = scen.map((x) => x.margin_pct)
   const curve = priceCurve(s, tot.cost, Math.min(0, Math.min(...ms) - 2), Math.max(...ms) + 3)
   const peak = curve.reduce((a, b) => (b.expected > a.expected ? b : a), curve[0])
@@ -374,7 +415,7 @@ function WinChart({ ctx, onPick }: { ctx: PricingCtx; onPick: (name: string) => 
           {/* panel frames and gridlines */}
           {[0, 0.5, 1].map((w) => (
             <g key={'g1' + w}>
-              <line x1={L} x2={W - R} y1={Y1(w)} y2={Y1(w)} stroke="#EDEDEA" />
+              <line x1={L} x2={W - R} y1={Y1(w)} y2={Y1(w)} stroke="var(--color-rowrule)" />
               <text x={L - 6} y={Y1(w) + 4} textAnchor="end" fill={C.muted}>
                 {pct(w)}
               </text>
@@ -382,7 +423,7 @@ function WinChart({ ctx, onPick }: { ctx: PricingCtx; onPick: (name: string) => 
           ))}
           {eTicks.map((v) => (
             <g key={'g2' + v}>
-              <line x1={L} x2={W - R} y1={Y2(v)} y2={Y2(v)} stroke="#EDEDEA" />
+              <line x1={L} x2={W - R} y1={Y2(v)} y2={Y2(v)} stroke="var(--color-rowrule)" />
               <text x={L - 6} y={Y2(v) + 4} textAnchor="end" fill={C.muted}>
                 {v ? k(v) : '0'}
               </text>

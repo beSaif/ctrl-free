@@ -1,0 +1,17 @@
+[
+  {"id": "l01", "clip": "upload", "offset": 0.5, "text": "So this is what an estimator at Equans gets... a two-hundred-page ventilation tender, in German. Lea drops it in, and a few seconds later every priced position is read, matched to the catalogue and priced."},
+  {"id": "l02", "clip": "overview", "text": "She's got three steps left before she can submit. And over here... it's been checked against Equans' own twenty-two examples. All of them match, to the cent."},
+  {"id": "l03", "clip": "trace-qty", "text": "Here's one line, a supply air valve on page seventy-eight. Every number has a note next to it. The quantity comes straight from this row of the tender."},
+  {"id": "l04", "clip": "trace-hours", "text": "The hours come from Equans' install rule, with every site factor written out... so she can defend the number if anyone asks."},
+  {"id": "l05", "clip": "equivalent", "text": "The tender names a Trox valve, but only as an example. So we offer the equivalent from the catalogue, and check it against what was asked for."},
+  {"id": "l06", "clip": "teach", "offset": 2.5, "text": "This inspection cover had no match in the catalogue. Lea finds the right one herself..."},
+  {"id": "l07", "clip": "similar", "text": "and applies it to the eight other lines with the same wording."},
+  {"id": "l08", "clip": "learned", "text": "It's kept as a rule, with who taught it and on which line. So the next tender with this wording comes back already matched."},
+  {"id": "l09", "clip": "pricelist", "text": "Equans' own negotiated prices go in here too. She imports the list, it's matched to the catalogue... and fifty-two lines get cheaper. About ten thousand francs off the direct cost."},
+  {"id": "l10", "clip": "quote", "text": "This silencer is still on a budget price. When the supplier replies, she drops the PDF in. Assist reads the prices out of it... but nothing changes until she says okay."},
+  {"id": "l11", "clip": "instructions", "text": "Pages thirty-six to forty-one are rules, not lines. Each one's quoted word for word, and sorted into what adds cost, what's a risk, and what's just scope. Spare filters for eighteen units... that one goes in the price."},
+  {"id": "l12", "clip": "strategy", "offset": 0.5, "text": "Then the price itself. She says how strong the competition is and how badly we want this one... and you can see the win chance move for each option. She goes with Target."},
+  {"id": "l13", "clip": "review", "text": "Marco's the senior. He sees what the AI picked, what Assist filled in and what Lea changed, each with what it did to the price. He approves them here, or reverts anything he doesn't like."},
+  {"id": "l14", "clip": "pdfcheck", "text": "Before it goes out, he checks the filled tender against the original. Here's the valve from earlier, on page seventy-eight... now with our selling price on it."},
+  {"id": "l15", "clip": "pdfcheck", "offset": 10.8, "text": "The model picks the products, the code does the maths, and the estimator decides. It runs on Azure OpenAI."}
+]

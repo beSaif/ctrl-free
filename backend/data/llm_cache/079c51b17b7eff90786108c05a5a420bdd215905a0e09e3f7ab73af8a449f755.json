@@ -1,0 +1,72 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T16:29:35",
+ "api": "responses",
+ "input_tokens": 6606,
+ "output_tokens": 615,
+ "response": {
+  "LV0015": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Circular galvanized duct straight pipe, but all candidates are bends",
+   "assumptions": []
+  },
+  "LV0016": {
+   "product_id": "P-AHU-3500",
+   "confidence": "medium",
+   "reason": "Air-handling unit, and this is the generic AHU candidate with no stated size",
+   "assumptions": [
+    "Capacity not specified, 3500 m3/h assumed"
+   ]
+  },
+  "LV0017": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Air filter, but all candidates are AHUs or a valve",
+   "assumptions": []
+  },
+  "LV0020": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Commissioning is a service, not a product in the candidate list",
+   "assumptions": []
+  },
+  "LV0021": {
+   "product_id": "P-FTG-B-160-90",
+   "confidence": "high",
+   "reason": "Circular bend 90°, DN160 matches exactly",
+   "assumptions": []
+  },
+  "LV0022": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Straight spiral duct DN160, but all candidates are bends",
+   "assumptions": []
+  },
+  "LV0023": {
+   "product_id": "P-FTG-B-160-90",
+   "confidence": "high",
+   "reason": "Circular bend 90°, DN160 matches exactly",
+   "assumptions": []
+  },
+  "LV0024": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Straight spiral duct DN160, but all candidates are bends",
+   "assumptions": []
+  },
+  "LV0025": {
+   "product_id": "P-FTG-B-160-90",
+   "confidence": "high",
+   "reason": "Exhaust circular bend 90°, DN160 matches exactly",
+   "assumptions": []
+  },
+  "LV0026": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Straight spiral duct DN160, but all candidates are bends",
+   "assumptions": []
+  }
+ }
+}

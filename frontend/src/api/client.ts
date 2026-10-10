@@ -23,6 +23,8 @@ import type {
   PricingResponse,
   ProjectCostItem,
   AssistProposal,
+  ChooseOfferBody,
+  QuoteReadResult,
   Totals,
   QuoteGroup,
   QuoteProposal,
@@ -75,7 +77,10 @@ export interface Api {
   resetPricing(id: string, keys?: string[]): Promise<PricingResponse>
   getQuotes(id: string): Promise<QuoteGroup[]>
   markQuoteSent(id: string, group: string, sent: boolean): Promise<unknown>
-  readQuote(id: string, input: File | string, lvId?: string): Promise<QuoteProposal[]>
+  /** Read one or several supplier replies (files and/or pasted text); each becomes its own offer. */
+  readQuote(id: string, input: File | string | (File | string)[], lvId?: string): Promise<QuoteReadResult>
+  /** Use one offer for a line, one supplier for all lines of a request, or the cheapest offer for each line. */
+  chooseOffer(id: string, body: ChooseOfferBody): Promise<AssistApplyResult>
   applyQuotes(id: string, proposals: QuoteProposal[], proposalId?: string): Promise<AssistApplyResult>
   /** Apply a tray proposal as a whole (e.g. confirm the instructions that do not change the price). */
   applyProposal(id: string, proposalId: string): Promise<AssistApplyResult>
@@ -352,11 +357,15 @@ export const realApi: Api = {
   markQuoteSent: (id, group, sent) => req('POST', `/tenders/${id}/quotes/${enc(group)}/sent?sent=${sent}`, { sent }),
   readQuote: async (id, input, lvId) => {
     const f = new FormData()
-    if (typeof input === 'string') f.append('text', input)
-    else f.append('file', input)
+    for (const x of Array.isArray(input) ? input : [input]) {
+      if (typeof x === 'string') f.append('text', x)
+      else f.append('files', x)
+    }
     if (lvId) f.append('lv_id', lvId)
-    return arr<QuoteProposal>(await req('POST', `/tenders/${id}/quotes/read`, f), 'proposals', 'items')
+    const r = await req<Obj>('POST', `/tenders/${id}/quotes/read`, f)
+    return { proposals: arr<QuoteProposal>(r, 'proposals', 'items'), replies: arr(r, 'replies'), title: str(r?.title) }
   },
+  chooseOffer: async (id, body) => normApply(await req('POST', `/tenders/${id}/quotes/choose`, body)),
   applyQuotes: async (id, proposals, proposalId) =>
     normApply(await req('POST', `/tenders/${id}/quotes/apply`, { proposals, proposal_id: proposalId ?? null })),
   applyProposal: async (id, proposalId) => normApply(await req('POST', `/tenders/${id}/assist/proposals/${enc(proposalId)}/apply`)),

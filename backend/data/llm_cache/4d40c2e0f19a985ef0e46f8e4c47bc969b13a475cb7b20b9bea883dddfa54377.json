@@ -1,0 +1,11 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "read_supplier_reply",
+ "created": "2026-10-10T20:29:07",
+ "api": "responses",
+ "input_tokens": 14483,
+ "output_tokens": 152,
+ "response": {
+  "items": []
+ }
+}

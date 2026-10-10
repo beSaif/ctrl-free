@@ -2,6 +2,8 @@
 
 - tray(t)                     -> {needs_ok, working_on, done, suggestions}
 - read_supplier_reply(...)    -> reads a reply (quotes.py), stores a proposal, applies nothing
+- line_offers / group_offers  -> every supplier's offer for a line, per-supplier totals for a request
+- choose_offers(...)          -> "Use this" / "Use {supplier} for all" / "Use the cheapest for each line"
 - apply_quotes / apply_proposal / dismiss
 - command(tid, text, ...)     -> a plan (concrete actions + effect on direct cost), stored, not applied
 - apply(tid, plan_id)         -> executes the plan with by="Assist", logged and undoable (one batch)
@@ -212,10 +214,21 @@ def _with_quote(pos: dict, unit_price: float) -> dict:
     return p
 
 
+def _budget_unit(t: dict, raw_pos: dict, settings: dict | None = None) -> float | None:
+    """The line's unit price without any supplier quote or typed price (catalogue / price list budget)."""
+    p = copy.deepcopy(raw_pos)
+    p["supplier_quote"] = None
+    (p.setdefault("overrides", {}))["unit_price"] = None
+    pr = pipeline.price(t, p, settings) if settings is not None else pipeline.price(t, p)
+    return (pr or {}).get("net_unit_cost")
+
+
 def _quote_item(t: dict, v: dict, raw_pos: dict, unit_price: float, source: str | None) -> dict:
     cur = v["by_lv"].get(raw_pos["lv_id"]) or {}
     pr = cur.get("pricing") or {}
     budget = pr.get("net_unit_cost")
+    if pr.get("unit_price_source") in ("supplier_quote", "manual"):
+        budget = _budget_unit(t, raw_pos, v["settings"])
     new = pipeline.price(t, _with_quote(raw_pos, unit_price), v["settings"])
     delta = round((new or {}).get("direct", 0) - _direct(cur), 2) if new else None
     return {"lv_id": raw_pos["lv_id"], "unit_price": float(unit_price), "budget": budget, "delta": delta,
@@ -226,7 +239,18 @@ def _quote_item(t: dict, v: dict, raw_pos: dict, unit_price: float, source: str 
             "state": "open"}
 
 
+def _quote_lines(t: dict, v: dict) -> list[dict]:
+    """Every supplier-quote line, quoted ones included: a second supplier's reply competes with the first."""
+    in_groups = {x for g in t.get("quote_requests") or [] for x in g.get("lv_ids") or []}
+    return [p for p in v["positions"] if p["status"] == "supplier_quote_required" or p["lv_id"] in in_groups]
+
+
+def _same(a: str | None, b: str | None) -> bool:
+    return bool(a and b and a.strip().lower() == b.strip().lower())
+
+
 def read_supplier_reply(tid: str, data: bytes | str, filename: str) -> dict:
+    """One reply (one file or pasted e-mail) -> one proposal of the supplier who sent it."""
     quotes = mod("quotes")
     jid = start_job(tid, "read_reply", f"Reading {filename}", "you can keep working")
     try:
@@ -234,15 +258,15 @@ def read_supplier_reply(tid: str, data: bytes | str, filename: str) -> dict:
         v = pipeline.view(t)
         if quotes is None:
             raise HTTPException(503, "Reading supplier replies is not available (app/quotes.py missing)")
-        open_lines = [p for p in v["positions"] if p["status"] == "supplier_quote_required"
-                      and not (p.get("supplier_quote") or {}).get("unit_price")]
+        lines = _quote_lines(t, v) or v["positions"]
         llm = mod("llm")
         if llm is not None and hasattr(llm, "time_budget"):
             with llm.time_budget(45):  # the user is waiting: bounded, then the rules reader alone
-                raw = quotes.read_supplier_reply(data, filename, open_lines or v["positions"]) or []
+                raw = quotes.read_supplier_reply(data, filename, lines) or []
         else:
-            raw = quotes.read_supplier_reply(data, filename, open_lines or v["positions"]) or []
+            raw = quotes.read_supplier_reply(data, filename, lines) or []
         by_lv = {p["lv_id"]: p for p in t["positions"]}
+        supplier = next((r.get("supplier") for r in raw if r.get("supplier")), None)
         items = []
         for r in raw:
             lv = r.get("lv_id")
@@ -250,9 +274,11 @@ def read_supplier_reply(tid: str, data: bytes | str, filename: str) -> dict:
             if lv not in by_lv or price is None:
                 continue
             it = _quote_item(t, v, by_lv[lv], float(price), r.get("source") or filename)
+            it["supplier"] = r.get("supplier") or supplier
+            it["notes"] = r.get("notes") or []
             # keep what the reader says about the reply row (position no., text, page ...) under reply_*
             for k, val in r.items():
-                if k not in ("lv_id", "unit_price", "source", "budget", "delta"):
+                if k not in ("lv_id", "unit_price", "source", "budget", "delta", "supplier"):
                     it[f"reply_{k}"] = val
             items.append(it)
         prop = None
@@ -260,30 +286,232 @@ def read_supplier_reply(tid: str, data: bytes | str, filename: str) -> dict:
             groups = {(v["by_lv"][x["lv_id"]].get("pricing") or {}).get("category") for x in items}
             what = (next(iter(groups)) or "").lower() if len(groups) == 1 else ""
             prop = {"id": store.new_id("pr_"), "kind": "supplier_reply", "state": "open", "source": filename,
-                    "received_at": store.now(),
-                    "title": f"Fill {len(items)} {what + ' ' if what else ''}quote{'s' if len(items) != 1 else ''}",
+                    "supplier": supplier, "received_at": store.now(),
+                    "title": f"Fill {len(items)} {what + ' ' if what else ''}quote{'s' if len(items) != 1 else ''}"
+                             + (f" from {supplier}" if supplier else ""),
                     "items": items}
             with store.edit(tid, by=None, touch=False) as t2:
-                _assist_state(t2)["proposals"].append(prop)
+                props = _assist_state(t2)["proposals"]
+                # a newer reply of the same supplier replaces its older offers for the same lines
+                mine = {x["lv_id"] for x in items}
+                for old in props:
+                    if old.get("kind") != "supplier_reply" or not _same(old.get("supplier"), supplier):
+                        continue
+                    for x in old.get("items") or []:
+                        if x["lv_id"] in mine and x.get("state") in ("open", "alternative"):
+                            x["state"] = "superseded"
+                    _proposal_state(old)
+                props.append(prop)
                 store.append_log(t2, "Assist", "read_reply", target=("tender", tid), undoable=False,
-                                 text=f"Read {filename}: {len(items)} price{'s' if len(items) != 1 else ''} found")
+                                 text=f"Read {filename}" + (f" from {supplier}" if supplier else "")
+                                      + f": {len(items)} price{'s' if len(items) != 1 else ''} found")
         return {"proposal_id": prop["id"] if prop else None, "proposals": items, "source": filename,
+                "supplier": supplier,
                 "title": prop["title"] if prop else "No prices for this tender's lines found in the reply"}
     finally:
         end_job(tid, jid)
 
 
+# ------------------------------------------------------------------ competing offers
+
+
+LIVE = ("open", "filled", "alternative")
+
+
+def _proposal_state(p: dict) -> None:
+    items = p.get("items") or []
+    if not items or p.get("state") not in ("open", "applied", "dismissed"):
+        return
+    if any(x.get("state") == "open" for x in items):
+        p["state"] = "open"
+    elif any(x.get("state") in ("filled", "alternative") for x in items):
+        p["state"] = "applied"
+    else:
+        p["state"] = "dismissed"
+
+
+def _sync_offer_states(t: dict, lv_ids: set[str]) -> None:
+    """After a quote changed on these lines: the offer in the line is "filled", the other offers stay as
+    "alternative" (still shown, can be chosen later); a line without a quote has all its offers open again."""
+    pos = {p["lv_id"]: p for p in t.get("positions") or [] if p["lv_id"] in lv_ids}
+    for p in _assist_state(t)["proposals"]:
+        if p.get("kind") != "supplier_reply":
+            continue
+        touched = False
+        for x in p.get("items") or []:
+            if x["lv_id"] not in pos or x.get("state") not in LIVE:
+                continue
+            sq = pos[x["lv_id"]].get("supplier_quote") or {}
+            if sq.get("unit_price") is None:
+                st = "open"
+            elif sq.get("proposal_id") == p["id"] and abs(float(sq["unit_price"]) - float(x["unit_price"])) < 0.005:
+                st = "filled"
+            else:
+                st = "alternative"
+            if x.get("state") != st:
+                x["state"] = st
+                touched = True
+        if touched:
+            _proposal_state(p)
+
+
+def _live_offers(t: dict) -> dict[str, list[tuple[dict, dict]]]:
+    """lv_id -> [(proposal, item)] for every offer still on the table, oldest first."""
+    out: dict[str, list[tuple[dict, dict]]] = {}
+    for p in _assist_state(t)["proposals"]:
+        if p.get("kind") != "supplier_reply":
+            continue
+        for x in p.get("items") or []:
+            if x.get("state") in LIVE:
+                out.setdefault(x["lv_id"], []).append((p, x))
+    return out
+
+
+def _supplier_name(p: dict, x: dict) -> str:
+    return x.get("supplier") or p.get("supplier") or re.sub(r"\.[A-Za-z0-9]{2,4}$", "", p.get("source") or "Supplier")
+
+
+def _offer_rows(t: dict, v: dict, lv_id: str, pairs: list[tuple[dict, dict]], budget: float | None) -> list[dict]:
+    cur = v["by_lv"].get(lv_id) or {}
+    qty = (cur.get("pricing") or {}).get("quantity", cur.get("quantity")) or 0
+    sq = cur.get("supplier_quote") or {}
+    rows = []
+    for p, x in pairs:
+        up = float(x["unit_price"])
+        rows.append({
+            "lv_id": lv_id, "supplier": _supplier_name(p, x), "unit_price": up, "quantity": qty,
+            "line_total": round(up * float(qty), 2), "budget": budget,
+            "delta_vs_budget": round((up - budget) * float(qty), 2) if budget is not None else None,
+            "source": x.get("source") or p.get("source"), "quoted_text": x.get("reply_quoted_text"),
+            "page": x.get("reply_page"), "pos": x.get("reply_pos"),
+            "proposal_id": p["id"], "received_at": p.get("received_at"),
+            "notes": x.get("notes") or x.get("reply_notes") or [], "state": x.get("state"),
+            "chosen": bool(sq.get("unit_price") is not None and sq.get("proposal_id") == p["id"]
+                           and abs(float(sq["unit_price"]) - up) < 0.005),
+            "best": False,
+        })
+    if rows:
+        low = min(r["unit_price"] for r in rows)
+        for r in rows:
+            r["best"] = abs(r["unit_price"] - low) < 0.005
+    rows.sort(key=lambda r: (r["unit_price"], r["received_at"] or ""))
+    return rows
+
+
+def line_offers(t: dict, lv_id: str, v: dict | None = None) -> list[dict]:
+    """Every supplier's offer for one line, cheapest first: [{supplier, unit_price, line_total,
+    delta_vs_budget, source, proposal_id, received_at, notes, best, chosen}]."""
+    pairs = _live_offers(t).get(lv_id) or []
+    if not pairs:
+        return []
+    v = v or pipeline.view(t)
+    raw = next((p for p in t["positions"] if p["lv_id"] == lv_id), None)
+    budget = _budget_unit(t, raw, v["settings"]) if raw else None
+    return _offer_rows(t, v, lv_id, pairs, budget)
+
+
+def group_offers(t: dict, lv_ids: list[str], v: dict | None = None) -> dict | None:
+    """Per supplier for one request: lines covered, total for those lines, and the cheapest supplier among
+    those that cover every line with an offer. None when no reply has come in for these lines."""
+    live = _live_offers(t)
+    ids = [x for x in lv_ids if live.get(x)]
+    if not ids:
+        return None
+    v = v or pipeline.view(t)
+    per_line = {x: line_offers(t, x, v) for x in ids}
+    sup: dict[str, dict] = {}
+    for x in ids:
+        for o in per_line[x]:
+            k = o["supplier"].strip().lower()
+            s = sup.setdefault(k, {"supplier": o["supplier"], "lv_ids": [], "total": 0.0, "chosen": 0})
+            if x in s["lv_ids"]:
+                continue  # a second offer of the same supplier for the line: the cheaper one counts (sorted)
+            s["lv_ids"].append(x)
+            s["total"] = round(s["total"] + o["line_total"], 2)
+            s["chosen"] += 1 if o["chosen"] else 0
+    rows = list(sup.values())
+    for s in rows:
+        s["lines"] = len(s["lv_ids"])
+        s["covers_all"] = s["lines"] == len(ids)
+        s["cheapest"] = False
+    full = [s for s in rows if s["covers_all"]]
+    if full:
+        min(full, key=lambda s: s["total"])["cheapest"] = True
+    rows.sort(key=lambda s: (not s["covers_all"], s["total"]))
+    cheapest_each = round(sum(per_line[x][0]["line_total"] for x in ids), 2)
+    return {"lines": len(ids), "lv_ids": ids, "suppliers": rows,
+            "cheapest_supplier": next((s["supplier"] for s in rows if s["cheapest"]), None),
+            "cheapest_each_total": cheapest_each,
+            "best": {x: per_line[x][0]["proposal_id"] for x in ids},
+            "offers": {x: len(per_line[x]) for x in ids}}
+
+
+def choose_offers(tid: str, lv_id: str | None = None, proposal_id: str | None = None, group: str | None = None,
+                  supplier: str | None = None, cheapest: bool = False) -> dict:
+    """The estimator picks: one offer for a line ("Use this"), one supplier for every line of a request it
+    offered, or the cheapest offer for each line. Logged by the current person, one undoable batch."""
+    batch = store.new_id("b_")
+    entries = []
+    with store.edit(tid) as t:
+        live = _live_offers(t)
+        picks: list[tuple[str, dict, dict]] = []
+        if lv_id and proposal_id:
+            pair = next(((p, x) for p, x in live.get(lv_id) or [] if p["id"] == proposal_id), None)
+            if pair is None:
+                raise HTTPException(404, f"No offer from {proposal_id} for {lv_id}")
+            picks.append((lv_id, *pair))
+        elif group:
+            g = store.resolve_target(t, "quote", group)
+            if g is None:
+                raise HTTPException(404, f"Quote group {group} not found")
+            for x in g.get("lv_ids") or []:
+                pairs = sorted(live.get(x) or [], key=lambda px: (float(px[1]["unit_price"]), px[0].get("received_at") or ""))
+                if supplier:
+                    pairs = [px for px in pairs if _same(_supplier_name(*px), supplier)]
+                elif not cheapest:
+                    raise HTTPException(400, "Say which supplier, or cheapest")
+                if pairs:
+                    picks.append((x, *pairs[0]))
+            if not picks:
+                raise HTTPException(404, "No offer to use for this request")
+        else:
+            raise HTTPException(400, "Send lv_id and proposal_id, or group with supplier or cheapest")
+        for x, p, it in picks:
+            sq = (store.resolve_target(t, "position", x) or {}).get("supplier_quote") or {}
+            if sq.get("proposal_id") == p["id"] and sq.get("unit_price") is not None \
+                    and abs(float(sq["unit_price"]) - float(it["unit_price"])) < 0.005:
+                continue  # already in the line
+            name = _supplier_name(p, it)
+            src = it.get("source") or p.get("source") or ""
+            e = _fill_quote(t, x, float(it["unit_price"]), f"{name} · {src}" if src else name, "You", batch, p["id"],
+                            supplier=name)
+            if e:
+                entries.append(e)
+        _sync_offer_states(t, {x for x, _, _ in picks})
+    return _result(tid, entries, batch)
+
+
 def _fill_quote(t: dict, lv_id: str, unit_price: float, source: str | None, by: str, batch: str,
-                proposal_id: str | None = None) -> dict | None:
+                proposal_id: str | None = None, supplier: str | None = None) -> dict | None:
     pos = store.resolve_target(t, "position", lv_id)
     if pos is None:
         raise HTTPException(404, f"Line {lv_id} not found")
-    q = {"unit_price": float(unit_price), "source": source, "received_at": store.now(), "by": by}
+    if supplier is None and proposal_id:  # the supplier of the reply goes with the price
+        prop = next((p for p in _assist_state(t)["proposals"] if p["id"] == proposal_id), None)
+        it = next((x for x in (prop or {}).get("items") or [] if x["lv_id"] == lv_id), None)
+        supplier = (it or {}).get("supplier") or (prop or {}).get("supplier")
+        if supplier and source and supplier.lower() not in source.lower():
+            source = f"{supplier} · {source}"
+    q = {"unit_price": float(unit_price), "source": source, "received_at": store.now(),
+         "by": store.me() if by == "You" else by}
     if proposal_id:
         q["proposal_id"] = proposal_id
+    if supplier:
+        q["supplier"] = supplier
     old = (pos.get("supplier_quote") or {}).get("unit_price")
     return store.change(t, by, "fill_quote", "position", lv_id, {"supplier_quote": q}, batch=batch,
-                        text=f"{lv_id}: supplier quote {swiss(old) if old is not None else 'empty'} → {swiss(unit_price)}")
+                        text=f"{lv_id}: supplier quote {swiss(old) if old is not None else 'empty'} → {swiss(unit_price)}"
+                             + (f" ({supplier})" if supplier else ""))
 
 
 def _mark_items(t: dict, proposal_id: str | None, lv_ids: set[str], state: str) -> None:
@@ -294,23 +522,21 @@ def _mark_items(t: dict, proposal_id: str | None, lv_ids: set[str], state: str) 
             if x["lv_id"] in lv_ids and x.get("state") == "open":
                 x["state"] = state
         if p.get("items") and all(x.get("state") != "open" for x in p["items"]):
-            p["state"] = "applied" if any(x.get("state") == "filled" for x in p["items"]) else "dismissed"
+            p["state"] = "applied" if any(x.get("state") in ("filled", "alternative") for x in p["items"]) else "dismissed"
+    if state == "filled":  # the other suppliers' offers for these lines stay as alternatives
+        _sync_offer_states(t, lv_ids)
 
 
 def reopen_after_undo(t: dict, undone: list[dict]) -> None:
-    """Undoing an Assist fill puts the reply's proposal back in "Needs your OK", so it can be filled again."""
+    """Undoing a fill puts the offers back as they were: the quote the line had before is the chosen one again,
+    and a line left without a quote has its reply proposals back in "Needs your OK"."""
+    lines = set()
     for u in undone:
         orig = next((e for e in t.get("log") or [] if e.get("id") == u.get("undoes")), None)
-        if not orig or orig.get("action") != "fill_quote":
-            continue
-        pid = ((orig.get("after") or {}).get("supplier_quote") or {}).get("proposal_id")
-        for p in _assist_state(t)["proposals"]:
-            if p["id"] != pid:
-                continue
-            for x in p.get("items") or []:
-                if x["lv_id"] == orig.get("lv_id") and x.get("state") == "filled":
-                    x["state"] = "open"
-                    p["state"] = "open"
+        if orig and (orig.get("action") == "fill_quote" or "supplier_quote" in (orig.get("after") or {})):
+            lines.add(orig.get("lv_id"))
+    if lines:
+        _sync_offer_states(t, lines)
 
 
 def apply_quotes(tid: str, proposals: list[dict], proposal_id: str | None = None) -> dict:
@@ -540,6 +766,14 @@ def _build_actions(t: dict, v: dict, cls: dict, scope: str, lv_id: str | None) -
         cond = cls.get("condition") or "all"
         confirm = bool(cls.get("confirm"))
         pending = [(p, x) for p in _open_reply_proposals(t) for x in p["items"] if x.get("state") == "open"]
+        # several suppliers for the same line: the plan fills the cheapest offer once
+        seen_lv: set[str] = set()
+        keep: set[int] = set()
+        for _, x in sorted(pending, key=lambda px: float(px[1]["unit_price"])):
+            if x["lv_id"] not in seen_lv:
+                seen_lv.add(x["lv_id"])
+                keep.add(id(x))
+        pending = [px for px in pending if id(px[1]) in keep]
         if scope == "line" and lv_id and lv_id in ids and len(ids) == 1:
             pending = [(p, x) for p, x in pending if x["lv_id"] == lv_id]
         elif ids and scope == "tender" and any(re.fullmatch(r"LV\d+", i) for i in cls.get("lv_ids") or []):

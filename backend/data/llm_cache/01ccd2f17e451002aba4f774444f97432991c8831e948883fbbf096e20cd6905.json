@@ -1,0 +1,94 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "translate_titles",
+ "created": "2026-10-10T16:29:34",
+ "api": "responses",
+ "input_tokens": 2914,
+ "output_tokens": 695,
+ "response": {
+  "LV0048": {
+   "title_en": "Wall sleeve, DN160",
+   "description_en": "AWG type wall sleeve, 160 mm diameter."
+  },
+  "LV0049": {
+   "title_en": "Duct silencer",
+   "description_en": "Round duct silencer."
+  },
+  "LV0050": {
+   "title_en": "Air valve, white plastic, DN160",
+   "description_en": "White plastic disc valve with installation frame, 50 mm insulation, 100 mm own row size."
+  },
+  "LV0051": {
+   "title_en": "Supply air distributor, 7 connections",
+   "description_en": "Ceiling-mounted cast-in supply air distributor with 7 connections, base part, head piece and end piece."
+  },
+  "LV0052": {
+   "title_en": "Supply air diffuser, ADW 1",
+   "description_en": "Ceiling-mounted supply air diffuser for 30 m3/h."
+  },
+  "LV0053": {
+   "title_en": "Air diffuser, ADW 2",
+   "description_en": "Air diffuser for ceiling installation, 60 m3/h."
+  },
+  "LV0054": {
+   "title_en": "Supply air grille, ALG 300",
+   "description_en": "Supply air outlet grille for 30 m3/h."
+  },
+  "LV0055": {
+   "title_en": "Supply air grille, ALG 500",
+   "description_en": "Supply air outlet grille for 60 m3/h."
+  },
+  "LV0056": {
+   "title_en": "Exhaust air distributor, 4 connections",
+   "description_en": "Ceiling-mounted cast-in exhaust air distributor with 4 connections."
+  },
+  "LV0057": {
+   "title_en": "Exhaust air box",
+   "description_en": "Exhaust air box for ventilation system."
+  },
+  "LV0058": {
+   "title_en": "PE pipe, DN90/75",
+   "description_en": "PE pipe LVRA 90 with 90/75 mm dimensions."
+  },
+  "LV0059": {
+   "title_en": "Cable tie, KB 90",
+   "description_en": "Cable tie type KB 90."
+  },
+  "LV0060": {
+   "title_en": "Connection sleeve, VB 90",
+   "description_en": "Connection sleeve type VB 90."
+  },
+  "LV0061": {
+   "title_en": "Cross piece, KS 2",
+   "description_en": "Cross piece type KS 2."
+  },
+  "LV0062": {
+   "title_en": "Cross piece, KS 5",
+   "description_en": "Cross piece type KS 5."
+  },
+  "ST004": {
+   "title_en": "Total fittings and instruments",
+   "description_en": "Summary line for 3 fittings and instruments."
+  },
+  "LV0063": {
+   "title_en": "Circular galvanized duct, DN160",
+   "description_en": "Insulate wall penetrations with 15 mm mineral wool mats, density over 100 kg/m3, and trim protruding insulation flush after masonry."
+  },
+  "LV0064": {
+   "title_en": "Circular galvanized duct, DN100",
+   "description_en": "Circular spiral duct, 100 mm diameter."
+  },
+  "LV0065": {
+   "title_en": "Armaflex insulation, rectangular ducts",
+   "description_en": "Exterior insulation for E50 marked rectangular ducts and fittings with 50 mm Armaflex sheets bonded full-surface with special adhesive, vapour-tight."
+  },
+  "LV0066": {
+   "title_en": "Armaflex insulation, round ducts",
+   "description_en": "Armaflex insulation for round ducts."
+  },
+  "ST005": {
+   "title_en": "Total insulation",
+   "description_en": "Summary line for 7 insulation items."
+  }
+ }
+}

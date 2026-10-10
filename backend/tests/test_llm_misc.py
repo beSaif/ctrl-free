@@ -317,7 +317,7 @@ def test_read_demo_replies(offline, examples, demo_replies):
     ps, m = examples
     open_ids = {"LV0006", "LV0010", "LV0011", "LV0007", "LV0012", "LV0018"}
     openp = [p for p in ps if p["lv_id"] in open_ids]
-    sil, vav = demo_replies
+    sil, vav = demo_replies[:2]
     props = {p["lv_id"]: p for p in quotes.read_supplier_reply(sil.read_bytes(), sil.name, openp, use_llm=False, matches=m)}
     assert {k: v["unit_price"] for k, v in props.items()} == {"LV0006": 2480.0, "LV0010": 5150.0, "LV0011": 3720.0}
     assert props["LV0010"]["source"] == "supplier_reply_silencers.pdf p.1 pos 2"

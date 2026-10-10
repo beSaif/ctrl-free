@@ -10,6 +10,7 @@ import { fmt0, fmtDateTime, fmtDaysLeft, shortTrade } from '../lib/format'
 import { isOpen } from '../lib/lines'
 import { AssistProvider } from '../assist/AssistContext'
 import { AssistPill, AssistLayer } from '../assist/AssistLayer'
+import { THEMES, setTheme, useTheme } from '../theme'
 
 export function LangToggle() {
   const lang = useLang()
@@ -34,6 +35,49 @@ export function LangToggle() {
         </span>
       ))}
     </div>
+  )
+}
+
+/** ctrl-free's own look or the Equans brand style; nothing else changes. */
+export function ThemeToggle() {
+  const theme = useTheme()
+  const t = useT()
+  return (
+    <div role="group" aria-label={t('Style')} className="inline-flex text-[13px] text-muted gap-0.5">
+      {THEMES.map((x, i) => (
+        <span key={x.id} className="inline-flex">
+          {i > 0 && (
+            <span aria-hidden="true" className="self-center">
+              |
+            </span>
+          )}
+          <button
+            type="button"
+            aria-pressed={theme === x.id}
+            onClick={() => setTheme(x.id)}
+            className={cx('min-h-8 px-1.5 border-0 bg-transparent', theme === x.id ? 'text-ink font-semibold' : 'text-muted hover:text-ink')}
+          >
+            {x.label}
+          </button>
+        </span>
+      ))}
+    </div>
+  )
+}
+
+/** The product name; in the Equans style the Equans logo comes first. */
+function Brand({ className }: { className?: string }) {
+  const theme = useTheme()
+  return (
+    <Link to="/" className={cx('inline-flex items-center gap-2.5 font-semibold text-[15px] text-ink! no-underline whitespace-nowrap', className)}>
+      {theme === 'equans' && (
+        <>
+          <img src="/brand/equans-logo-on-dark.png" alt="Equans" className="h-[22px] w-auto" />
+          <span aria-hidden="true" className="self-stretch w-px bg-rule" />
+        </>
+      )}
+      ctrl-free
+    </Link>
   )
 }
 
@@ -110,7 +154,7 @@ export function PersonMenu() {
         <div
           ref={pop}
           role="dialog"
-          aria-label={t('Person and language')}
+          aria-label={t('Person, language and style')}
           className="absolute right-0 top-full mt-1 z-40 w-[300px] bg-white border border-ink flex flex-col text-[13px] text-ink"
         >
           {!!people?.length && (
@@ -128,6 +172,10 @@ export function PersonMenu() {
           <div className="flex items-center justify-between gap-3 px-3.5 py-1.5">
             <span className="text-muted">{t('Language')}</span>
             <LangToggle />
+          </div>
+          <div className="flex items-center justify-between gap-3 px-3.5 py-1.5 border-t border-rule">
+            <span className="text-muted">{t('Style')}</span>
+            <ThemeToggle />
           </div>
           {mode === 'mock' && (
             <div className="flex flex-col gap-1 px-3.5 py-2.5 border-t border-rule">
@@ -154,10 +202,8 @@ export function AppLayout() {
   const loc = useLocation()
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="flex flex-wrap items-center gap-x-7 gap-y-3 px-6 border-b border-rule">
-        <Link to="/" className="font-semibold text-[15px] text-ink! no-underline py-3.5">
-          ctrl-free
-        </Link>
+      <header className="cf-header flex flex-wrap items-center gap-x-7 gap-y-3 px-6 border-b border-rule">
+        <Brand className="py-3.5" />
         <nav aria-label={t('Main')} className="flex gap-1 flex-auto">
           {mainNav.map((n) => {
             const on = n.end ? loc.pathname === '/' || loc.pathname === '/new' : loc.pathname.startsWith(n.to)
@@ -228,12 +274,10 @@ function TenderShell({ id }: { id: string }) {
   const trade = shortTrade(tender?.trade ?? '')
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-rule">
+      <header className="cf-header border-b border-rule">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-6 pt-3">
           <div className="flex items-baseline gap-x-3.5 flex-[1_1_380px] min-w-0">
-            <Link to="/" className="font-semibold text-[15px] text-ink! no-underline whitespace-nowrap">
-              ctrl-free
-            </Link>
+            <Brand className="self-center" />
             <nav aria-label={t('Breadcrumb')} className="text-[14px] text-muted min-w-0 truncate" title={tender ? `${tender.name} · ${trade}` : undefined}>
               <Link to="/" className="text-muted!">
                 {t('Tenders')}

@@ -2,8 +2,9 @@
 
     group_for_quotes(positions, matches=None, catalog=None, instructions=None) -> [{id, title, title_de, lv_ids, rule, rule_ref, ...}]
     draft_request(tender_meta, group, positions, instructions=None) -> {subject, body_de}
-    read_supplier_reply(file_bytes_or_text, filename, positions, use_llm=None) -> [{lv_id, unit_price, quoted_text, source, confidence, ...}]
-    make_demo_replies(out_dir=None) -> [Path]      (writes the two demo supplier PDFs)
+    read_supplier_reply(file_bytes_or_text, filename, positions, use_llm=None) -> [{lv_id, unit_price, quoted_text, source, supplier, notes, ...}]
+    supplier_of(file, filename, pages=None, use_llm=None) -> str   (who sent the reply)
+    make_demo_replies(out_dir=None) -> [Path]      (writes the demo supplier PDFs, two of them compete)
 
 The email is a deterministic template (no LLM). Reading a reply: rules first (LV ids, sizes and
 quantities in the reply lines; unit price = the price that times the quantity gives the line total),
@@ -15,6 +16,7 @@ from __future__ import annotations
 import datetime as dt
 import email
 import email.policy
+import email.utils
 import json
 import re
 from pathlib import Path
@@ -445,9 +447,117 @@ def _llm_map(pages: list[tuple[int, str]], positions: list[dict], matches: dict 
     return out
 
 
+# --------------------------------------------------------------------------- who sent the reply
+
+COMPANY_RX = re.compile(r"[A-ZÄÖÜ][\w&.'’\-]*(?:[ \t]+[\w&.'’\-]+){0,5}?[ \t]+(?:AG|GmbH|SA|Sàrl|S\.A\.|Ltd\.?|KG|SE)\b")
+FROM_RX = re.compile(r"^\s*(?:From|Von|Absender|De)\s*:\s*(.+)$", re.I | re.M)
+OWN_COMPANY = re.compile(r"equans", re.I)
+
+
+def _clean_name(s: str | None) -> str | None:
+    s = norm_ws((s or "").strip().strip("\"'<>«»"))
+    s = re.sub(r"^(?:Freundliche|Mit freundlichen|Beste|Liebe)\s+Gr(?:ü|ue)sse?\s*,?\s*", "", s, flags=re.I).strip(" ,")
+    if not s or len(s) > 80 or not re.search(r"[A-Za-zÄÖÜäöü]{2}", s) or OWN_COMPANY.search(s):
+        return None
+    return s
+
+
+def _company_in(text: str) -> str | None:
+    """A company name with its legal form (AG, GmbH ...) in the letterhead or the signature of a text reply."""
+    lines = [l for l in text.splitlines() if l.strip()]
+    for l in lines[:6] + lines[-15:][::-1]:
+        m = COMPANY_RX.search(l)
+        if m and (n := _clean_name(m.group(0))):
+            return n
+    return None
+
+
+def _from_header(value: str | None) -> str | None:
+    """'DemoAcoustic AG <offerten@demoacoustic.example>' -> 'DemoAcoustic AG'; a bare address -> its domain."""
+    if not value:
+        return None
+    name, addr = email.utils.parseaddr(value)
+    if n := _clean_name(name):
+        return n
+    dom = addr.split("@")[-1].split(".")[0] if "@" in addr else ""
+    return _clean_name(dom[:1].upper() + dom[1:]) if dom else None
+
+
+def _pdf_letterhead(b: bytes) -> str | None:
+    """The supplier's name on its letterhead: the largest (then bold) text in the top third of page 1."""
+    import pymupdf
+
+    try:
+        doc = pymupdf.open(stream=b, filetype="pdf")
+        page = doc[0]
+    except Exception:
+        return None
+    best = None
+    for block in page.get_text("dict").get("blocks", []):
+        for line in block.get("lines", []):
+            text = norm_ws("".join(sp.get("text", "") for sp in line.get("spans", [])))
+            spans = line.get("spans") or []
+            if not text or not spans or line["bbox"][1] > page.rect.height / 3:
+                continue
+            size = max(sp.get("size", 0) for sp in spans)
+            bold = any("bold" in (sp.get("font") or "").lower() or (sp.get("flags", 0) & 16) for sp in spans)
+            key = (round(size, 1), bold, -line["bbox"][1])
+            if _clean_name(text) and not re.search(r"\b(Angebot|Offerte|Datum|Seite)\b", text, re.I) and (best is None or key > best[0]):
+                best = (key, text)
+    return _clean_name(best[1]) if best else None
+
+
+def _llm_supplier(pages: list[tuple[int, str]]) -> str | None:
+    text = "\n".join(t for _, t in pages)[:4000]
+    schema = {"type": "object", "properties": {"supplier": {"type": "string"}}, "required": ["supplier"],
+              "additionalProperties": False}
+    res = llm.call_json("You read a supplier's offer or e-mail. Return the name of the company that sends the offer "
+                        "exactly as written in the text (not the customer Equans). Empty string if it is not named.",
+                        text, schema, name="reply_supplier", temperature=0)
+    name = _clean_name(res.get("supplier"))
+    return name if name and verbatim_in(name, text) else None
+
+
+def _stem(filename: str) -> str:
+    st = re.sub(r"[_\-]+", " ", Path(filename or "").stem).strip()
+    return st or (filename or "Supplier")
+
+
+def supplier_of(file, filename: str = "", pages: list[tuple[int, str]] | None = None,
+                use_llm: bool | None = None) -> str:
+    """Who sent the reply: e-mail sender (company in the signature, else the From name) for .eml/.msg and pasted
+    text; the letterhead for a PDF; then the LLM (if available); else the file name."""
+    if isinstance(file, (str, Path)) and Path(str(file)).exists() and len(str(file)) < 1024:
+        file = Path(file).read_bytes()
+    b = bytes(file) if isinstance(file, (bytes, bytearray)) else str(file or "").encode("utf-8")
+    pages = pages if pages is not None else extract_reply_pages(b, filename)
+    text = "\n".join(t for _, t in pages)
+    name = None
+    if b[:5] == b"%PDF-":
+        name = _pdf_letterhead(b)
+    else:
+        sender = None
+        if filename.lower().endswith(".eml") or b[:200].lower().find(b"subject:") >= 0:
+            msg = email.message_from_bytes(b, policy=email.policy.default)
+            sender = msg.get("from")
+        if not sender:
+            m = FROM_RX.search(b.decode("utf-8", errors="replace"))
+            sender = m.group(1) if m else None
+        name = _company_in(text) or _from_header(sender)
+    if not name and use_llm is not False:
+        try:
+            name = _llm_supplier(pages)
+        except (llm.LLMUnavailable, llm.LLMError):
+            pass
+    return name or _stem(filename)
+
+
 def read_supplier_reply(file, filename: str, positions: list[dict], use_llm: bool | None = None,
                         matches: dict | None = None) -> list[dict]:
-    """Proposals only (never applied here). `positions` = the open supplier-quote lines to map to."""
+    """Proposals only (never applied here). `positions` = the supplier-quote lines to map to (quoted ones
+    included, so a second supplier's reply competes with the first). Each item carries the `supplier`."""
+    if isinstance(file, (str, Path)) and Path(str(file)).exists() and len(str(file)) < 1024:
+        file = Path(file).read_bytes()
     pages = extract_reply_pages(file, filename)
     rows = _reply_rows(pages)
     found = {}
@@ -465,11 +575,13 @@ def read_supplier_reply(file, filename: str, positions: list[dict], use_llm: boo
     for _, t in pages:
         notes += [norm_ws(m.group(0)) for m in META_RX.finditer(t)]
     by_order = {p["lv_id"]: i for i, p in enumerate(positions)}
+    supplier = supplier_of(file, filename, pages, use_llm=use_llm) if found else None
     out = []
     for lv, pr in sorted(found.items(), key=lambda kv: by_order.get(kv[0], 0)):
         pos = f" pos {pr['pos']}" if pr.get("pos") else ""
         pr["source"] = f"{filename} p.{pr['page']}{pos}"
         pr["notes"] = notes[:4]
+        pr["supplier"] = supplier
         out.append(pr)
     return out
 
@@ -536,7 +648,8 @@ def _offer_pdf(path: Path, supplier: list[str], offer_no: str, date: str, ref: s
 
 
 def make_demo_replies(out_dir: Path | None = None) -> list[Path]:
-    """Two fictional supplier offers for the demo (silencers, air volume controllers)."""
+    """Fictional supplier offers for the demo: silencers, air volume controllers, and a second silencer
+    offer from a competitor (one line cheaper, one dearer, one not offered) to compare suppliers."""
     out_dir = Path(out_dir or DEMO_DIR)
     out_dir.mkdir(parents=True, exist_ok=True)
     p1 = out_dir / "supplier_reply_silencers.pdf"
@@ -565,4 +678,18 @@ def make_demo_replies(out_dir: Path | None = None) -> list[Path]:
                 "Lieferfrist: ca. 6 Wochen.",
                 "Angebot gültig bis 31.12.2026.",
                 "Mit freundlichen Grüssen, DemoControl GmbH"])
-    return [p1, p2]
+    p3 = out_dir / "supplier_reply_silencers_competitor.pdf"
+    _offer_pdf(p3, ["Akustik Demo Partner AG", "Bahnhofstrasse 40, 8400 Winterthur",
+                    "Tel. 052 000 00 00 · angebote@akustikdemo.example"],
+               "ADP-26-112", "11.09.2026",
+               "Ihre Preisanfrage Schalldämpfer, Primarschule Erlenstrasse, Oberglatt (BKP 244)",
+               [("1.1", "Rechteckschalldämpfer 400 x 300 x 1250 mm", "4 Stk", "2'390.00", "9'560.00",
+                 ["Kulissen 100 mm, Mineralwolle kaschiert, A1"]),
+                ("1.2", "Rechteckschalldämpfer 600 x 600 x 1750 mm", "4 Stk", "5'480.00", "21'920.00",
+                 ["2 Kulissen 200 mm, inkl. Revisionsöffnung"])],
+               ["Position 540 x 400 x 1250 mm können wir nicht anbieten.",
+                "Preise netto, exkl. MWST, ab Werk Winterthur.",
+                "Lieferzeit: 6-8 Wochen.",
+                "Gültigkeit: 30 Tage.",
+                "Freundliche Grüsse, Akustik Demo Partner AG"])
+    return [p1, p2, p3]

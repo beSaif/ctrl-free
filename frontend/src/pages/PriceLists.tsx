@@ -22,6 +22,7 @@ import {
 } from '../api/priceLists'
 import { Button, Dialog, ErrorBox, Field, FilterTabs, IconFile, IconUpload, Loading, Marker, Td, TextInput, Th } from '../components/ui'
 import { cx } from '../lib/cx'
+import { TABLE_ACCEPT } from '../lib/files'
 import { fmt2, fmtDate, fmtSigned, fmtUnit } from '../lib/format'
 import { C } from '../lib/lines'
 import { Source } from '../components/Source'
@@ -290,7 +291,7 @@ export function PriceLists() {
       {!lists.length && (
         <div className="flex flex-col gap-2 mt-4 px-4 py-4 border border-dashed border-stone">
           <span className="font-medium">{t('No price lists yet: every line uses the standard catalogue.')}</span>
-          <span className="text-[13px] text-muted">{t("Import a supplier's price list or Equans' negotiated prices as CSV or XLSX. Headers in German or English are recognised.")}</span>
+          <span className="text-[13px] text-muted">{t("Import a supplier's price list or Equans' negotiated prices as Excel, CSV, ODS, JSON or PDF. Headers in German or English are recognised.")}</span>
           <DemoButtons files={data.demo_files} onPick={(name) => setImporting({ demo: name })} t={t} />
         </div>
       )}
@@ -563,11 +564,11 @@ function ImportDialog({
               <IconUpload />
               <span className="flex flex-col">
                 <span className="font-medium">{t('Drop the price list here or choose a file')}</span>
-                <span className="text-[13px] text-muted">{t('CSV or XLSX from the supplier, or Equans’ own negotiated prices. Rows are matched to the catalogue by product id, or by manufacturer and model.')}</span>
+                <span className="text-[13px] text-muted">{t('Excel, CSV, ODS, JSON or a PDF with a table, from the supplier or Equans’ own negotiated prices. Rows are matched to the catalogue by product id, or by manufacturer and model.')}</span>
               </span>
               <input
                 type="file"
-                accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                accept={TABLE_ACCEPT}
                 className="sr-only"
                 onChange={(e) => {
                   const f = e.target.files?.[0]

@@ -1,8 +1,10 @@
 """Reference data: product catalogue, install rules and project parameters.
 
 Loaded from ``app.config.REFERENCE_DIR`` (catalog.csv, productivity.csv,
-project_parameters.json) and cached. ``import_reference`` validates a new file,
-archives the current one under ``history/`` and replaces it.
+project_parameters.json) and cached. ``import_reference`` reads a new catalogue or
+rule table in any format app.tables reads (Excel, ODS, CSV, JSON, PDF) with German or English
+headers, normalises it to the stored CSV columns, validates it, archives the current file and
+the original upload under ``history/`` and replaces it.
 """
 from __future__ import annotations
 
@@ -10,12 +12,14 @@ import copy
 import csv
 import io
 import json
+import re
 import shutil
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 
-from app import config
+from app import config, tables
+from app.units import normalize_unit
 
 REFERENCE_DIR: Path = config.REFERENCE_DIR
 
@@ -61,6 +65,63 @@ CATALOG_REQUIRED = ["product_id", "category", "description", "unit", "net_cost_c
                     "source_type", "supplier_quote_required"]
 RULES_REQUIRED = ["install_code", "work_type", "unit", "base_hours_per_unit", "labour_role",
                   "default_hourly_rate_chf", "factor_keys"]
+# Column order of the stored catalog.csv / productivity.csv. An import in any format and with any
+# headers (German or English) is normalised to these columns before it is validated and saved.
+CATALOG_COLUMNS = ["product_id", "category", "subcategory", "manufacturer", "model", "description", "unit",
+                   "list_price_chf", "discount_pct", "net_cost_chf", "install_code", "source_type",
+                   "supplier_quote_required"]
+RULES_COLUMNS = RULES_REQUIRED
+# Filled in when the column is missing (a supplier's own catalogue export has neither).
+COLUMN_DEFAULTS = {"catalog": {"source_type": "catalog", "supplier_quote_required": "false"}, "rules": {}}
+NUMERIC_COLUMNS = {"list_price_chf", "discount_pct", "net_cost_chf", "base_hours_per_unit", "default_hourly_rate_chf"}
+# Headers we recognise per column, compared folded (lower case, umlauts folded, no spaces or punctuation),
+# exact first, then as the start of a header ("Nettopreis CHF/Stk").
+HEADER_ALIASES = {
+    "catalog": {
+        "product_id": ["productid", "produktid", "artikelnummer", "artikelnr", "artnr", "articleno", "articlenumber",
+                       "articlenr", "articleid", "itemno", "itemnumber", "itemid", "sku", "produktnummer",
+                       "productnumber", "productno", "produktnr", "equansnr", "equansid", "katalognr", "id", "nr",
+                       "nummer", "artikel", "product", "produkt"],
+        "category": ["category", "kategorie", "warengruppe", "produktgruppe", "productgroup", "hauptgruppe",
+                     "gruppe", "group", "sparte"],
+        "subcategory": ["subcategory", "unterkategorie", "untergruppe", "subgroup", "produktart", "art"],
+        "manufacturer": ["manufacturer", "hersteller", "make", "marke", "brand", "fabrikat"],
+        "model": ["model", "modell", "typ", "type", "typenbezeichnung", "typbezeichnung", "modelnr"],
+        "description": ["description", "bezeichnung", "beschreibung", "artikelbezeichnung", "produktbezeichnung",
+                        "kurztext", "langtext", "text", "name", "benennung"],
+        "unit": ["unit", "einheit", "me", "mengeneinheit", "uom", "masseinheit", "eh", "vpe"],
+        "list_price_chf": ["listpricechf", "listprice", "listenpreis", "listenpreischf", "bruttopreis", "brutto",
+                           "bruttopreischf", "grossprice", "katalogpreis", "preisbrutto"],
+        "discount_pct": ["discountpct", "discount", "rabatt", "rabattprozent", "rabattsatz"],
+        "net_cost_chf": ["netcostchf", "netcost", "netto", "nettopreis", "nettopreischf", "nettochf", "netprice",
+                         "netpricechf", "net", "preisnetto", "einkaufspreis", "ekpreis", "ek", "preis", "price",
+                         "unitprice", "kosten", "cost", "einheitspreis"],
+        "install_code": ["installcode", "montagecode", "montageregel", "montageart", "montage", "installrule",
+                         "installationcode", "installation", "einbaucode"],
+        "source_type": ["sourcetype", "quelle", "herkunft", "source", "preisquelle", "pricesource"],
+        "supplier_quote_required": ["supplierquoterequired", "quoterequired", "offerteerforderlich",
+                                    "offertenoetig", "offertepflichtig", "lieferantenofferte", "anfrageerforderlich",
+                                    "anfragenoetig", "lieferantenanfrage", "angebotnoetig"],
+    },
+    "rules": {
+        "install_code": ["installcode", "montagecode", "montageregel", "code", "regel", "rule", "einbaucode"],
+        "work_type": ["worktype", "work", "arbeit", "arbeitsart", "taetigkeit", "leistung", "bezeichnung",
+                      "beschreibung", "description"],
+        "unit": ["unit", "einheit", "me", "mengeneinheit", "uom"],
+        "base_hours_per_unit": ["basehoursperunit", "hoursperunit", "stundenproeinheit", "stdproeinheit", "stdme",
+                                "hme", "hproeinheit", "montagezeit", "zeitwert", "stunden", "std", "hours"],
+        "labour_role": ["labourrole", "laborrole", "role", "rolle", "funktion", "qualifikation", "monteur"],
+        "default_hourly_rate_chf": ["defaulthourlyratechf", "hourlyratechf", "hourlyrate", "rate", "stundenansatz",
+                                    "stundenansatzchf", "stundensatz", "stundensatzchf", "ansatz", "ansatzchf"],
+        "factor_keys": ["factorkeys", "factors", "sitefactors", "faktoren", "standortfaktoren", "baustellenfaktoren"],
+    },
+}
+SOURCE_TYPE_VALUES = {"catalog": "catalog", "catalogue": "catalog", "katalog": "catalog", "standard": "catalog",
+                      "supplierpackage": "supplier_package", "supplier": "supplier_package",
+                      "lieferant": "supplier_package", "lieferantenpaket": "supplier_package",
+                      "package": "supplier_package", "paket": "supplier_package", "budget": "supplier_package"}
+KIND_WORDS = {"catalog": ("Catalogue", "catalogue"), "rules": ("Install rules", "install rules")}
+
 PARAMS_REQUIRED = {
     "productivity_factors": ["site_efficiency"],
     "allowances": ["material_waste_pct", "small_material_pct", "transport_equipment_pct",
@@ -83,7 +144,7 @@ def _path(kind: str) -> Path:
 
 
 def _to_bool(v) -> bool:
-    return str(v).strip().lower() in ("true", "1", "yes", "y", "ja")
+    return str(v).strip().lower() in ("true", "1", "yes", "y", "ja", "j", "x", "wahr")
 
 
 def _to_float(v, field: str, row_id: str) -> float:
@@ -95,13 +156,15 @@ def _to_float(v, field: str, row_id: str) -> float:
 
 # ---------------------------------------------------------------- parsing
 
-def _parse_catalog(text: str) -> dict[str, dict]:
+def _parse_catalog(text: str, lines: list[int] | None = None) -> dict[str, dict]:
+    """``lines``: the row numbers in the uploaded file, for the messages (default: the CSV's own)."""
     reader = csv.DictReader(io.StringIO(text))
     missing = [c for c in CATALOG_REQUIRED if c not in (reader.fieldnames or [])]
     if missing:
         raise ValueError(f"Catalogue is missing columns: {', '.join(missing)}")
     out: dict[str, dict] = {}
-    for i, raw in enumerate(reader, start=2):
+    for k, raw in enumerate(reader):
+        i = lines[k] if lines and k < len(lines) else k + 2
         pid = (raw.get("product_id") or "").strip()
         if not pid:
             raise ValueError(f"Row {i}: product_id is empty")
@@ -123,13 +186,14 @@ def _parse_catalog(text: str) -> dict[str, dict]:
     return out
 
 
-def _parse_rules(text: str, factor_keys: set[str] | None = None) -> dict[str, dict]:
+def _parse_rules(text: str, factor_keys: set[str] | None = None, lines: list[int] | None = None) -> dict[str, dict]:
     reader = csv.DictReader(io.StringIO(text))
     missing = [c for c in RULES_REQUIRED if c not in (reader.fieldnames or [])]
     if missing:
         raise ValueError(f"Install rules are missing columns: {', '.join(missing)}")
     out: dict[str, dict] = {}
-    for i, raw in enumerate(reader, start=2):
+    for k, raw in enumerate(reader):
+        i = lines[k] if lines and k < len(lines) else k + 2
         code = (raw.get("install_code") or "").strip()
         if not code:
             raise ValueError(f"Row {i}: install_code is empty")
@@ -166,6 +230,128 @@ def _parse_parameters(text: str) -> dict:
         if not isinstance(v, (int, float)) or v <= 0:
             raise ValueError(f"Parameters: factor '{k}' must be a positive number")
     return params
+
+
+# ---------------------------------------------------------------- any table -> canonical CSV
+
+_NO_PREFIX = {"product", "produkt", "artikel", "montage", "installation"}  # too general to match a header start
+
+
+def _column_for(kind: str, header, exact_only: bool) -> str | None:
+    h = tables.fold(header)
+    if not h:
+        return None
+    aliases = HEADER_ALIASES[kind]
+    for col, names in aliases.items():
+        if h == tables.fold(col) or h in names:
+            return col
+    if exact_only:
+        return None
+    best = None
+    for col, names in aliases.items():
+        for a in names:
+            if len(a) >= 4 and a not in _NO_PREFIX and h.startswith(a) and (best is None or len(a) > best[1]):
+                best = (col, len(a))
+    return best[0] if best else None
+
+
+def _map_columns(kind: str, headers: list) -> dict[str, int]:
+    """{canonical column: index in the row}, exact header matches first, then header starts."""
+    out: dict[str, int] = {}
+    for exact in (True, False):
+        for j, h in enumerate(headers):
+            if j in out.values():
+                continue
+            col = _column_for(kind, h, exact)
+            if col and col not in out:
+                out[col] = j
+    return out
+
+
+def _header_row(kind: str, rows: list[list]) -> tuple[int, int]:
+    """(index, recognised columns) of the header row among the first 20 rows (title lines may come first)."""
+    best = (0, -1)
+    for i, r in enumerate(rows[:20]):
+        n = len(_map_columns(kind, [c if isinstance(c, str) else "" for c in r]))
+        if n > best[1]:
+            best = (i, n)
+    if best[1] < 2:  # nothing recognisable: the first non-empty row is the header
+        i = next((i for i, r in enumerate(rows) if any(tables.cell_text(c) for c in r)), 0)
+        return i, max(best[1], 0)
+    return best
+
+
+def _fmt_number(x: float) -> str:
+    return str(int(x)) if float(x).is_integer() else repr(round(float(x), 6))
+
+
+def _cell_out(col: str, v) -> str:
+    if col in NUMERIC_COLUMNS:
+        if isinstance(v, str) and re.fullmatch(r"\s*-?\d+(\.\d+)?\s*", v):
+            return v.strip()                            # already plain: keep it as written
+        n = tables.num(v)
+        return _fmt_number(n) if n is not None else tables.cell_text(v)
+    if col == "supplier_quote_required":
+        return "true" if v is True or _to_bool(tables.cell_text(v)) else "false"
+    text = tables.cell_text(v)
+    if col == "unit":
+        return normalize_unit(text) or text
+    if col == "source_type":
+        return SOURCE_TYPE_VALUES.get(tables.fold(text), text) if text else "catalog"
+    if col == "factor_keys":
+        return "|".join(k for k in re.split(r"[|,;/\s]+", text) if k)
+    return text
+
+
+def to_canonical_csv(kind: str, data: bytes, filename: str | None = None) -> dict:
+    """Read a catalogue / install-rules table in any format (app.tables) with German or English headers
+    and write it as the CSV the validators and catalog.csv / productivity.csv use.
+
+    Returns {text, lines (row numbers in the upload), format, ignored (headers not used), defaulted}."""
+    label, word = KIND_WORDS[kind]
+    rows, fmt = tables.read_table_fmt(data, filename, score=lambda t: _header_row(kind, t)[1], what=word)
+    if not rows:
+        raise ValueError(f"{label} file is empty")
+    hi, _ = _header_row(kind, rows)
+    headers = [tables.cell_text(c) for c in rows[hi]]
+    cols = _map_columns(kind, headers)
+    required = CATALOG_REQUIRED if kind == "catalog" else RULES_REQUIRED
+    defaults = COLUMN_DEFAULTS[kind]
+    missing = [c for c in required if c not in cols and c not in defaults]
+    if missing:
+        found = ", ".join(f"'{h}'" for h in headers if h) or "none"
+        raise ValueError(f"{label} {'is' if kind == 'catalog' else 'are'} missing columns: {', '.join(missing)}. "
+                         f"Headers found: {found}")
+    defaulted = [c for c in defaults if c not in cols]
+    columns = [c for c in (CATALOG_COLUMNS if kind == "catalog" else RULES_COLUMNS) if c in cols or c in required]
+    key = required[0]                                   # product_id | install_code
+    amount = "net_cost_chf" if kind == "catalog" else "base_hours_per_unit"
+    header_key = [tables.fold(h) for h in headers]
+    buf = io.StringIO()
+    w = csv.writer(buf, lineterminator="\n")
+    w.writerow(columns)
+    lines: list[int] = []
+    for n, r in enumerate(rows[hi + 1:], start=hi + 2):
+        if not any(tables.cell_text(c) for c in r):
+            continue
+        if [tables.fold(c) for c in r[:len(headers)]] == header_key:   # header repeated (page breaks)
+            continue
+
+        def cell(col):
+            j = cols.get(col)
+            return r[j] if j is not None and j < len(r) else None
+        filled = sum(1 for c in r if tables.cell_text(c))
+        if not tables.cell_text(cell(amount)) and (filled == 1 or not tables.cell_text(cell(key))):
+            continue                                    # a section heading or a note between the rows
+        if not tables.cell_text(cell(key)):
+            raise ValueError(f"Row {n}: {key} is empty")
+        w.writerow([_cell_out(c, cell(c)) if c in cols else defaults.get(c, "") for c in columns])
+        lines.append(n)
+        if len(lines) > tables.MAX_ROWS:
+            raise ValueError(f"{label} has more than {tables.MAX_ROWS} rows")
+    used = set(cols.values())
+    ignored = [h for j, h in enumerate(headers) if h and j not in used]
+    return {"text": buf.getvalue(), "lines": lines, "format": fmt, "ignored": ignored, "defaulted": defaulted}
 
 
 # ---------------------------------------------------------------- cached loaders
@@ -341,38 +527,55 @@ def reference_versions() -> list[dict]:
         return []
 
 
-def import_reference(kind: str, data: bytes, by: str = "You") -> dict:
+def _safe_name(name: str) -> str:
+    stem = Path(name or "upload").name
+    return re.sub(r"[^A-Za-z0-9._-]+", "_", stem).strip("._") or "upload"
+
+
+def import_reference(kind: str, data: bytes, by: str = "You", filename: str | None = None) -> dict:
     """Validate and save a new version of catalog | rules | parameters.
 
-    The current file is archived to ``REFERENCE_DIR/history/`` and the change is
-    appended to ``versions.json``. Raises ``ValueError`` with a plain message when
-    the file is not usable (nothing is written in that case).
+    Catalogue and install rules can come as CSV/TSV, Excel (.xlsx/.xls), .ods, JSON or a PDF with a
+    table, with German or English headers (app.tables, ``to_canonical_csv``); they are stored as
+    catalog.csv / productivity.csv as before. The current file is archived to ``REFERENCE_DIR/history/``
+    together with the original upload, and the change is appended to ``versions.json``. Raises
+    ``ValueError`` with a plain message when the file is not usable (nothing is written in that case).
     """
     k = KIND_ALIASES.get((kind or "").lower())
     if not k:
         raise ValueError(f"Unknown reference kind '{kind}'. Use catalog, rules or parameters.")
-    try:
-        text = data.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        raise ValueError("File must be UTF-8 text") from None
 
+    extra: dict = {}
     if k == "catalog":
-        parsed = _parse_catalog(text)
+        conv = to_canonical_csv("catalog", data, filename)
+        text = conv["text"]
+        parsed = _parse_catalog(text, conv["lines"])
         rules = load_rules()
         unknown = sorted({r["install_code"] for r in parsed.values() if r["install_code"] and r["install_code"] not in rules})
         if unknown:
             raise ValueError(f"Catalogue uses install rules that do not exist: {', '.join(unknown)}")
         rows = len(parsed)
     elif k == "rules":
-        parsed = _parse_rules(text, set(load_parameters()["productivity_factors"]))
+        conv = to_canonical_csv("rules", data, filename)
+        text = conv["text"]
+        parsed = _parse_rules(text, set(load_parameters()["productivity_factors"]), conv["lines"])
         rows = len(parsed)
     else:
+        try:
+            text = data.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            raise ValueError("File must be UTF-8 text") from None
+        conv = {"format": "json", "ignored": [], "defaulted": []}
         parsed = _parse_parameters(text)
         used = {f for r in load_rules().values() for f in r["factor_keys"]}
         missing = sorted(used - set(parsed["productivity_factors"]))
         if missing:
             raise ValueError(f"Parameters are missing site factors used by install rules: {', '.join(missing)}")
         rows = sum(len(v) for v in parsed.values() if isinstance(v, dict))
+    if conv["ignored"]:
+        extra["ignored_columns"] = conv["ignored"]
+    if conv["defaulted"]:
+        extra["defaulted_columns"] = conv["defaulted"]
 
     now = datetime.now()
     target = _path(k)
@@ -382,13 +585,17 @@ def import_reference(kind: str, data: bytes, by: str = "You") -> dict:
     if target.exists():
         archived = hist / f"{target.stem}_{now:%Y%m%d-%H%M%S}{target.suffix}"
         shutil.copy2(target, archived)
+    original = filename or FILES[k]
+    upload = hist / f"{target.stem}_{now:%Y%m%d-%H%M%S}_upload_{_safe_name(original)}"
+    upload.write_bytes(data)
     target.write_text(text, encoding="utf-8")
 
     versions = reference_versions()
     entry = {"kind": k, "file": target.name, "rows": rows, "version": sum(1 for v in versions if v["kind"] == k) + 2,
              "saved_at": now.isoformat(timespec="seconds"), "by": by,
-             "previous": archived.name if archived else None}
+             "previous": archived.name if archived else None,
+             "original_name": original, "format": conv["format"], "upload": upload.name, **extra}
     versions.append(entry)
-    _versions_file().write_text(json.dumps(versions, indent=1), encoding="utf-8")
+    _versions_file().write_text(json.dumps(versions, indent=1, ensure_ascii=False), encoding="utf-8")
     clear_cache()
     return entry

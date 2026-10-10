@@ -1,0 +1,21 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "assist_command",
+ "created": "2026-10-10T18:17:12",
+ "api": "responses",
+ "input_tokens": 668,
+ "output_tokens": 206,
+ "response": {
+  "intent": "set_status",
+  "lv_ids": [
+   "LV0016"
+  ],
+  "product_id": null,
+  "quantity": null,
+  "status": "confirmed",
+  "field": null,
+  "condition": "at_or_below_budget",
+  "confirm": false,
+  "reply": "Bevestig de lijnen met een offerte op of onder budget."
+ }
+}

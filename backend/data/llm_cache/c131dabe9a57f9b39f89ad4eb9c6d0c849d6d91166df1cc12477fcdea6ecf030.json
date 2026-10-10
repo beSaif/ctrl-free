@@ -1,0 +1,70 @@
+{
+ "model": "gpt-5.4-mini",
+ "name": "pick_products",
+ "created": "2026-10-10T16:29:34",
+ "api": "responses",
+ "input_tokens": 6446,
+ "output_tokens": 565,
+ "response": {
+  "LV0027": {
+   "product_id": "P-FTG-B-160-90",
+   "confidence": "high",
+   "reason": "Circular bend 90° with DN160 matches the tender size 160",
+   "assumptions": []
+  },
+  "LV0028": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender asks for circular galvanized duct, but all candidates are circular bends",
+   "assumptions": []
+  },
+  "LV0029": {
+   "product_id": "P-FTG-B-160-90",
+   "confidence": "high",
+   "reason": "Circular bend 90° with DN160 matches the tender size 160",
+   "assumptions": []
+  },
+  "LV0030": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender asks for circular galvanized duct, but all candidates are circular bends",
+   "assumptions": []
+  },
+  "LV0031": {
+   "product_id": "P-FTG-B-160-90",
+   "confidence": "high",
+   "reason": "Circular bend 90° with DN160 matches the tender size 160",
+   "assumptions": []
+  },
+  "LV0032": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender asks for circular galvanized duct, but all candidates are circular bends",
+   "assumptions": []
+  },
+  "LV0033": {
+   "product_id": "P-FTG-B-160-90",
+   "confidence": "high",
+   "reason": "Exhaust circular bend 90° with DN160 matches the tender size 160",
+   "assumptions": []
+  },
+  "LV0034": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender asks for circular galvanized duct, but all candidates are circular bends",
+   "assumptions": []
+  },
+  "LV0035": {
+   "product_id": "P-FTG-B-160-90",
+   "confidence": "high",
+   "reason": "Circular bend 90° with DN160 matches the tender size 160",
+   "assumptions": []
+  },
+  "LV0036": {
+   "product_id": "none",
+   "confidence": "high",
+   "reason": "Tender asks for circular galvanized duct, but all candidates are circular bends",
+   "assumptions": []
+  }
+ }
+}

@@ -4,6 +4,8 @@ export const DE_SHELL: Record<string, string> = {
   Language: 'Sprache',
   Demo: 'Demo',
   'Person and language': 'Person und Sprache',
+  'Person, language and style': 'Person, Sprache und Darstellung',
+  Style: 'Darstellung',
   'Working as {name} · {role}': 'Angemeldet als {name} · {role}',
   'Reset the demo data': 'Demodaten zurücksetzen',
   // Overview
