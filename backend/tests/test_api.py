@@ -245,6 +245,22 @@ def test_pricing_put_changes_offer_and_reset(client, tid):
     assert r3["totals"]["standard_price"] == std0
 
 
+def test_pricing_effects_and_reset_one_setting(client, tid):
+    g = client.get(f"/api/tenders/{tid}/pricing").json()
+    assert g["effects"] == {} and g["default_totals"]["cost"] == g["totals"]["cost"]
+    assert g["sources"]["overhead_pct"].startswith("project_parameters.json")
+    r = client.put(f"/api/tenders/{tid}/pricing",
+                   json={"overhead_pct": 10.0, "factors": {"site_efficiency": 0.8}}).json()
+    assert set(r["effects"]) == {"overhead_pct", "factors.site_efficiency"}
+    assert all(v > 0 for v in r["effects"].values())
+    assert r["default_totals"]["cost"] == g["totals"]["cost"]
+    r2 = client.post(f"/api/tenders/{tid}/pricing/reset", json={"keys": ["factors.site_efficiency"]}).json()
+    assert r2["changed"] == ["overhead_pct"] and list(r2["effects"]) == ["overhead_pct"]
+    assert r2["settings"]["factors"]["site_efficiency"] == g["settings"]["factors"]["site_efficiency"]
+    assert r2["settings"]["overhead_pct"] == 10.0
+    assert client.post(f"/api/tenders/{tid}/pricing/reset", json={"keys": ["nope"]}).status_code == 400
+
+
 # ------------------------------------------------------------------ exports, submit, outcome, results
 
 

@@ -146,7 +146,7 @@ export function usePutPricing(id: string) {
 export function useResetPricing(id: string) {
   return useTenderMutation(
     id,
-    () => api.resetPricing(id),
+    (keys?: string[]) => api.resetPricing(id, keys),
     (qc, r) => {
       if (r && (r as PricingResponse).totals) qc.setQueryData(qk.pricing(id), r)
     },

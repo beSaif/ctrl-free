@@ -46,6 +46,7 @@ export default function App() {
         <Route path="instructions/:iid" element={<InstructionDetail />} />
         <Route path="pricing" element={<Pricing />} />
         <Route path="changes" element={<Changes />} />
+        <Route path="pricing/:step" element={<Pricing />} />
         <Route path="export" element={<Export />} />
         <Route path="outcome" element={<OutcomePage />} />
         <Route path="*" element={<NotFound />} />

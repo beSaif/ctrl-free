@@ -271,6 +271,45 @@ def default_settings(params: dict | None = None) -> dict:
     }
 
 
+_SETTING_SOURCES = {
+    "competition": "stretch_bid_optimization.competition_adjustment",
+    "appetite": "stretch_bid_optimization.strategic_appetite_adjustment",
+    "sensitivity": "stretch_bid_optimization.price_sensitivity_probability_points_per_1pct_price",
+    "ref_win": "stretch_bid_optimization.reference_win_probability",
+    "overhead_pct": "commercial.overhead_pct",
+    "transport_pct": "allowances.transport_equipment_pct",
+    "material_waste_pct": "allowances.material_waste_pct",
+    "small_material_pct": "allowances.small_material_pct",
+    "supplier_contingency_pct": "allowances.supplier_package_contingency_pct",
+    "round_to": "commercial.round_to_chf",
+}
+_PROJECT_COST_SOURCES = {
+    "engineering": "project_costs.engineering_hours × engineering_rate_chf_per_h",
+    "commissioning": "project_costs.commissioning_hours × commissioning_rate_chf_per_h",
+    "hygiene": "project_costs.hygiene_inspection_chf",
+    "documentation": "project_costs.documentation_chf",
+}
+
+
+def setting_source(key: str) -> str | None:
+    """Where the default of a (flattened) setting comes from: the project_parameters.json key."""
+    if key in _SETTING_SOURCES:
+        return f"project_parameters.json {_SETTING_SOURCES[key]}"
+    group, _, sub = key.partition(".")
+    if group == "factors":
+        return f"project_parameters.json productivity_factors.{sub}"
+    if group == "margins":
+        if sub == "Standard":
+            return "project_parameters.json commercial.target_margin_pct"
+        return f"project_parameters.json stretch_bid_optimization.scenario_margins_pct.{sub}"
+    if group == "project_costs":
+        src = _PROJECT_COST_SOURCES.get(sub)
+        return f"project_parameters.json {src} (off by default)" if src else None
+    if key in ("include_small_material", "include_supplier_contingency"):
+        return "Off by default (Equans' golden examples use none)"
+    return None
+
+
 def merge_settings(settings: dict | None) -> dict:
     """Defaults overlaid with the given (possibly partial) settings; nested dicts merged one level deep."""
     out = default_settings()

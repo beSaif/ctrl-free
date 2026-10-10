@@ -4,6 +4,7 @@ import { DE_CHANGES } from './i18n.de.changes'
 import { DE_PICKER } from './i18n.de.picker'
 import { DE_FILLEDLV } from './i18n.de.filledlv'
 
+import { DE_PRICING } from './i18n.de.pricing'
 export const DE: Record<string, string> = {
   ' and ': ' und ',
   'match.Strong': 'Sicher',
@@ -774,4 +775,5 @@ export const DE: Record<string, string> = {
   ...DE_CHANGES,
   ...DE_PICKER,
   ...DE_FILLEDLV,
+  ...DE_PRICING,
 }

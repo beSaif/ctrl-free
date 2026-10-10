@@ -352,7 +352,11 @@ export interface PricingSettings {
   project_costs: Record<string, boolean>
   chosen: OptionName | null
   notes: Record<string, string>
+  /** Who changed what: flat for top-level settings, nested like the setting for the rest (changed_by.factors.site_efficiency). */
   changed_by?: Record<string, { by: string; at: string }>
+  min_win?: number
+  max_win?: number
+  round_to?: number
 }
 
 export interface Scenario {
@@ -401,6 +405,14 @@ export interface PricingResponse {
   defaults: PricingSettings
   totals: Totals
   changed_count: number
+  /** Flattened keys that differ from the defaults ("overhead_pct", "factors.site_efficiency"). */
+  changed?: string[]
+  /** Per changed setting: CHF it adds to the cost (cost now minus cost with only that setting at its default). */
+  effects?: Record<string, number>
+  /** Cost and options with every setting at its default (chosen option kept). */
+  default_totals?: { cost: number; direct?: number; standard_price?: number; scenarios: Scenario[] }
+  /** Flattened key -> where its default comes from (project_parameters.json key). */
+  sources?: Record<string, string | null>
 }
 
 export type PricingPut = Partial<Omit<PricingSettings, 'margins' | 'factors' | 'project_costs' | 'notes'>> & {

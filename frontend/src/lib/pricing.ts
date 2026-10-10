@@ -90,6 +90,87 @@ export function winWords(s: PricingSettings, ch: Scenario, totals: Totals, t: T)
   return parts.join(', ') + ' ' + t('(CHF {price} at {m}%).', { price: fmt0(stdPrice), m: std.toFixed(1) })
 }
 
+// ---- the win-chance model, client side (same formula as backend/app/pricing.py scenarios) ----
+
+/** win(price) = clamp(ref_win + appetite + competition − sensitivity × % above the standard price). */
+export function winAt(s: PricingSettings, cost: number, price: number): number {
+  const ref = cost / (1 - standardMargin(s) / 100)
+  const rel = (price / ref - 1) * 100
+  const raw = s.ref_win + s.appetite + s.competition - s.sensitivity * rel
+  return Math.min(s.max_win ?? 0.95, Math.max(s.min_win ?? 0.05, raw))
+}
+
+/** The price options for a cost: offer price rounded up to 1'000, win chance, profit, expected profit. */
+export function scenariosAt(cost: number, s: PricingSettings): Scenario[] {
+  const rnd = s.round_to || 1000
+  const order = OPTION_ORDER.filter((n) => s.margins[n] !== undefined)
+  const names = [...order, ...Object.keys(s.margins).filter((n) => !order.includes(n))]
+  const sc: Scenario[] = names.map((name) => {
+    const m = s.margins[name]
+    const bid = Math.ceil(cost / (1 - m / 100) / rnd) * rnd
+    const p = winAt(s, cost, bid)
+    return { name, margin_pct: m, bid, win: p, profit: bid - cost, expected: p * (bid - cost) }
+  })
+  const best = sc.reduce<Scenario | undefined>((a, b) => (!a || b.expected > a.expected ? b : a), undefined)
+  sc.forEach((x) => (x.best = x === best))
+  return sc
+}
+
+export interface CurvePoint {
+  price: number
+  margin: number
+  win: number
+  expected: number
+}
+
+/** Win chance and expected profit for every price between two margins (unrounded prices). */
+export function priceCurve(s: PricingSettings, cost: number, mLo: number, mHi: number, n = 160): CurvePoint[] {
+  const lo = cost / (1 - mLo / 100)
+  const hi = cost / (1 - mHi / 100)
+  return Array.from({ length: n + 1 }, (_, i) => {
+    const price = lo + ((hi - lo) * i) / n
+    const win = winAt(s, cost, price)
+    return { price, margin: (1 - cost / price) * 100, win, expected: win * (price - cost) }
+  })
+}
+
+/** The competition call one step stronger (dir −1) or lighter (dir +1), if there is one. */
+export function competitionStep(v: number, dir: -1 | 1): { value: number; label: string } | null {
+  const sorted = [...COMPETITION].sort((a, b) => a.value - b.value)
+  const i = sorted.findIndex((o) => Math.abs(o.value - v) < 1e-9)
+  if (i < 0) return null
+  return sorted[i + dir] ?? null
+}
+
+/** Flattened settings ("factors.site_efficiency") without the bookkeeping fields. */
+export function flatSettings(s: PricingSettings): Record<string, number | boolean> {
+  const out: Record<string, number | boolean> = {}
+  const skip = new Set(['changed_by', 'notes', 'chosen', 'min_win', 'max_win', 'round_to'])
+  for (const [k, v] of Object.entries(s)) {
+    if (skip.has(k) || v === null || v === undefined) continue
+    if (typeof v === 'object') for (const [kk, vv] of Object.entries(v as Record<string, number | boolean>)) out[`${k}.${kk}`] = vv
+    else if (typeof v === 'number' || typeof v === 'boolean') out[k] = v
+  }
+  return out
+}
+
+/** Keys whose value differs from the default, in a stable order. */
+export function changedKeys(s: PricingSettings, d: PricingSettings): string[] {
+  const fs = flatSettings(s)
+  const fd = flatSettings(d)
+  return Object.keys(fs).filter((k) => (typeof fs[k] === 'number' ? Math.abs((fs[k] as number) - ((fd[k] as number) ?? NaN)) > 1e-9 || fd[k] === undefined : fs[k] !== !!fd[k]))
+}
+
+/** Who changed a setting and when (changed_by is nested like the setting on the server, flat in the demo data). */
+export function changedByOf(s: PricingSettings, key: string): { by: string; at: string } | null {
+  const cb = (s.changed_by ?? {}) as Record<string, unknown>
+  const flat = cb[key] as { by?: string; at?: string } | undefined
+  const [g, sub] = key.split('.')
+  const nested = sub ? ((cb[g] as Record<string, { by?: string; at?: string } | null> | undefined)?.[sub] ?? undefined) : undefined
+  const c = (flat && flat.by ? flat : nested) ?? null
+  return c && c.by ? { by: c.by, at: c.at ?? '' } : null
+}
+
 export const COMPETITION = [
   { value: 0.05, label: 'Light' },
   { value: 0, label: 'Normal' },

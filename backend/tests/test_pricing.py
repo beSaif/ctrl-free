@@ -312,3 +312,28 @@ def test_import_reference(tmp_path, monkeypatch):
     finally:
         monkeypatch.undo()
         R.clear_cache()
+
+
+def test_setting_effects(positions, settings):
+    base = P.project_totals(positions, settings)["cost"]
+    s = {**settings, "overhead_pct": 10.0, "margins": {**settings["margins"], "Target": 5.0},
+         "project_costs": {**settings["project_costs"], "hygiene": True}}
+    now = P.project_totals(positions, s)["cost"]
+    eff = P.setting_effects(positions, s, ["overhead_pct", "margins.Target", "project_costs.hygiene"])
+    assert "margins.Target" not in eff  # a margin does not change the cost
+    assert eff["overhead_pct"] == round(now - P.project_totals(positions, {**s, "overhead_pct": 8.5})["cost"], 2)
+    assert eff["project_costs.hygiene"] == round(now - P.project_totals(positions, {**s, "project_costs": settings["project_costs"]})["cost"], 2)
+    assert eff["project_costs.hygiene"] == pytest.approx(18000 * 1.025 * 1.10, abs=0.01)
+    assert now > base
+    # a site factor changes every line's hours, so its effect comes from re-pricing the lines
+    f = {**settings, "factors": {**settings["factors"], "site_efficiency": 0.8}}
+    e2 = P.setting_effects(positions, f, ["factors.site_efficiency"])
+    assert e2["factors.site_efficiency"] == round(P.project_totals(positions, f)["cost"] - base, 2) > 0
+
+
+def test_setting_sources():
+    assert R.setting_source("overhead_pct") == "project_parameters.json commercial.overhead_pct"
+    assert R.setting_source("margins.Standard").endswith("commercial.target_margin_pct")
+    assert R.setting_source("margins.Target").endswith("scenario_margins_pct.Target")
+    assert R.setting_source("factors.site_efficiency").endswith("productivity_factors.site_efficiency")
+    assert "hygiene_inspection_chf" in R.setting_source("project_costs.hygiene")
