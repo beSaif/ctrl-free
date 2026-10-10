@@ -118,7 +118,8 @@ function originRows(p: Position, readAt: string | null | undefined, cat: Record<
       at: readAt,
       who,
       text,
-      detail: [how, m.reason, m.install_code ? t('Install rule {code} from the product', { code: m.install_code }) : '']
+      // a learned match's reason already says where it was learned
+      detail: [m.method === 'learned' && m.reason ? '' : how, m.reason, m.install_code ? t('Install rule {code} from the product', { code: m.install_code }) : '']
         .map((x) => (x ?? '').trim().replace(/\.$/, ''))
         .filter(Boolean)
         .join('. ') + '.',
