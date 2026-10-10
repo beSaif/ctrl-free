@@ -82,8 +82,10 @@ def open_points(tender: dict, totals: dict) -> list[dict]:
     """Export checklist (not blocking). Each item: {key, ok, title, detail, link}."""
     pts: list[dict] = []
     priceable = totals.get("lines_priceable", 0)
-    catalog_lines = sum(1 for p in _evaluate(tender, _settings(tender))
-                        if p["status"] == "calculated")
+    evaluated = _evaluate(tender, _settings(tender))
+    catalog_lines = sum(1 for p in evaluated if p["status"] == "calculated")
+    no_price = [p for p in evaluated if p["status"] not in ("non_priceable", "out_of_scope")
+                and not (p.get("pricing") or {}).get("direct") and not p.get("confirmed")]
     to_review = totals.get("to_review", 0)
     pts.append({"key": "lines", "ok": to_review == 0,
                 "title": f"{catalog_lines} of {priceable} lines priced from the catalogue",
@@ -103,6 +105,21 @@ def open_points(tender: dict, totals: dict) -> list[dict]:
     else:
         pts.append({"key": "budget", "ok": True, "title": "No lines on budget prices",
                     "detail": f"{totals.get('quotes_entered', 0)} supplier quotes entered", "link": "lines"})
+
+    if no_price:
+        n_sup = sum(1 for p in no_price if p["status"] == "supplier_quote_required")
+        n_qty = sum(1 for p in no_price if p["status"] == "insufficient_information")
+        n_other = len(no_price) - n_sup - n_qty
+        bits = []
+        if n_sup:
+            bits.append(f"{n_sup} not in the catalogue (supplier requests are drafted)")
+        if n_qty:
+            bits.append(f"{n_qty} without a quantity in the tender")
+        if n_other:
+            bits.append(f"{n_other} without a product")
+        pts.append({"key": "unpriced", "ok": False,
+                    "title": f"{len(no_price)} line{'s' if len(no_price) != 1 else ''} without a price",
+                    "detail": "; ".join(bits) + ". They are not in the direct cost yet.", "link": "lines"})
 
     ins = tender.get("instructions") or []
     if ins:

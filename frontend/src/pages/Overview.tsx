@@ -1,13 +1,13 @@
 // N03 Overview: "N steps left before you can submit" + due date, price so far, tender facts.
-import { useState, type ReactNode } from 'react'
+import { Fragment, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
-import { useInstructions, usePositions, usePricing, useReference, useTender } from '../api/hooks'
-import { LinkButton, Loading } from '../components/ui'
+import { useInstructions, usePositions, usePricing, useReference, useTender, useVerification } from '../api/hooks'
+import { IconCheck, LinkButton, Loading } from '../components/ui'
 import { cx } from '../lib/cx'
 import { PageViewer } from '../components/PdfCrop'
-import { fmt0, fmt2, fmtDateTime, fmtDaysLeft, fmtShare } from '../lib/format'
-import { isOpen, isSupplier, quotedPrice } from '../lib/lines'
+import { fmt0, fmt2, fmtDateTime, fmtDaysLeft, fmtShare, translationLabel } from '../lib/format'
+import { isOpen, isPriceable, isSupplier, quotedPrice } from '../lib/lines'
 import { allProjectCosts, standardMargin } from '../lib/pricing'
 
 interface Step {
@@ -29,12 +29,16 @@ export function Overview() {
   const { data: ins } = useInstructions(id)
   const { data: pr } = usePricing(id)
   const { data: ref } = useReference()
+  const { data: verif } = useVerification(id)
   const [pageOpen, setPageOpen] = useState(false)
   if (!tender || !pos || !ins || !pr) return <Loading label={t('Loading')} />
 
   const ps = pos.positions
   const open = ps.filter(isOpen)
-  const budgetOpen = open.filter((p) => isSupplier(p) && quotedPrice(p) === null)
+  const priceable = ps.filter(isPriceable)
+  const pricedLines = ps.filter((p) => (p.pricing?.direct ?? 0) > 0).length
+  const budgetOpen = open.filter((p) => isSupplier(p) && quotedPrice(p) === null && (p.pricing?.direct ?? 0) > 0)
+  const unpricedOpen = open.filter((p) => !(p.pricing?.direct ?? 0))
   const tot = pr.totals
   const budgetDirect = budgetOpen.reduce((a, p) => a + (p.pricing?.direct ?? 0), 0)
   const openIns = ins.instructions.filter((i) => i.state === 'open')
@@ -56,16 +60,18 @@ export function Overview() {
       urgent: true,
       body: open.length ? (
         <>
-          <span className="text-attn font-medium">{t('{n} of {total} lines need you.', { n: open.length, total: ps.length })}</span>{' '}
-          {budgetOpen.length
-            ? t(budgetOpen.length === open.length ? 'They run on budget prices: CHF {amount} of direct cost ({share}).' : '{k} of them run on budget prices: CHF {amount} of direct cost ({share}).', {
-                k: budgetOpen.length,
-                amount: fmt0(budgetDirect),
-                share: fmtShare(tot.direct ? budgetDirect / tot.direct : 0),
-              }) +
-              ' ' +
-              t('Enter the supplier quote on the line or confirm the budget price.')
-            : t('Check the product or the quantity and confirm.')}
+          <span className="text-attn font-medium">{t('{n} of {total} lines need you.', { n: open.length, total: priceable.length })}</span>{' '}
+          {budgetOpen.length > 0 &&
+            t(budgetOpen.length === open.length ? 'They run on budget prices: CHF {amount} of direct cost ({share}).' : '{k} of them run on budget prices: CHF {amount} of direct cost ({share}).', {
+              k: budgetOpen.length,
+              amount: fmt0(budgetDirect),
+              share: fmtShare(tot.direct ? budgetDirect / tot.direct : 0),
+            }) + ' '}
+          {unpricedOpen.length > 0 &&
+            t(unpricedOpen.length === 1 ? '1 has no price yet (not in the catalogue or no quantity in the tender).' : '{u} have no price yet (not in the catalogue or no quantity in the tender).', {
+              u: unpricedOpen.length,
+            }) + ' '}
+          {budgetOpen.length || unpricedOpen.length ? t('Supplier requests are drafted per product type.') : t('Check the product or the quantity and confirm.')}
         </>
       ) : (
         <span className="text-muted">{t('Every line that needed you is confirmed. Direct cost is CHF {d}.', { d: fmt2(tot.direct) })}</span>
@@ -159,6 +165,14 @@ export function Overview() {
   return (
     <main className="flex-auto flex flex-wrap items-start">
       <section aria-label={t('What is left')} className="flex-[999_1_640px] min-w-0 px-6 pt-7 pb-10 flex flex-col gap-6">
+        {priceable.length === 0 && (
+          <div role="status" className="flex flex-col gap-1 px-4 py-3.5 border border-attn">
+            <span className="font-semibold text-attn">{t('No bill-of-quantities lines were found in this PDF.')}</span>
+            <span className="text-muted">
+              {t('ctrl-free reads tenders whose LV positions have a quantity and a unit (e.g. "Stk 5"). Check that this is the tender PDF, not a letter or a plan.')}
+            </span>
+          </div>
+        )}
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-1">
             <h1 className="m-0 text-[24px] leading-[1.25] font-semibold">
@@ -167,7 +181,7 @@ export function Overview() {
             <span className="text-muted">
               {left === 0
                 ? t('Every line is checked, the instructions are handled and the price is chosen.')
-                : t('The tender is read and every line has a first price. This is what still needs you.')}
+                : t('The tender is read and priced where the catalogue allows. This is what still needs you.')}
             </span>
           </div>
           {next && cta && (
@@ -203,7 +217,7 @@ export function Overview() {
           <span className="font-mono">{fmtDateTime(tender.due_at)}</span>
           {rule && (
             <span className="text-[13px] text-muted">
-              {lang === 'de' ? rule.text_de : rule.text_en} {t('Read from the tender, p. {page}.', { page: rule.page })}{' '}
+              {lang === 'de' || !rule.text_en ? rule.text_de : `${rule.text_en} (${t(translationLabel(rule.text_en_method)).toLowerCase()})`} {t('Read from the tender, p. {page}.', { page: rule.page })}{' '}
               <button type="button" onClick={() => setPageOpen(true)} className="border-0 bg-transparent p-0 min-h-0 text-accent underline underline-offset-2">
                 {t('Show on page')}
               </button>
@@ -214,7 +228,7 @@ export function Overview() {
         <section className="flex flex-col gap-1.5">
           <h2 className="m-0 text-[15px] font-semibold">{t('Price so far')}</h2>
           <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3">
-            <span className="py-[7px] border-b border-rowrule">{t('Direct cost, {n} lines', { n: ps.length })}</span>
+            <span className="py-[7px] border-b border-rowrule">{t('Direct cost, {n} priced lines', { n: pricedLines })}</span>
             <span className="py-[7px] border-b border-rowrule font-mono text-right">{fmt2(tot.direct)}</span>
             <span className="py-[7px] border-b border-rowrule">{t('Cost incl. transport and overhead')}</span>
             <span className="py-[7px] border-b border-rowrule font-mono text-right">{fmt2(tot.cost)}</span>
@@ -234,6 +248,8 @@ export function Overview() {
             {chosen ? t('Chosen by you in Pricing. You can still change it.') : t('Not the offer price yet. It becomes final in step 3.')}
           </span>
         </section>
+
+        {verif?.summary && verif.summary.found > 0 && <VerifiedPanel v={verif} tenderId={id} />}
 
         <section className="flex flex-col gap-1.5">
           <h2 className="m-0 text-[15px] font-semibold">{t('Tender')}</h2>
@@ -265,5 +281,56 @@ export function Overview() {
         />
       )}
     </main>
+  )
+}
+
+function VerifiedPanel({ v, tenderId }: { v: NonNullable<ReturnType<typeof useVerification>['data']>; tenderId: string }) {
+  const t = useT()
+  const [open, setOpen] = useState(false)
+  const s = v.summary!
+  const all = s.found === s.total && s.direct_ok === s.total && s.product_ok === s.total
+  return (
+    <section className="flex flex-col gap-1.5">
+      <h2 className="m-0 text-[15px] font-semibold">
+        {all && (
+          <span className="inline-block mr-1.5 align-[-1px]">
+            <IconCheck size={13} />
+          </span>
+        )}
+        {t('Verified against Equans examples: {a}/{b}', { a: s.direct_ok, b: s.total })}
+      </h2>
+      <span className="text-[13px] text-muted">
+        {t('{f} of {n} example lines found in the PDF, {p} with the same product, {d} with the same line total to the centime.', {
+          f: s.found,
+          n: s.total,
+          p: s.product_ok,
+          d: s.direct_ok,
+        })}{' '}
+        {s.subset_direct_golden !== undefined &&
+          t('Subset direct cost CHF {a} (Equans: {b}).', { a: fmt2(s.subset_direct_ours), b: fmt2(s.subset_direct_golden) })}
+      </span>
+      <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open} className="self-start p-0 min-h-0 border-0 bg-transparent text-accent underline underline-offset-2 text-[13px]">
+        {open ? t('Hide the examples') : t('Show the examples')}
+      </button>
+      {open && (
+        <div className="grid grid-cols-[52px_52px_minmax(0,1fr)_auto] gap-x-2 text-[12.5px]">
+          {v.rows.map((r) => (
+            <Fragment key={r.example_id}>
+              <span className="py-1 border-b border-rowrule font-mono text-muted">{r.example_id}</span>
+              <span className="py-1 border-b border-rowrule font-mono">
+                {r.our_lv_id ? <Link to={`/t/${tenderId}/lines/${r.our_lv_id}?f=all`}>{r.our_lv_id}</Link> : '–'}
+              </span>
+              <span className="py-1 border-b border-rowrule overflow-hidden text-ellipsis whitespace-nowrap" title={r.description}>
+                {r.description}
+              </span>
+              <span className={cx('py-1 border-b border-rowrule font-mono text-right inline-flex items-center justify-end gap-1', !r.direct_ok && 'text-attn')}>
+                {fmt2(r.golden_direct)}
+                {r.direct_ok ? <IconCheck size={11} /> : <span>≠</span>}
+              </span>
+            </Fragment>
+          ))}
+        </div>
+      )}
+    </section>
   )
 }

@@ -7,7 +7,7 @@ import { useInstructions, usePatchInstruction, useTender } from '../api/hooks'
 import type { InstructionPatch } from '../api/types'
 import { Button, ErrorBox, IconBack, Kbd, LinkButton, Loading, TextInput } from '../components/ui'
 import { PdfCrop } from '../components/PdfCrop'
-import { fmtShortDate } from '../lib/format'
+import { fmtShortDate, translationLabel } from '../lib/format'
 import { C } from '../lib/lines'
 import { IMPACT, impactOf, insQueue, useInsTab } from './instructionsShared'
 
@@ -140,7 +140,7 @@ function InstructionDetailView() {
               />
               {s.text_en && (
                 <section className="flex flex-col gap-1.5">
-                  <h2 className="m-0 text-[15px] font-semibold">{t('Machine translation')}</h2>
+                  <h2 className="m-0 text-[15px] font-semibold">{t(translationLabel(s.text_en_method))}</h2>
                   <p className="m-0 text-body leading-[1.6]">{s.text_en}</p>
                 </section>
               )}

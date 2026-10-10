@@ -29,6 +29,7 @@ import type {
   Snapshot,
   TenderDetail,
   TenderSummary,
+  Verification,
 } from './types'
 
 export type ExportKind = 'xlsx' | 'report.pdf' | 'sia'
@@ -65,6 +66,8 @@ export interface Api {
   undo(id: string, logId: string): Promise<unknown>
   explain(id: string, lv: string, field: string): Promise<Explain>
   getLog(id: string): Promise<LogEntry[]>
+  /** Our lines vs the Equans verified examples (null when not available, e.g. mock or another tender). */
+  getVerification(id: string): Promise<Verification | null>
   /** URL of the rendered page image, or null when there is none (mock mode). */
   pageImageUrl(id: string, page: number, scale?: number): string | null
   /** Starts a file download for an export. */
@@ -145,7 +148,7 @@ function normApply(r: unknown): AssistApplyResult {
 function normPricing(r: PricingResponse): PricingResponse {
   const t = r.totals as Totals & Obj
   const items = (t.project_cost_items ?? (t.project_costs_detail as ProjectCostItem[] | undefined)) || undefined
-  return { ...r, totals: { ...t, lines: t.lines ?? num(t.lines_total) ?? num(t.lines_priced), project_cost_items: items } }
+  return { ...r, totals: { ...t, lines: t.lines ?? num(t.lines_priced) ?? num(t.lines_total), project_cost_items: items } }
 }
 
 function normResults(r: unknown): ResultsResponse {
@@ -222,7 +225,8 @@ function normTray(r: Obj): AssistTray {
     at: str(d.at),
     lv_id: str(d.lv_id),
     log_id: str(d.log_id) ?? (d.undoable ? str(d.id) : undefined),
-    undoable: !!d.undoable,
+    undoable: !!d.undoable && !d.undone,
+    undone: !!d.undone,
   }))
   return { needs_ok: needs, working_on: working, done }
 }
@@ -239,7 +243,7 @@ function normPlan(r: Obj): AssistPlan {
     plan_id: str(r.plan_id) ?? null,
     plan,
     effect: (r.effect as AssistPlan['effect']) ?? null,
-    answer: str(r.answer) ?? (kind === 'message' || (!r.plan_id && !plan.length) ? (str(r.message) ?? null) : null),
+    answer: str(r.answer) ?? (kind === 'message' || !r.plan_id ? (str(r.message) ?? null) : null),
     kind: kind === 'plan' && !r.plan_id ? 'finds' : kind,
     explain: ex ? { field: str(ex.field) ?? '', title: str(ex.title), steps: (ex.steps as Explain['steps']) ?? [], sources: ex.sources as string[] } : undefined,
   }
@@ -294,6 +298,14 @@ export const realApi: Api = {
   undo: (id, logId) => req('POST', `/tenders/${id}/assist/undo/${enc(logId)}`),
   explain: (id, lv, field) => req('GET', `/tenders/${id}/explain/${enc(lv)}${qs({ field })}`),
   getLog: async (id) => arr<LogEntry>(await req('GET', `/tenders/${id}/log`), 'log', 'entries'),
+  getVerification: async (id) => {
+    try {
+      const r = await req<Verification>('GET', `/tenders/${id}/verification`)
+      return r && r.loaded && r.rows?.length ? r : null
+    } catch {
+      return null
+    }
+  },
   pageImageUrl: (id, page, scale = 2) => `/api/tenders/${id}/pages/${page}.png?scale=${scale}`,
   download: async (id, kind) => {
     const a = document.createElement('a')

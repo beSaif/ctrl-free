@@ -7,9 +7,9 @@ import { api, type ExportKind } from '../api/client'
 import { useInstructions, usePositions, usePricing, useSubmit, useTender } from '../api/hooks'
 import { Button, Loading, Td, Th } from '../components/ui'
 import { PageViewer } from '../components/PdfCrop'
-import { fmt0, fmtDateTime, fmtDaysLeft, fmtShare } from '../lib/format'
+import { fmt0, fmtDateTime, fmtDaysLeft, fmtShare, translationLabel } from '../lib/format'
 import { C, isOpen, isPriceable, isSupplier, quotedPrice } from '../lib/lines'
-import { allProjectCosts, bestScenario } from '../lib/pricing'
+import { allProjectCosts, previewScenario } from '../lib/pricing'
 
 function Check({ color, children, link }: { color: string; children: ReactNode; link?: ReactNode }) {
   return (
@@ -37,18 +37,23 @@ export function Export() {
 
   const ps = pos.positions
   const tot = pr.totals
-  const priced = ps.filter((p) => isPriceable(p) && !isSupplier(p)).length
-  const budget = ps.filter((p) => isSupplier(p) && quotedPrice(p) === null && isPriceable(p))
+  const priceable = ps.filter(isPriceable)
+  const hasPrice = (p: (typeof ps)[number]) => (p.pricing?.direct ?? 0) > 0
+  const priced = ps.filter((p) => p.status === 'calculated').length
+  const budget = priceable.filter((p) => isSupplier(p) && quotedPrice(p) === null && hasPrice(p) && !p.confirmed)
   const budgetDirect = budget.reduce((a, p) => a + (p.pricing?.direct ?? 0), 0)
+  const unpriced = priceable.filter((p) => !hasPrice(p) && !p.confirmed)
+  const unpricedSup = unpriced.filter((p) => isSupplier(p) && p.status !== 'insufficient_information').length
+  const unpricedQty = unpriced.filter((p) => p.status === 'insufficient_information').length
   const quotes = ps.filter((p) => isSupplier(p) && quotedPrice(p) !== null).length
-  const otherOpen = ps.filter((p) => isOpen(p) && !isSupplier(p)).length
+  const otherOpen = ps.filter((p) => isOpen(p) && hasPrice(p) && !budget.includes(p)).length
   const openIns = ins.instructions.filter((i) => i.state === 'open')
   const cost = openIns.filter((i) => i.kind === 'cost').length
   const risk = openIns.filter((i) => i.kind === 'risk').length
   const s = pr.settings
   const pcOn = Object.entries(s.project_costs).filter(([, v]) => v)
   const chosen = s.chosen ? tot.scenarios.find((x) => x.name === s.chosen) : undefined
-  const best = bestScenario(tot.scenarios)
+  const best = previewScenario(tot.scenarios, s.chosen)
   const rule = tender.submission_rule
   const sub = tender.submission
   const lnk = (to: string, label: string) => (
@@ -76,7 +81,7 @@ export function Export() {
         </div>
         <div className="flex flex-col">
           <Check color={C.stone} link={lnk(`/t/${id}/lines?f=priced`, t('Lines'))}>
-            <strong className="font-semibold">{t('{a} of {b} lines priced', { a: priced, b: ps.length })}</strong> {t('from the catalogue')}
+            <strong className="font-semibold">{t('{a} of {b} lines priced', { a: priced, b: priceable.length })}</strong> {t('from the catalogue')}
           </Check>
           {budget.length > 0 ? (
             <Check color={C.attn} link={lnk(`/t/${id}/lines`, t('Lines'))}>
@@ -87,6 +92,18 @@ export function Export() {
           ) : (
             <Check color={C.ink} link={lnk(`/t/${id}/lines?f=all`, t('Lines'))}>
               <strong className="font-semibold">{t('No budget prices left')}</strong> · {t('{n} supplier quotes entered.', { n: quotes })}
+            </Check>
+          )}
+          {unpriced.length > 0 && (
+            <Check color={C.attn} link={lnk(`/t/${id}/lines`, t('Lines'))}>
+              <strong className="font-semibold text-attn">{unpriced.length === 1 ? t('1 line without a price') : t('{n} lines without a price', { n: unpriced.length })}</strong> ·{' '}
+              {[
+                unpricedSup ? t('{n} not in the catalogue (supplier requests are drafted)', { n: unpricedSup }) : null,
+                unpricedQty ? t('{n} without a quantity in the tender', { n: unpricedQty }) : null,
+              ]
+                .filter(Boolean)
+                .join('; ')}
+              . {t('They are not in the direct cost yet.')}
             </Check>
           )}
           {otherOpen > 0 && (
@@ -134,7 +151,7 @@ export function Export() {
             </div>
             <blockquote className="m-0 px-3 py-2.5 border border-rule text-[13.5px] leading-[1.55]">«{rule.text_de}»</blockquote>
             <span className="text-[13px] text-muted">
-              {t('Machine translation:')} {rule.text_en} ·{' '}
+              {t(translationLabel(rule.text_en_method))}: {rule.text_en} ·{' '}
               <button type="button" onClick={() => setPageOpen(true)} className="border-0 bg-transparent p-0 text-accent underline underline-offset-2">
                 {t('Show on page')}
               </button>

@@ -22,7 +22,7 @@ export function FooterTotals({ tenderId }: { tenderId: string }) {
   return (
     <footer
       aria-label={t('Totals')}
-      className="sticky bottom-0 z-10 flex flex-wrap gap-x-7 gap-y-2 px-6 py-3 border-t border-ink bg-white text-[14px]"
+      className="sticky bottom-0 z-10 flex flex-wrap gap-x-5 gap-y-2 px-6 py-3 border-t border-ink bg-white text-[14px]"
     >
       <span>
         {t('Material')} <span className="font-mono">{fmt2(tot?.material)}</span>

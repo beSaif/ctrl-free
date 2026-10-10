@@ -56,6 +56,12 @@ export function sortScenarios(sc: Scenario[]) {
   })
 }
 
+/** The option shown before the estimator picks one: Target (as designed), else the best expected profit. */
+export const DEFAULT_PREVIEW = 'Target'
+export function previewScenario(sc: Scenario[], chosen?: string | null): Scenario | undefined {
+  return sc.find((x) => x.name === chosen) ?? sc.find((x) => x.name === DEFAULT_PREVIEW) ?? bestScenario(sc) ?? sc[0]
+}
+
 export function bestScenario(sc: Scenario[]): Scenario | undefined {
   return sc.find((s) => s.best) ?? sc.reduce<Scenario | undefined>((a, b) => (!a || b.expected > a.expected ? b : a), undefined)
 }

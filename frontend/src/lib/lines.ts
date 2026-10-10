@@ -68,8 +68,12 @@ export function lineStatus(p: Position, t: T): StatusView {
 }
 
 export function matchView(p: Position, t: T): { label: string; fg: string; strong: boolean; line: string } {
-  if (isSupplier(p) && isPriceable(p))
-    return { label: t('No price'), fg: C.muted, strong: false, line: t('Catalogue has only a budget figure for this product') }
+  if (isSupplier(p) && isPriceable(p) && p.status !== 'insufficient_information') {
+    if (p.supplier_quote) return { label: t('Quote'), fg: C.muted, strong: false, line: t('Priced with the supplier quote') }
+    if ((p.pricing?.direct ?? 0) > 0)
+      return { label: t('Budget'), fg: C.muted, strong: false, line: t('Catalogue has only a budget figure for this product') }
+    return { label: t('Not in catalogue'), fg: C.muted, strong: false, line: t('Not in the catalogue: ask a supplier for a price') }
+  }
   const m = p.match
   if (!m || !m.product_id) return { label: t('None'), fg: C.attn, strong: true, line: t('No product matched') }
   const label = m.label || (m.confidence >= 0.85 ? 'Strong' : m.confidence >= 0.75 ? 'Close' : m.confidence >= 0.5 ? 'Weak' : 'None')
@@ -130,6 +134,7 @@ export function buildRows(
   filter: LineFilter,
   q: string,
   t: T,
+  lang: 'en' | 'de' = 'en',
 ): { rows: Row[]; queue: Position[] } {
   const ps = all.filter((p) => matchesSearch(p, q))
   const rows: Row[] = []
@@ -151,7 +156,7 @@ export function buildRows(
       rows.push({
         type: 'group',
         key: 'q-' + g.id,
-        name: t(g.title),
+        name: lang === 'de' && g.title_de ? g.title_de : t(g.title),
         meta: nLines(ls.length) + ' · ' + t('one supplier request'),
         req: g.sent ? t('Request sent') : t('Request not sent'),
         reqFg: g.sent ? C.accent : C.attn,

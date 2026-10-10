@@ -158,3 +158,8 @@ export function deUnit(u: string | null | undefined): string {
 export function shortTrade(trade: string): string {
   return trade.replace(/s?anlagen$/, '')
 }
+
+/** Label for an English rendering of tender text: honest about the word-by-word glossary fallback. */
+export function translationLabel(method: string | null | undefined): string {
+  return method === 'glossary' ? 'Rough word-by-word translation' : 'Machine translation'
+}

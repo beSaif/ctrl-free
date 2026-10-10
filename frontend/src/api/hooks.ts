@@ -42,7 +42,7 @@ export function useTenders() {
   return useQuery({
     queryKey: qk.tenders,
     queryFn: () => api.listTenders(),
-    refetchInterval: (q) => (q.state.data?.some(isReading) ? 1000 : false),
+    refetchInterval: (q) => (q.state.data?.some(isReading) ? 400 : false),
   })
 }
 
@@ -50,7 +50,7 @@ export function useTender(id: string) {
   return useQuery({
     queryKey: qk.tender(id),
     queryFn: () => api.getTender(id),
-    refetchInterval: (q) => (isReading(q.state.data) ? 1000 : false),
+    refetchInterval: (q) => (isReading(q.state.data) ? 400 : false),
   })
 }
 
@@ -86,6 +86,10 @@ export function useAssist(id: string, enabled = true) {
     enabled,
     refetchInterval: (q) => (q.state.data?.working_on.length ? 700 : false),
   })
+}
+
+export function useVerification(id: string) {
+  return useQuery({ queryKey: ['verification', id] as const, queryFn: () => api.getVerification(id), staleTime: 30_000 })
 }
 
 export function useResults() {

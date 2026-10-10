@@ -530,3 +530,11 @@ export function IconUpload() {
     </svg>
   )
 }
+
+export function IconCheck({ color = 'currentColor', size = 12 }: { color?: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 12 12" fill="none" stroke={color} strokeWidth="1.8" aria-hidden="true">
+      <path d="M2.5 6.3l2.3 2.3 4.7-5" />
+    </svg>
+  )
+}

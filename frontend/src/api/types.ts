@@ -14,6 +14,7 @@ export interface Progress {
 
 export interface OpenWork {
   lines_to_review: number
+  lines_total?: number
   instructions_to_confirm: number
   price_chosen: boolean
 }
@@ -23,6 +24,7 @@ export interface SubmissionRule {
   heading: string
   text_de: string
   text_en: string
+  text_en_method?: string
   bbox?: number[] | null
 }
 
@@ -32,6 +34,7 @@ export interface AwardCriterion {
   page: number
   rule_de?: string
   rule_en?: string
+  rule_en_method?: string
 }
 
 export interface TenderSummary {
@@ -184,6 +187,8 @@ export interface PositionPrice {
   sources?: Record<string, string>
   /** extras some backends send: what the line would cost without overrides */
   calculated?: { quantity?: number; net_unit_cost?: number; hours?: number; direct?: number }
+  calculated_hours?: number
+  hours_overridden?: boolean
 }
 
 export interface CatalogRow {
@@ -280,6 +285,7 @@ export interface Instruction {
   section?: string
   text_de: string
   text_en?: string
+  text_en_method?: string
   bbox?: number[] | null
   page_size?: number[] | null
   kind: InstructionKind | string
@@ -444,6 +450,7 @@ export interface AssistDone {
   at?: string
   log_id?: string
   undoable?: boolean
+  undone?: boolean
 }
 
 export interface AssistTray {
@@ -551,4 +558,38 @@ export interface ChecklistItem {
   key: string
   level: 'ok' | 'warn' | 'info' | string
   text: string
+}
+
+export interface VerificationRow {
+  example_id: string
+  page: number
+  description: string
+  quantity: number
+  unit: string
+  our_lv_id: string | null
+  found: boolean
+  product_ok: boolean
+  install_ok: boolean
+  direct_ok: boolean
+  status_ok: boolean
+  our_direct: number | null
+  golden_direct: number
+}
+
+export interface Verification {
+  loaded: boolean
+  source?: string
+  rows: VerificationRow[]
+  summary?: {
+    total: number
+    found: number
+    product_ok: number
+    install_ok: number
+    direct_ok: number
+    status_ok: number
+    subset_direct_ours?: number
+    subset_direct_golden?: number
+    subset_direct_ok?: boolean
+    scenarios_ok?: boolean
+  }
 }

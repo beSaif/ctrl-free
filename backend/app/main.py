@@ -1,6 +1,7 @@
 """FastAPI routes (docs/SPEC.md "API"). Run: cd backend && uv run uvicorn app.main:app --reload --port 8000"""
 from __future__ import annotations
 
+import copy
 import io
 import logging
 import math
@@ -181,6 +182,7 @@ def summary(t: dict) -> dict:
     else:
         out["offer_price"] = totals.get("standard_price")
     out["outcome"] = t.get("outcome")
+    out["submission"] = t.get("submission")
     return out
 
 
@@ -509,6 +511,10 @@ def _shortlist_ids(pos: dict, k: int = 5) -> list[tuple[str, dict]]:
             except Exception as e:
                 log.warning("shortlist failed: %s", e)
     pid = pipeline.effective_product(pos)
+    # drop far-off padding ("Partly the same type", an air-handling unit for a valve); "Search all" still finds them
+    strong = [(x, c) for x, c in out if x == pid or not isinstance(c.get("score"), (int, float)) or c["score"] >= 0.33]
+    if len(strong) >= 2:
+        out = strong
     if pid and pid not in [x for x, _ in out]:
         out.insert(0, (pid, {"why": "Current product"}))
     return out[:max(k, 1) + 1]
@@ -560,6 +566,14 @@ def position_detail(t: dict, lv_id: str) -> dict:
     out = dict(cur)
     pid = (cur.get("pricing") or {}).get("product_id") or pipeline.effective_product(cur)
     out["product"] = _product_brief(pid)
+    # what the line costs without the estimator's overrides ("Calculated total was ...")
+    if cur.get("pricing") and any(v is not None for v in (raw.get("overrides") or {}).values()):
+        base = copy.deepcopy(raw)
+        base["overrides"] = {}
+        calc = pipeline.price(t, base)
+        if calc:
+            out["pricing"] = {**cur["pricing"], "calculated": {
+                k: calc.get(k) for k in ("quantity", "net_unit_cost", "hours", "material", "labour", "direct")}}
     out["install_rule"] = pipeline.rules().get((cur.get("pricing") or {}).get("install_code") or "")
     out["candidates"] = [_candidate(t, raw, cur, c_pid, extra) for c_pid, extra in _shortlist_ids(raw)]
     out["instructions"] = [i for i in t.get("instructions") or [] if lv_id in (i.get("applies_to") or [])]
@@ -575,6 +589,12 @@ def position_detail(t: dict, lv_id: str) -> dict:
     }
     out["quote_group"] = _quote_group_for(t, lv_id)
     out["log"] = [e for e in reversed(t.get("log") or []) if e.get("lv_id") == lv_id]
+    sq = cur.get("supplier_quote")
+    if sq and not sq.get("log_id"):  # the entry that set the quote, so the UI can offer Undo
+        e = next((e for e in out["log"] if e.get("undoable", True) and not e.get("undone")
+                  and e.get("action") in ("fill_quote", "edit")), None)
+        if e:
+            out["supplier_quote"] = {**sq, "log_id": e["id"]}
     out["assist"] = assist.line_proposals(t, lv_id)
     out["explain_steps"] = {}
     pricing = mod("pricing")
@@ -1209,6 +1229,7 @@ def assist_undo(tid: str, log_id: str):
             entries = store.undo(t, log_id)
         except ValueError as e:
             raise HTTPException(409, str(e))
+        assist.reopen_after_undo(t, entries)
     t = store.load(tid)
     v = pipeline.view(t)
     return {"undone": entries, "totals": _footer(v["totals"])}

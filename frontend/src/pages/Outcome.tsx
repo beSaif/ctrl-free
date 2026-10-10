@@ -68,7 +68,7 @@ export function OutcomePage() {
   const calls = sub?.settings
   const allDefault =
     !!calls && calls.competition === defaults.competition && calls.appetite === defaults.appetite && calls.sensitivity === defaults.sensitivity
-  const notes = Object.values(sub?.notes ?? {}).filter(Boolean)
+  const notes = Object.values(sub?.notes ?? sub?.settings?.notes ?? {}).filter(Boolean)
 
   return (
     <main className="flex flex-wrap items-start">

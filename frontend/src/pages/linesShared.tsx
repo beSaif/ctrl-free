@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useT } from '../i18n'
+import { useLang, useT } from '../i18n'
 import { usePositions, useQuotes, useReference } from '../api/hooks'
 import type { CatalogRow } from '../api/types'
 import { buildRows, filterCounts, type LineFilter } from '../lib/lines'
@@ -22,11 +22,12 @@ export function useLineFilter(): [LineFilter, string, (f: LineFilter, q?: string
 
 export function useLineQueue(id: string, filter: LineFilter, q: string) {
   const t = useT()
+  const lang = useLang()
   const pq = usePositions(id)
   const qq = useQuotes(id)
   const positions = useMemo(() => pq.data?.positions ?? [], [pq.data])
   const quotes = useMemo(() => qq.data ?? [], [qq.data])
-  const built = useMemo(() => buildRows(positions, quotes, filter, q, t), [positions, quotes, filter, q, t])
+  const built = useMemo(() => buildRows(positions, quotes, filter, q, t, lang), [positions, quotes, filter, q, t, lang])
   const counts = useMemo(() => filterCounts(positions), [positions])
   return { ...built, counts, positions, quotes, isLoading: pq.isLoading || qq.isLoading, error: pq.error }
 }

@@ -127,6 +127,17 @@ def search_bbox(doc, page: int, text: str) -> list[float] | None:
     y0 = min(r.y0 for r in rects)
     x1 = max(r.x1 for r in rects)
     y1 = max(r.y1 for r in rects)
+    # widen to the full text lines in that band (the hits cover only the first and last words),
+    # but not into a separate column such as the margin label
+    try:
+        for b in pg.get_text("dict").get("blocks", []):
+            for ln in b.get("lines", []):
+                lx0, ly0, lx1, ly1 = ln["bbox"]
+                cy = (ly0 + ly1) / 2
+                if y0 - 1 <= cy <= y1 + 1 and lx0 <= x1 + 20 and lx1 >= x0 - 20:
+                    x0, x1 = min(x0, lx0), max(x1, lx1)
+    except Exception:
+        pass
     return [round(x0, 1), round(y0, 1), round(x1, 1), round(y1, 1)]
 
 

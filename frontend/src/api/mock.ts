@@ -1412,6 +1412,9 @@ export const mockApi: Api = {
     await delay(60)
     return tender(id).log.map(({ snapshot: _s, ...e }) => e)
   },
+  async getVerification() {
+    return null
+  },
   pageImageUrl: () => null,
   async download(id, kind) {
     exportFile(tender(id), kind)

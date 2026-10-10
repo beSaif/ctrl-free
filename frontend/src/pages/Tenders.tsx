@@ -151,6 +151,11 @@ function TenderRow({ x }: { x: TenderSummary }) {
               />
             </div>
           </>
+        ) : ow && ow.lines_total === 0 ? (
+          <span className="flex items-center gap-2 text-attn">
+            <span className="w-2 h-2 bg-attn" aria-hidden="true" />
+            {t('No lines found in this PDF')}
+          </span>
         ) : x.status === 'error' ? (
           <span className="text-attn">{t('Could not read the PDF')}</span>
         ) : x.status === 'submitted' || x.status === 'awarded' ? (

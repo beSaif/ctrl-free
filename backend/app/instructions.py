@@ -402,6 +402,8 @@ def _llm_select(rules: list[dict], quotes: dict, pos_summary: dict, allowances: 
 def extract_instructions(pages_text: dict[int, str] | None, positions: list[dict], catalog=None, pdf=None,
                          matches: dict | None = None, use_llm: bool | None = None, max_rules: int = 16,
                          titles: dict | None = None) -> list[dict]:
+    # subtotals ("Total Kanäle B") and pure text blocks are never what a rule applies to
+    positions = [p for p in positions if p.get("kind") not in ("subtotal", "text_only")]
     doc = open_pdf(pdf)
     if doc is not None:
         last_cond = min(doc.page_count, min([p.get("page") or 10**6 for p in positions] or [doc.page_count]) - 1) or doc.page_count

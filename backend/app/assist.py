@@ -292,6 +292,22 @@ def _mark_items(t: dict, proposal_id: str | None, lv_ids: set[str], state: str) 
             p["state"] = "applied" if any(x.get("state") == "filled" for x in p["items"]) else "dismissed"
 
 
+def reopen_after_undo(t: dict, undone: list[dict]) -> None:
+    """Undoing an Assist fill puts the reply's proposal back in "Needs your OK", so it can be filled again."""
+    for u in undone:
+        orig = next((e for e in t.get("log") or [] if e.get("id") == u.get("undoes")), None)
+        if not orig or orig.get("action") != "fill_quote":
+            continue
+        pid = ((orig.get("after") or {}).get("supplier_quote") or {}).get("proposal_id")
+        for p in _assist_state(t)["proposals"]:
+            if p["id"] != pid:
+                continue
+            for x in p.get("items") or []:
+                if x["lv_id"] == orig.get("lv_id") and x.get("state") == "filled":
+                    x["state"] = "open"
+                    p["state"] = "open"
+
+
 def apply_quotes(tid: str, proposals: list[dict], proposal_id: str | None = None) -> dict:
     batch = store.new_id("b_")
     entries = []
@@ -646,6 +662,73 @@ def _confirm_instruction(t: dict, iid: str, by: str, batch: str | None) -> dict 
                         batch=batch, text=f"Confirmed: {ins.get('type')}")
 
 
+def _title(p: dict) -> str:
+    return (p.get("title_en") or p.get("title_de") or "").strip()
+
+
+def _finds(t: dict, v: dict, text: str, scope: str, lv_id: str | None) -> dict | None:
+    """Questions answered by looking things up (no change, no plan): money at risk, same product
+    elsewhere, a reminder draft. Deterministic, so they work the same with and without the LLM."""
+    s = text.lower()
+    if re.search(r"money at risk|most money|largest|biggest|highest|meiste[ns]? geld|grösste|größte", s):
+        rows = sorted((p for p in v["positions"] if p.get("needs_review")), key=lambda p: -_direct(p))[:8]
+        total = sum(_direct(p) for p in v["positions"] if p.get("needs_review"))
+        return {"kind": "plan", "plan_id": None, "intent": "find", "method": "rules",
+                "message": (f"The lines that still need you carry CHF {swiss(total, 0)} of direct cost. "
+                            f"These {len(rows)} carry the most:"),
+                "plan": [{"lv_id": p["lv_id"], "text": f"{_title(p)} · CHF {swiss(_direct(p))}", "action": "open"}
+                         for p in rows]}
+    if re.search(r"same product|other areas|elsewhere|gleiche[sn]? produkt|andere[nm]? (bereich|anlage)", s):
+        x = (re.findall(r"\bLV\d{3,5}\b", text.upper()) or [lv_id])[0]
+        cur = v["by_lv"].get(x) if x else None
+        if not cur:
+            return {"kind": "message", "plan_id": None, "plan": [], "intent": "find", "method": "rules",
+                    "message": "Open a line first, then ask for the same product in other areas."}
+        pid = (cur.get("pricing") or {}).get("product_id") or pipeline.effective_product(cur)
+        group = next((g for g in t.get("quote_requests") or [] if x in (g.get("lv_ids") or [])), None)
+        same, what = [], "the same product"
+        if pid:
+            same = [p for p in v["positions"] if p["lv_id"] != x and
+                    ((p.get("pricing") or {}).get("product_id") or pipeline.effective_product(p)) == pid]
+            what = f"product {pid}"
+        if not same and group:
+            same = [v["by_lv"][i] for i in group["lv_ids"] if i != x and i in v["by_lv"]]
+            what = f"the same product type ({group.get('title')})"
+        if not same:
+            return {"kind": "message", "plan_id": None, "plan": [], "intent": "find", "method": "rules",
+                    "message": f"No other line uses {what}."}
+        return {"kind": "plan", "plan_id": None, "intent": "find", "method": "rules",
+                "message": f"{len(same)} other line{'s' if len(same) != 1 else ''} use {what}:",
+                "plan": [{"lv_id": p["lv_id"], "text": f"{p.get('system_key') or ''} · p. {p.get('page')} · "
+                                                     f"{_title(p)}".strip(" ·"), "action": "open"} for p in same[:12]]}
+    if re.search(r"remind|reminder|erinner|nachfass", s):
+        groups = t.get("quote_requests") or []
+        open_g = []
+        for g in groups:
+            missing = [i for i in g.get("lv_ids") or [] if i in v["by_lv"] and not v["by_lv"][i].get("supplier_quote")
+                       and v["by_lv"][i].get("needs_review")]
+            if missing:
+                open_g.append((g, missing))
+        if lv_id and scope == "line":
+            open_g = [(g, m) for g, m in open_g if lv_id in (g.get("lv_ids") or [])] or open_g[:1]
+        sent = [(g, m) for g, m in open_g if g.get("sent_at")]
+        pick = sent[:1] or open_g[:1]
+        if not pick:
+            return {"kind": "message", "plan_id": None, "plan": [], "intent": "draft", "method": "rules",
+                    "message": "Every supplier request has its answer. Nothing to remind."}
+        g, missing = pick[0]
+        rows = "\n".join(f"- {i} · Seite {v['by_lv'][i].get('page')} · {v['by_lv'][i].get('title_de')}" for i in missing[:12])
+        more = f"\n- und {len(missing) - 12} weitere" if len(missing) > 12 else ""
+        when = f" vom {g['sent_at'][8:10]}.{g['sent_at'][5:7]}.{g['sent_at'][:4]}" if g.get("sent_at") else ""
+        body = (f"Betreff: Erinnerung Preisanfrage {g.get('title_de') or g.get('title')} · {t.get('name') or ''}\n\n"
+                f"Guten Tag\n\nGerne erinnern wir Sie an unsere Preisanfrage{when}. Für folgende Positionen fehlt uns "
+                f"noch Ihr Preis:\n{rows}{more}\n\nFür eine Antwort in den nächsten Tagen danken wir Ihnen.\n\n"
+                f"Freundliche Grüsse\n[Ihr Name], Equans")
+        return {"kind": "message", "plan_id": None, "plan": [], "intent": "draft", "method": "rules",
+                "message": f"Reminder draft for {g.get('title')} ({len(missing)} open lines). Nothing is sent:\n\n{body}"}
+    return None
+
+
 def command(tid: str, text: str, scope: str = "tender", lv_id: str | None = None) -> dict:
     t = store.load(tid)
     if not t.get("positions"):
@@ -653,6 +736,9 @@ def command(tid: str, text: str, scope: str = "tender", lv_id: str | None = None
     if lv_id and not any(p["lv_id"] == lv_id for p in t["positions"]):
         raise HTTPException(404, f"Line {lv_id} not found")
     v = pipeline.view(t)
+    found = _finds(t, v, text, scope, lv_id)
+    if found is not None:
+        return found
     cls, method = _classify(t, v, text, scope, lv_id)
     direct_before = v["totals"].get("direct")
 

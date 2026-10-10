@@ -1,10 +1,10 @@
 // N04 Lines: filter tabs, search, table grouped by product type (review) or area (all).
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useT } from '../i18n'
 import { usePricing } from '../api/hooks'
 import type { Position } from '../api/types'
-import { AssistTag, ErrorBox, FilterTabs, LinkButton, Button, Loading, SearchBox, type TabItem } from '../components/ui'
+import { AssistTag, ErrorBox, FilterTabs, IconChevron, LinkButton, Button, Loading, SearchBox, type TabItem } from '../components/ui'
 import { cx } from '../lib/cx'
 import { FooterTotals } from '../components/FooterTotals'
 import { AssistBarButton } from '../assist/AssistLayer'
@@ -12,7 +12,7 @@ import { fmt2, fmtQty, fmtUnit } from '../lib/format'
 import { isSupplier, lineStatus, matchView, productLabel, quotedPrice, type LineFilter } from '../lib/lines'
 import { linesQuery, useCatalog, useLineFilter, useLineQueue } from './linesShared'
 
-export const LINE_GRID = 'grid grid-cols-[56px_minmax(0,1.5fr)_52px_40px_minmax(0,1fr)_92px_104px_84px_200px] gap-x-3'
+export const LINE_GRID = 'grid grid-cols-[56px_minmax(0,1.5fr)_52px_40px_minmax(0,1fr)_92px_104px_112px_184px] gap-x-3'
 
 export function Lines() {
   const { id = '' } = useParams()
@@ -26,6 +26,32 @@ export function Lines() {
   const cat = useCatalog()
   const [sel, setSel] = useState<string | null>(params.get('sel'))
   const rowRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
+
+  // Large lists open with the biggest groups expanded and the rest collapsed (one click each, or all).
+  const groupOf = useMemo(() => {
+    const m: Record<string, string> = {}
+    let g = ''
+    for (const r of rows) {
+      if (r.type === 'group') g = r.key
+      else m[r.p.lv_id] = g
+    }
+    return m
+  }, [rows])
+  const groupKeys = useMemo(() => rows.filter((r) => r.type === 'group').map((r) => r.key), [rows])
+  const big = queue.length > 80 && !q
+  // expanded/collapsed choices belong to one filter + search; switching starts fresh
+  const fk = filter + '|' + q
+  const [tog, setTog] = useState<{ k: string; v: Record<string, boolean> }>({ k: fk, v: {} })
+  const toggled = tog.k === fk ? tog.v : {}
+  const setToggled = (f: (x: Record<string, boolean>) => Record<string, boolean>) => setTog({ k: fk, v: f(toggled) })
+  const isCollapsed = (key: string) => {
+    if (key in toggled) return toggled[key]
+    if (sel && groupOf[sel] === key) return false
+    return big && groupKeys.indexOf(key) >= 5
+  }
+  const allOpen = groupKeys.every((k) => !isCollapsed(k))
+  const setAll = (collapsed: boolean) => setToggled(() => Object.fromEntries(groupKeys.map((k) => [k, collapsed])))
+  const visibleQueue = queue.filter((p) => !isCollapsed(groupOf[p.lv_id] ?? ''))
 
   useEffect(() => {
     const h = setTimeout(() => {
@@ -43,16 +69,17 @@ export function Lines() {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement
       if (e.metaKey || e.ctrlKey || e.altKey || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) return
-      if (!queue.length) return
-      const i = queue.findIndex((p) => p.lv_id === sel)
+      const vq = visibleQueue
+      if (!vq.length) return
+      const i = vq.findIndex((p) => p.lv_id === sel)
       if (e.key === 'j' || e.key === 'J') {
         e.preventDefault()
-        const n = queue[Math.min(queue.length - 1, i + 1)]
+        const n = vq[Math.min(vq.length - 1, i + 1)]
         setSel(n.lv_id)
         rowRefs.current[n.lv_id]?.focus()
       } else if (e.key === 'k' || e.key === 'K') {
         e.preventDefault()
-        const n = queue[Math.max(0, i - 1)]
+        const n = vq[Math.max(0, i - 1)]
         setSel(n.lv_id)
         rowRefs.current[n.lv_id]?.focus()
       } else if (e.key === 'Enter' && sel && el.tagName !== 'A' && el.tagName !== 'BUTTON') {
@@ -61,7 +88,7 @@ export function Lines() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [queue, sel, nav, id, filter, q])
+  }, [visibleQueue, sel, nav, id, filter, q])
 
   const items: TabItem<LineFilter>[] = [
     { key: 'review', label: t('To review'), count: counts.review },
@@ -88,7 +115,12 @@ export function Lines() {
         <FilterTabs label={t('Filter lines')} items={items} value={filter} onChange={(f) => setFilter(f, q)} />
         <div className="flex-[1_1_200px]" />
         <span className="text-[13px] text-muted">{hint}</span>
-        <SearchBox value={search} onChange={setSearch} label={t('Search')} placeholder={t('Search lines or pages')} className="flex-[0_1_260px]" />
+        {groupKeys.length > 1 && (
+          <button type="button" onClick={() => setAll(allOpen)} className="min-h-8 px-1 border-0 bg-transparent text-[13px] text-accent underline underline-offset-2">
+            {allOpen ? t('Collapse all') : t('Expand all')}
+          </button>
+        )}
+        <SearchBox value={search} onChange={setSearch} label={t('Search')} placeholder={t('Search lines or pages')} className="flex-[0_1_220px]" />
       </div>
 
       <main className="flex-auto">
@@ -125,7 +157,14 @@ export function Lines() {
               </div>
               {rows.map((r) =>
                 r.type === 'group' ? (
-                  <div key={r.key} className="flex items-center gap-2.5 min-h-9 px-6 border-b border-rule bg-panel">
+                  <button
+                    type="button"
+                    key={r.key}
+                    onClick={() => setToggled((x) => ({ ...x, [r.key]: !isCollapsed(r.key) }))}
+                    aria-expanded={!isCollapsed(r.key)}
+                    className="flex items-center gap-2.5 w-full min-h-9 px-6 border-0 border-b border-rule bg-panel text-left text-ink hover:bg-rowrule"
+                  >
+                    <IconChevron open={!isCollapsed(r.key)} />
                     <span className="font-semibold">{r.name}</span>
                     <span className="text-muted">{r.meta}</span>
                     <span className="flex-auto" />
@@ -135,8 +174,8 @@ export function Lines() {
                       </span>
                     )}
                     <span className="font-mono min-w-[110px] text-right">{fmt2(r.sub)}</span>
-                  </div>
-                ) : (
+                  </button>
+                ) : isCollapsed(groupOf[r.p.lv_id] ?? '') ? null : (
                   <LineRow
                     key={r.p.lv_id}
                     p={r.p}

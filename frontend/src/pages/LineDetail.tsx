@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
-import { useInstructions, useMarkSent, usePatchPosition, usePosition, useTender } from '../api/hooks'
+import { useInstructions, useMarkSent, usePatchPosition, usePosition, useTender, useVerification } from '../api/hooks'
 import type { Position, PositionPatch, QuoteGroup } from '../api/types'
-import { Button, ErrorBox, IconBack, Kbd, LinkButton, Loading } from '../components/ui'
+import { Button, ErrorBox, IconBack, IconCheck, Kbd, LinkButton, Loading } from '../components/ui'
 import { cx } from '../lib/cx'
 import { PdfCrop } from '../components/PdfCrop'
 import { FooterTotals } from '../components/FooterTotals'
@@ -53,10 +53,14 @@ export function LineDetail() {
   const cat = useCatalog()
 
   // keep a frozen queue for this visit so confirming does not reshuffle Previous/Next
-  const qi = queue.findIndex((x) => x.lv_id === lv)
-  const prev = qi > 0 ? queue[qi - 1] : null
-  const next = qi >= 0 && qi < queue.length - 1 ? queue[qi + 1] : null
-  const qs = linesQuery(filter, q)
+  // a line outside the current queue (e.g. a priced line opened from a link) steps through the tender in order
+  const inQueue = queue.findIndex((x) => x.lv_id === lv)
+  const docOrder = useMemo(() => positions.filter((x) => x.kind !== 'subtotal'), [positions])
+  const navList = inQueue >= 0 ? queue : docOrder
+  const qi = inQueue >= 0 ? inQueue : docOrder.findIndex((x) => x.lv_id === lv)
+  const prev = qi > 0 ? navList[qi - 1] : null
+  const next = qi >= 0 && qi < navList.length - 1 ? navList[qi + 1] : null
+  const qs = inQueue >= 0 ? linesQuery(filter, q) : linesQuery('all', '')
   const goTo = (x: Position | null) => x && nav(`/t/${id}/lines/${x.lv_id}${qs}`)
 
   useEffect(() => {
@@ -70,9 +74,10 @@ export function LineDetail() {
   const confirm = async () => {
     if (!p) return
     const rest = queue.filter((x) => x.lv_id !== lv)
-    const nxt = filter === 'review' ? (queue[qi + 1] ?? rest[0] ?? null) : null
+    const review = filter === 'review' && inQueue >= 0
+    const nxt = review ? (queue[inQueue + 1] ?? rest[0] ?? null) : null
     await doPatch({ confirm: true })
-    if (filter === 'review') {
+    if (review) {
       if (nxt) nav(`/t/${id}/lines/${nxt.lv_id}${qs}`)
       else nav(`/t/${id}/lines${qs}`)
     }
@@ -104,6 +109,8 @@ export function LineDetail() {
   }, [quotes, lv, dq.data])
   const rules = (ins?.instructions ?? []).filter((i) => i.applies_to?.includes(lv))
   const lp = useLineProposal(id, lv)
+  const { data: verif } = useVerification(id)
+  const vrow = verif?.rows.find((r) => r.our_lv_id === lv)
 
   if (!p) return dq.isLoading ? <Loading label={t('Loading')} /> : <ErrorBox error={dq.error} label={t('This line was not found.')} />
 
@@ -111,7 +118,7 @@ export function LineDetail() {
   const sup = isSupplier(p)
   const open = isOpen(p)
   const quoted = quotedPrice(p)
-  const posLabel = filter === 'review' ? t('To review') : filter === 'priced' ? t('Priced') : t('Line')
+  const posLabel = inQueue < 0 ? t('Line') : filter === 'review' ? t('To review') : filter === 'priced' ? t('Priced') : t('Line')
   const sysName = p.system.replace(/^\d+(\.\d+)*\s+/, '')
   const showProposal = lp && !lp.dismissed && lp.line.state !== 'filled' && sup && !p.confirmed
   const filledByAssist = p.supplier_quote?.by === 'Assist'
@@ -125,7 +132,7 @@ export function LineDetail() {
           {t('All lines')}
         </LinkButton>
         <span className="flex-auto" />
-        <span className="text-[13px] text-muted">{qi >= 0 ? t('{label} {i} of {n}', { label: posLabel, i: qi + 1, n: queue.length }) : ''}</span>
+        <span className="text-[13px] text-muted">{qi >= 0 ? t('{label} {i} of {n}', { label: posLabel, i: qi + 1, n: navList.length }) : ''}</span>
         <Button size="sm" onClick={() => goTo(prev)} disabled={!prev}>
           {t('Previous')} <Kbd>K</Kbd>
         </Button>
@@ -147,6 +154,7 @@ export function LineDetail() {
               {st.label}
               {p.status_reason && !p.confirmed && lang === 'en' && <span className="text-muted text-[13px]">· {p.status_reason}</span>}
             </span>
+            {vrow && <VerifiedBadge row={vrow} current={p.pricing?.direct ?? null} />}
           </div>
 
           <div className="flex flex-wrap items-start gap-x-10 gap-y-7">
@@ -195,7 +203,7 @@ export function LineDetail() {
                 />
               )}
 
-              {sup && showProposal && lp && <ProposalCard tenderId={id} p={p} proposal={lp.proposal} line={lp.line} groupTitle={group ? t(group.title) : undefined} />}
+              {sup && showProposal && lp && <ProposalCard tenderId={id} p={p} proposal={lp.proposal} line={lp.line} groupTitle={group ? (lang === 'de' && group.title_de ? group.title_de : t(group.title)) : undefined} />}
               {sup && filledByAssist && <FilledNote tenderId={id} p={p} allFilled={groupFilled} />}
               {sup && !showProposal && quoted === null && !p.confirmed && <DropZone tenderId={id} lv={lv} />}
 
@@ -325,7 +333,7 @@ function PriceSection({
   const unit = fmtUnit(p.unit)
   const quoted = quotedPrice(p)
   const catalogue = p.product?.net_cost_chf ?? (o.product_id ? cat[o.product_id]?.net_cost_chf : p.match?.product_id ? cat[p.match.product_id]?.net_cost_chf : undefined)
-  const calcHours = pr?.calculated?.hours
+  const calcHours = pr?.calculated?.hours ?? pr?.calculated_hours
   const calcDirect = pr?.calculated?.direct
   const changed = wasChanged(p) || (sup && quoted !== null && p.supplier_quote?.by !== 'Assist')
   const qtySet = o.quantity != null
@@ -444,12 +452,27 @@ function PriceSection({
             <span>{t('Material, incl. {w}% waste', { w: pr.waste_pct })}</span>
             <span className="flex-none font-mono">{fmt2(pr.material)}</span>
           </div>
-          <span className="pb-1.5 border-b border-rowrule text-[12.5px] text-muted">{materialSentence(pr, p.unit, t)}</span>
+          <span className="pb-1.5 border-b border-rowrule text-[12.5px] text-muted">
+            {materialSentence(pr, p.unit, t)}
+            {(qtySet || priceSet) && (
+              <span className="text-accent">
+                {' · '}
+                {qtySet && priceSet
+                  ? t('quantity and unit price changed by you')
+                  : qtySet
+                    ? t('quantity changed by you (tender: {q})', { q: fmtQty(p.quantity) })
+                    : t('unit price changed by you')}
+              </span>
+            )}
+          </span>
           <div className="flex justify-between gap-3 pt-1.5">
             <span>{t('Labour')}</span>
             <span className="flex-none font-mono">{fmt2(pr.labour)}</span>
           </div>
-          <span className="text-[12.5px] text-muted">{hoursSentence(pr, p.unit, t, hoursSet)}</span>
+          <span className="text-[12.5px] text-muted">
+            {hoursSentence(pr, p.unit, t, hoursSet)}
+            {hoursSet && calcHours !== undefined && <span className="text-accent"> · {t('changed by you (install rule: {h} h)', { h: fmt2(calcHours) })}</span>}
+          </span>
           <span className="pb-1.5 border-b border-rowrule text-[12.5px] text-muted">{labourSentence(pr, t)}</span>
           <div className="flex justify-between gap-3 py-2 font-semibold text-[16px]">
             <span>{t('Line total')}</span>
@@ -459,7 +482,7 @@ function PriceSection({
             {changed && calcDirect !== undefined && Math.abs(calcDirect - pr.direct) >= 0.005 && (
               <>{t('Calculated total was {c} ({d}).', { c: fmt2(calcDirect), d: fmtSigned(pr.direct - calcDirect) })} </>
             )}
-            {factorText && (
+            {factorText && !hoursSet && (
               <>
                 {t('Hours include the site factors from')} <Link to={`/t/${tenderId}/pricing`}>{t('Pricing')}</Link>: {factorText}.
               </>
@@ -579,7 +602,7 @@ function SupplierSection({
       </span>
       {group && (
         <>
-          <span className="text-[13px] text-muted">{t('One request covers the same product type across all areas ({g}):', { g: t(group.title) })}</span>
+          <span className="text-[13px] text-muted">{t('One request covers the same product type across all areas ({g}):', { g: lang === 'de' && group.title_de ? group.title_de : t(group.title) })}</span>
           <div className="flex flex-wrap gap-1.5">
             {group.lv_ids.map((x) => {
               const s = positions.find((y) => y.lv_id === x)
@@ -631,5 +654,29 @@ function SupplierSection({
         </>
       )}
     </section>
+  )
+}
+
+/** "Equans verified example LV0001 · CHF 806.26 ✓": this line is one of the case's 22 worked examples. */
+function VerifiedBadge({ row, current }: { row: { example_id: string; golden_direct: number; direct_ok: boolean }; current: number | null }) {
+  const t = useT()
+  const same = current !== null && Math.abs(current - row.golden_direct) < 0.005
+  return (
+    <span
+      className="self-start inline-flex items-center gap-2 mt-0.5 px-2 py-[3px] border text-[12.5px]"
+      style={{ borderColor: same ? C.ink : C.attn, color: same ? C.ink : C.attn }}
+      title={t('One of the 22 example lines Equans priced by hand for this case')}
+    >
+      <span>{t('Equans verified example {id}', { id: row.example_id })}</span>
+      <span className="font-mono">· CHF {fmt2(row.golden_direct)}</span>
+      {same ? (
+        <span className="inline-flex items-center gap-1">
+          <IconCheck />
+          <span className="sr-only">{t('matches')}</span>
+        </span>
+      ) : (
+        <span>· {t('ours now {v}', { v: current === null ? '–' : fmt2(current) })}</span>
+      )}
+    </span>
   )
 }

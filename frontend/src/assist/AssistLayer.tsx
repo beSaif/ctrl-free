@@ -66,7 +66,7 @@ function Tray() {
   const needs = data?.needs_ok ?? []
   const ref = useRef<HTMLElement>(null)
   useEffect(() => {
-    ref.current?.focus()
+    ref.current?.focus({ preventScroll: true })
   }, [])
 
   const approve = async (p: AssistProposal) => {
@@ -177,8 +177,9 @@ function Tray() {
         <span className="text-[13px] font-semibold">{t('Done')}</span>
         {(data?.done ?? []).map((d, i) => (
           <div key={d.id ?? i} className="flex justify-between items-center gap-3">
-            <span>{d.text}</span>
+            <span className={d.undone ? 'text-muted line-through' : undefined}>{d.text}</span>
             <span className="flex-none flex items-center gap-2 text-[13px] text-muted">
+              {d.undone && <span>{t('undone')}</span>}
               {d.undoable && d.log_id && (
                 <button
                   type="button"
@@ -405,7 +406,7 @@ function CommandBar() {
 
       {st.s === 'plan' && (
         <div className="px-4 py-3.5 flex flex-col gap-2.5">
-          {st.plan.answer && !st.plan.explain && <span>{st.plan.answer}</span>}
+          {st.plan.answer && !st.plan.explain && <span className="whitespace-pre-line">{st.plan.answer}</span>}
           {st.plan.explain && (
             <>
               <span className="font-semibold">{st.plan.explain.title ?? st.plan.answer}</span>

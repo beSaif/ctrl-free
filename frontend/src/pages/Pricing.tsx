@@ -8,9 +8,9 @@ import { usePricing, usePutPricing, useResetPricing, useTender } from '../api/ho
 import type { PricingPut, PricingResponse, PricingSettings, Scenario, Totals } from '../api/types'
 import { Button, ErrorBox, IconChevron, Loading, SegmentedControl, Stepper, Toggle } from '../components/ui'
 import { cx } from '../lib/cx'
-import { fmt0, fmt2, fmtShortDate } from '../lib/format'
+import { fmt0, fmt2, fmtShortDate, translationLabel } from '../lib/format'
 import { C } from '../lib/lines'
-import { APPETITE, COMPETITION, SENSITIVITY, bestScenario, projectCostItems, sortScenarios, standardMargin, winWords } from '../lib/pricing'
+import { APPETITE, COMPETITION, SENSITIVITY, bestScenario, previewScenario, projectCostItems, sortScenarios, standardMargin, winWords } from '../lib/pricing'
 
 type Draft = PricingPut
 
@@ -118,7 +118,7 @@ export function Pricing() {
   const scen = sortScenarios(tot.scenarios)
   const best = bestScenario(scen)
   const chosenName = s.chosen
-  const shown = scen.find((x) => x.name === chosenName) ?? best ?? scen[0]
+  const shown = previewScenario(scen, chosenName)!
   const pcItems = projectCostItems(tot, s, t)
   const pcOn = pcItems.filter((i) => i.on)
   const pcAll = pcItems.reduce((a, i) => a + i.amount, 0)
@@ -228,7 +228,7 @@ export function Pricing() {
 
         <section aria-label={t('Offer price')} className="flex-[1_1_520px] min-w-0 p-6 flex flex-col gap-6">
           <div className="flex flex-col gap-1.5 px-[18px] py-4 border border-ink" aria-live="polite">
-            <span className="text-[13px] text-muted">{chosenName ? t('Offer price') : t('Offer price · not chosen yet, showing the best expected profit')}</span>
+            <span className="text-[13px] text-muted">{chosenName ? t('Offer price') : t('Offer price · not chosen yet, showing {name}', { name: t(shown.name) })}</span>
             <span className={cx('font-mono text-[32px] leading-[1.15] font-medium', busy && 'cf-pending')}>CHF {fmt0(shown.bid)}</span>
             <span>
               {t(shown.name)} · {t('{m} margin', { m: shown.margin_pct.toFixed(1) + '%' })} ·{' '}
@@ -287,7 +287,7 @@ export function Pricing() {
             <span className="text-[13px] text-muted">
               {t('Expected profit = win chance × profit if won.')}
               {price && ' ' + t('Price is worth {p} of 100 award points (p. {page}).', { p: price.points, page: price.page })}
-              {price?.rule_en && ' ' + (lang === 'de' ? (price.rule_de ?? price.rule_en) : price.rule_en)}
+              {price?.rule_en && ' ' + (lang === 'de' ? (price.rule_de ?? price.rule_en) : `${price.rule_en} (${t(translationLabel(price.rule_en_method)).toLowerCase()})`)}
             </span>
           </div>
 
@@ -439,7 +439,7 @@ function MoreSettings({ s, D, change, t, busy }: { s: PricingSettings; D: Pricin
 
 function Buildup({ tot, s, shown, t, busy }: { tot: Totals; s: PricingSettings; shown: Scenario; t: T; busy: boolean }) {
   const rows: { label: string; val: string; strong?: boolean; rule: string }[] = [
-    { label: tot.lines ? t('Direct cost, {n} lines', { n: tot.lines }) : t('Direct cost'), val: fmt2(tot.direct), rule: 'border-rowrule' },
+    { label: tot.lines ? t('Direct cost, {n} priced lines', { n: tot.lines }) : t('Direct cost'), val: fmt2(tot.direct), rule: 'border-rowrule' },
   ]
   if (tot.project_costs) rows.push({ label: t('+ Project costs switched on'), val: fmt2(tot.project_costs), rule: 'border-rowrule' })
   if (tot.small_material) rows.push({ label: t('+ Small material {p}%', { p: s.small_material_pct.toFixed(1) }), val: fmt2(tot.small_material), rule: 'border-rowrule' })
