@@ -1,14 +1,15 @@
-// N08 Export: before-you-submit checklist (not blocking), submission rule from the tender,
-// files, Mark as submitted.
+// N08 Export: open points as one count (the full checklist folded, not blocking), submission rule
+// from the tender, files, Mark as submitted.
 import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
 import { api, type ExportKind } from '../api/client'
 import { useInstructions, usePositions, usePricing, useSubmit, useTender } from '../api/hooks'
-import { Button, Loading, Td, Th } from '../components/ui'
+import { Button, Disclosure, Loading, Td, Th } from '../components/ui'
 import { PageViewer } from '../components/PdfCrop'
+import { Source } from '../components/Source'
 import { FilledLv } from './FilledLv'
-import { fmt0, fmtDateTime, fmtDaysLeft, fmtShare } from '../lib/format'
+import { fmt0, fmtDateTime, fmtShare } from '../lib/format'
 import { C, isOpen, isPriceable, isSupplier, quotedPrice } from '../lib/lines'
 import { allProjectCosts, previewScenario } from '../lib/pricing'
 
@@ -60,6 +61,10 @@ export function Export() {
   const rule = tender.submission_rule
   const sub = tender.submission
   const rt = tender.review_trail
+  const changesOpen = !!rt && (rt.to_review > 0 || rt.ai_to_review > 0)
+  // the attn rows of the checklist below; the line above it shows only this count
+  const openPoints = [budget.length > 0, unpriced.length > 0, otherOpen > 0, openIns.length > 0, pcOn.length === 0, !chosen, changesOpen].filter(Boolean).length
+  const checkN = 5 + (unpriced.length > 0 ? 1 : 0) + (otherOpen > 0 ? 1 : 0) + (changesOpen || (rt?.changes ?? 0) > 0 ? 1 : 0)
   const lnk = (to: string, label: string) => (
     <Link to={to} className="whitespace-nowrap">
       {label}
@@ -76,117 +81,131 @@ export function Export() {
 
   return (
     <main className="flex flex-wrap items-start">
-      <section aria-label={t('Before you submit')} className="flex-[1_1_520px] max-w-[640px] min-w-0 p-6 flex flex-col gap-4 border-r border-rule">
+      <section aria-label={t('Before you submit')} className="flex-[1_1_420px] max-w-[560px] min-w-0 p-6 flex flex-col gap-5 border-r border-rule">
         <div className="flex flex-col gap-1">
           <h1 className="m-0 text-[20px] font-semibold">{t('Before you submit')}</h1>
-          <p className="m-0 text-muted">
-            {fmtDaysLeft(tender.due_at, lang).replace(/^./, (c) => c.toUpperCase())}. {t('Open points are listed, not blocked. You decide whether to submit with them.')}
+          <p className="m-0">
+            {openPoints === 0 ? (
+              t('No open points.')
+            ) : (
+              <>
+                <span className="font-mono font-semibold text-attn">{openPoints}</span> {openPoints === 1 ? t('open point') : t('open points')} ·{' '}
+                <Link to={`/t/${id}`}>{t('See the Overview')}</Link>
+              </>
+            )}
           </p>
         </div>
-        <div className="flex flex-col">
-          <Check color={C.stone} link={lnk(`/t/${id}/lines?f=priced`, t('Lines'))}>
-            <strong className="font-semibold">{t('{a} of {b} lines priced', { a: priced, b: priceable.length })}</strong> {t('from the catalogue')}
-          </Check>
-          {budget.length > 0 ? (
-            <Check color={C.attn} link={lnk(`/t/${id}/lines`, t('Lines'))}>
-              <strong className="font-semibold text-attn">{budget.length === 1 ? t('1 line on a budget price') : t('{n} lines on budget prices', { n: budget.length })}</strong> ·{' '}
-              {t('CHF {a} of direct cost ({s}).', { a: fmt0(budgetDirect), s: fmtShare(tot.direct ? budgetDirect / tot.direct : 0) })}{' '}
-              {quotes ? t('{n} supplier quotes entered.', { n: quotes }) : t('No supplier quotes entered yet.')}
+        <Disclosure label={t('All checks')} summary={`(${checkN})`}>
+          <p className="m-0 mt-1 text-[13px] text-muted">{t('Open points are listed, not blocked. You decide whether to submit with them.')}</p>
+          <div className="flex flex-col">
+            <Check color={C.stone} link={lnk(`/t/${id}/lines?f=priced`, t('Lines'))}>
+              <strong className="font-semibold">{t('{a} of {b} lines priced', { a: priced, b: priceable.length })}</strong> {t('from the catalogue')}
             </Check>
-          ) : (
-            <Check color={C.ink} link={lnk(`/t/${id}/lines?f=all`, t('Lines'))}>
-              <strong className="font-semibold">{t('No budget prices left')}</strong> · {t('{n} supplier quotes entered.', { n: quotes })}
-            </Check>
-          )}
-          {unpriced.length > 0 && (
-            <Check color={C.attn} link={lnk(`/t/${id}/lines`, t('Lines'))}>
-              <strong className="font-semibold text-attn">{unpriced.length === 1 ? t('1 line without a price') : t('{n} lines without a price', { n: unpriced.length })}</strong> ·{' '}
-              {[
-                unpricedSup ? t('{n} not in the catalogue (supplier requests are drafted)', { n: unpricedSup }) : null,
-                unpricedQty ? t('{n} without a quantity in the tender', { n: unpricedQty }) : null,
-              ]
-                .filter(Boolean)
-                .join('; ')}
-              . {t('They are not in the direct cost yet.')}
-            </Check>
-          )}
-          {otherOpen > 0 && (
-            <Check color={C.attn} link={lnk(`/t/${id}/lines`, t('Lines'))}>
-              <strong className="font-semibold text-attn">{allGuesses ? (otherOpen === 1 ? t('1 line priced with an assumption') : t('{n} lines priced with an assumption', { n: otherOpen })) : t('{n} more lines to review', { n: otherOpen })}</strong>
-              {allGuesses && <> · {t('check them before you submit')}</>}
-            </Check>
-          )}
-          {openIns.length > 0 ? (
-            <Check color={C.attn} link={lnk(`/t/${id}/instructions`, t('Instructions'))}>
-              <strong className="font-semibold text-attn">{t('{a} of {b} instructions not confirmed', { a: openIns.length, b: ins.instructions.length })}</strong> ·{' '}
-              {t('{c} add cost, {r} are risks', { c: cost, r: risk })}
-            </Check>
-          ) : (
-            <Check color={C.ink} link={lnk(`/t/${id}/instructions?tab=all`, t('Instructions'))}>
-              <strong className="font-semibold">{t('All instructions handled')}</strong>
-            </Check>
-          )}
-          {pcOn.length === 0 ? (
-            <Check color={C.attn} link={lnk(`/t/${id}/pricing/costs`, t('Pricing'))}>
-              <strong className="font-semibold text-attn">{t('Project costs not included')}</strong> ·{' '}
-              {t('engineering, commissioning, hygiene inspection, documentation (CHF {a} if all on)', { a: fmt0(allProjectCosts(tot)) })}
-            </Check>
-          ) : (
-            <Check color={C.ink} link={lnk(`/t/${id}/pricing/costs`, t('Pricing'))}>
-              <strong className="font-semibold">{t('Project costs included')}</strong> · CHF {fmt0(tot.project_costs)}
-            </Check>
-          )}
-          {chosen ? (
-            <Check color={C.accent} link={lnk(`/t/${id}/pricing/strategy`, t('Change'))}>
-              <strong className="font-semibold">{t('Offer price CHF {p}', { p: fmt0(chosen.bid) })}</strong> ·{' '}
-              {t('{name}, {m}% margin · {w} win chance', { name: t(chosen.name), m: chosen.margin_pct.toFixed(1), w: fmtShare(chosen.win) })}
-            </Check>
-          ) : (
-            <Check color={C.attn} link={lnk(`/t/${id}/pricing/strategy`, t('Pricing'))}>
-              <strong className="font-semibold text-attn">{t('Offer price not chosen')}</strong> · {t('the standard margin gives CHF {p}', { p: fmt0(tot.standard_price) })}
-            </Check>
-          )}
-          {rt && (rt.to_review > 0 || rt.ai_to_review > 0) ? (
-            <Check color={C.attn} link={lnk(`/t/${id}/changes`, t('Changes'))}>
-              {rt.to_review > 0 && (
-                <strong className="font-semibold text-attn">
-                  {rt.to_review === 1 ? t('1 change not reviewed by a senior') : t('{n} changes not reviewed by a senior', { n: rt.to_review })}
-                </strong>
-              )}
-              {rt.to_review > 0 && rt.ai_to_review > 0 && ' · '}
-              {rt.ai_to_review > 0 &&
-                (rt.to_review > 0 ? (
-                  t('{n} low-confidence AI picks not reviewed', { n: rt.ai_to_review })
-                ) : (
-                  <strong className="font-semibold text-attn">{t('{n} low-confidence AI picks not reviewed', { n: rt.ai_to_review })}</strong>
-                ))}
-            </Check>
-          ) : rt && rt.changes > 0 ? (
-            <Check color={C.ink} link={lnk(`/t/${id}/changes?tab=all`, t('Changes'))}>
-              <strong className="font-semibold">{t('All {n} changes reviewed by a senior', { n: rt.changes })}</strong>
-            </Check>
-          ) : null}
-        </div>
+            {budget.length > 0 ? (
+              <Check color={C.attn} link={lnk(`/t/${id}/lines`, t('Lines'))}>
+                <strong className="font-semibold text-attn">{budget.length === 1 ? t('1 line on a budget price') : t('{n} lines on budget prices', { n: budget.length })}</strong> ·{' '}
+                {t('CHF {a} of direct cost ({s}).', { a: fmt0(budgetDirect), s: fmtShare(tot.direct ? budgetDirect / tot.direct : 0) })}{' '}
+                {quotes ? t('{n} supplier quotes entered.', { n: quotes }) : t('No supplier quotes entered yet.')}
+              </Check>
+            ) : (
+              <Check color={C.ink} link={lnk(`/t/${id}/lines?f=all`, t('Lines'))}>
+                <strong className="font-semibold">{t('No budget prices left')}</strong> · {t('{n} supplier quotes entered.', { n: quotes })}
+              </Check>
+            )}
+            {unpriced.length > 0 && (
+              <Check color={C.attn} link={lnk(`/t/${id}/lines`, t('Lines'))}>
+                <strong className="font-semibold text-attn">{unpriced.length === 1 ? t('1 line without a price') : t('{n} lines without a price', { n: unpriced.length })}</strong> ·{' '}
+                {[
+                  unpricedSup ? t('{n} not in the catalogue (supplier requests are drafted)', { n: unpricedSup }) : null,
+                  unpricedQty ? t('{n} without a quantity in the tender', { n: unpricedQty }) : null,
+                ]
+                  .filter(Boolean)
+                  .join('; ')}
+                . {t('They are not in the direct cost yet.')}
+              </Check>
+            )}
+            {otherOpen > 0 && (
+              <Check color={C.attn} link={lnk(`/t/${id}/lines`, t('Lines'))}>
+                <strong className="font-semibold text-attn">{allGuesses ? (otherOpen === 1 ? t('1 line priced with an assumption') : t('{n} lines priced with an assumption', { n: otherOpen })) : t('{n} more lines to review', { n: otherOpen })}</strong>
+                {allGuesses && <> · {t('check them before you submit')}</>}
+              </Check>
+            )}
+            {openIns.length > 0 ? (
+              <Check color={C.attn} link={lnk(`/t/${id}/instructions`, t('Instructions'))}>
+                <strong className="font-semibold text-attn">{t('{a} of {b} instructions not confirmed', { a: openIns.length, b: ins.instructions.length })}</strong> ·{' '}
+                {t('{c} add cost, {r} are risks', { c: cost, r: risk })}
+              </Check>
+            ) : (
+              <Check color={C.ink} link={lnk(`/t/${id}/instructions?tab=all`, t('Instructions'))}>
+                <strong className="font-semibold">{t('All instructions handled')}</strong>
+              </Check>
+            )}
+            {pcOn.length === 0 ? (
+              <Check color={C.attn} link={lnk(`/t/${id}/pricing/costs`, t('Pricing'))}>
+                <strong className="font-semibold text-attn">{t('Project costs not included')}</strong> ·{' '}
+                {t('engineering, commissioning, hygiene inspection, documentation (CHF {a} if all on)', { a: fmt0(allProjectCosts(tot)) })}
+              </Check>
+            ) : (
+              <Check color={C.ink} link={lnk(`/t/${id}/pricing/costs`, t('Pricing'))}>
+                <strong className="font-semibold">{t('Project costs included')}</strong> · CHF {fmt0(tot.project_costs)}
+              </Check>
+            )}
+            {chosen ? (
+              <Check color={C.accent} link={lnk(`/t/${id}/pricing/strategy`, t('Change'))}>
+                <strong className="font-semibold">{t('Offer price CHF {p}', { p: fmt0(chosen.bid) })}</strong> ·{' '}
+                {t('{name}, {m}% margin · {w} win chance', { name: t(chosen.name), m: chosen.margin_pct.toFixed(1), w: fmtShare(chosen.win) })}
+              </Check>
+            ) : (
+              <Check color={C.attn} link={lnk(`/t/${id}/pricing/strategy`, t('Pricing'))}>
+                <strong className="font-semibold text-attn">{t('Offer price not chosen')}</strong> · {t('the standard margin gives CHF {p}', { p: fmt0(tot.standard_price) })}
+              </Check>
+            )}
+            {rt && (rt.to_review > 0 || rt.ai_to_review > 0) ? (
+              <Check color={C.attn} link={lnk(`/t/${id}/changes`, t('Changes'))}>
+                {rt.to_review > 0 && (
+                  <strong className="font-semibold text-attn">
+                    {rt.to_review === 1 ? t('1 change not reviewed by a senior') : t('{n} changes not reviewed by a senior', { n: rt.to_review })}
+                  </strong>
+                )}
+                {rt.to_review > 0 && rt.ai_to_review > 0 && ' · '}
+                {rt.ai_to_review > 0 &&
+                  (rt.to_review > 0 ? (
+                    t('{n} low-confidence AI picks not reviewed', { n: rt.ai_to_review })
+                  ) : (
+                    <strong className="font-semibold text-attn">{t('{n} low-confidence AI picks not reviewed', { n: rt.ai_to_review })}</strong>
+                  ))}
+              </Check>
+            ) : rt && rt.changes > 0 ? (
+              <Check color={C.ink} link={lnk(`/t/${id}/changes?tab=all`, t('Changes'))}>
+                <strong className="font-semibold">{t('All {n} changes reviewed by a senior', { n: rt.changes })}</strong>
+              </Check>
+            ) : null}
+          </div>
+        </Disclosure>
 
         {rule && (
-          <div className="flex flex-col gap-1.5 pt-2">
+          <div className="flex flex-col gap-1.5">
             <h2 className="m-0 text-[15px] font-semibold">{t('Submission rules from the tender')}</h2>
-            <div className="text-[13px] text-muted">
-              {t('p. {page}', { page: rule.page })} · {rule.heading}
-            </div>
-            <blockquote className="m-0 px-3 py-2.5 border border-rule text-[13.5px] leading-[1.55]">«{rule.text_de}»</blockquote>
             <span className="text-[13.5px]">
-              {rule.summary && lang === 'en' ? rule.summary.full_en + ' ' : ''}
+              {rule.summary ? (lang === 'de' ? rule.summary.short_de : rule.summary.short_en) : rule.heading}{' '}
+              <span className="text-muted">· {t('p. {page}', { page: rule.page })}</span>{' '}
               <button type="button" onClick={() => setPageOpen(true)} className="border-0 bg-transparent p-0 text-[13px] text-accent underline underline-offset-2">
                 {t('Show on page')}
               </button>
             </span>
-            {lang === 'en' && rule.text_en && (
-              <details className="text-[13px] text-muted">
-                <summary className="cursor-pointer w-fit">{t(rule.text_en_method === 'glossary' ? 'Machine translation (rough)' : 'Machine translation')}</summary>
-                <p className="m-0 mt-1 leading-[1.55]">{rule.text_en}</p>
-              </details>
-            )}
+            <Disclosure label={t('Tender text')} className="text-[13.5px]">
+              <div className="flex flex-col gap-1.5 pt-1">
+                <div className="text-[13px] text-muted">{rule.heading}</div>
+                <blockquote className="m-0 px-3 py-2.5 border border-rule text-[13.5px] leading-[1.55]">«{rule.text_de}»</blockquote>
+                {rule.summary && lang === 'en' && <span className="text-[13.5px]">{rule.summary.full_en}</span>}
+                {lang === 'en' && rule.text_en && (
+                  <details className="text-[13px] text-muted">
+                    <summary className="cursor-pointer w-fit">{t(rule.text_en_method === 'glossary' ? 'Machine translation (rough)' : 'Machine translation')}</summary>
+                    <p className="m-0 mt-1 leading-[1.55]">{rule.text_en}</p>
+                  </details>
+                )}
+              </div>
+            </Disclosure>
             <PageViewer
               open={pageOpen}
               onClose={() => setPageOpen(false)}
@@ -282,8 +301,10 @@ export function Export() {
               <div className="flex flex-col gap-0.5 flex-[1_1_320px]">
                 <span className="font-semibold">{t('Mark as submitted')}</span>
                 <span className="text-muted text-[13px]">
-                  {t('Saves a snapshot of the price and every value behind it. You compare it with the award later in Outcome.')}
-                  {!chosen && best && ' ' + t('The price is not chosen yet: the snapshot uses {o} (CHF {p}).', { o: t(best.name), p: fmt0(best.bid) })}
+                  {!chosen && best && t('The price is not chosen yet: the snapshot uses {o} (CHF {p}).', { o: t(best.name), p: fmt0(best.bid) }) + ' '}
+                  <Source label={t('What it saves')} title={t('Mark as submitted')}>
+                    <p className="m-0 leading-[1.55]">{t('Saves a snapshot of the price and every value behind it. You compare it with the award later in Outcome.')}</p>
+                  </Source>
                 </span>
               </div>
               <Button

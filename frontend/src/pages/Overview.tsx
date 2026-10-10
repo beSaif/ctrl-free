@@ -8,6 +8,7 @@ import { changedBy, rec } from '../lib/trace'
 import { Button, Dialog, IconCheck, LinkButton, Loading } from '../components/ui'
 import { cx } from '../lib/cx'
 import { PageViewer } from '../components/PdfCrop'
+import { Source } from '../components/Source'
 import { fmt0, fmt2, fmtDateTime, fmtDaysLeft, fmtShare } from '../lib/format'
 import { isOpen, isPriceable, isSupplier, quotedPrice, reviewBreakdown } from '../lib/lines'
 import { allProjectCosts, standardMargin } from '../lib/pricing'
@@ -20,7 +21,10 @@ interface Step {
   action: string
   done: boolean
   urgent: boolean
-  body: ReactNode
+  /** one line with the key number; nothing when there is nothing to say */
+  status: ReactNode
+  /** the long explanation, behind a "Details" popover */
+  details: string | null
 }
 
 export function Overview() {
@@ -55,6 +59,7 @@ export function Overview() {
   const std = standardMargin(s)
   const base = `/t/${id}`
 
+  // each step: one short status with its key number; the long sentence sits behind "Details"
   const steps: Step[] = [
     {
       n: 1,
@@ -63,15 +68,12 @@ export function Overview() {
       action: open.length ? t('Start review') : t('Open'),
       done: open.length === 0,
       urgent: true,
-      body: open.length ? (
-        <>
-          <span className="text-attn font-medium">{t('{n} of {total} lines need you.', { n: open.length, total: priceable.length })}</span>{' '}
-          {reviewBreakdown(open, tot.direct, t).join(' ') + ' '}
-          {supplierOpen.length ? t('Supplier requests are drafted per product type.') : t('Check the product or the quantity and confirm.')}
-        </>
-      ) : (
-        <span className="text-muted">{t('Every line that needed you is confirmed. Direct cost is CHF {d}.', { d: fmt2(tot.direct) })}</span>
-      ),
+      status: open.length ? <span className="text-attn font-medium">{t('{n} of {total} lines need you', { n: open.length, total: priceable.length })}</span> : null,
+      details: open.length
+        ? reviewBreakdown(open, tot.direct, t).join(' ') +
+          ' ' +
+          (supplierOpen.length ? t('Supplier requests are drafted per product type.') : t('Check the product or the quantity and confirm.'))
+        : null,
     },
     {
       n: 2,
@@ -80,14 +82,12 @@ export function Overview() {
       action: t('Open'),
       done: openIns.length === 0,
       urgent: true,
-      body: openIns.length ? (
-        <>
-          <span className="text-attn font-medium">{t('{n} of {total} not confirmed.', { n: openIns.length, total: ins.instructions.length })}</span>{' '}
-          {t('{c} add cost and {r} are risks. Each one is quoted from the tender with its page.', { c: costN, r: riskN })}
-        </>
-      ) : (
-        <span className="text-muted">{t('All {n} handled. They go into the pricing report.', { n: ins.instructions.length })}</span>
-      ),
+      status: openIns.length ? (
+        <span className="text-attn font-medium">{t('{n} of {total} not confirmed', { n: openIns.length, total: ins.instructions.length })}</span>
+      ) : null,
+      details: openIns.length
+        ? t('{c} add cost and {r} are risks. Each one is quoted from the tender with its page.', { c: costN, r: riskN })
+        : t('All {n} handled. They go into the pricing report.', { n: ins.instructions.length }),
     },
     {
       n: 3,
@@ -97,18 +97,19 @@ export function Overview() {
       action: t('Open'),
       done: !!chosen,
       urgent: true,
-      body: chosen ? (
+      status: chosen ? (
         <span className="text-muted">
           {t('CHF {bid} · {name}, {m}% margin · {w} win chance.', { bid: fmt0(chosen.bid), name: t(chosen.name), m: chosen.margin_pct.toFixed(1), w: fmtShare(chosen.win) })}
-          {!pcOn && ' ' + t('Project costs are not in the price.')}
         </span>
       ) : (
-        <>
-          <span className="text-attn font-medium">{t('Not chosen yet.')}</span>{' '}
-          {!pcOn && t('Project costs are not in the price (CHF {pc} if all are switched on).', { pc: fmt0(allProjectCosts(tot)) }) + ' '}
-          {t('At the standard {m}% margin the price would be CHF {p}.', { m: std.toFixed(1), p: fmt0(tot.standard_price) })}
-        </>
+        <span className="text-attn font-medium">{t('Not chosen yet')}</span>
       ),
+      details: chosen
+        ? pcOn
+          ? null
+          : t('Project costs are not in the price.')
+        : (!pcOn ? t('Project costs are not in the price (CHF {pc} if all are switched on).', { pc: fmt0(allProjectCosts(tot)) }) + ' ' : '') +
+          t('At the standard {m}% margin the price would be CHF {p}.', { m: std.toFixed(1), p: fmt0(tot.standard_price) }),
     },
     {
       n: 4,
@@ -117,11 +118,13 @@ export function Overview() {
       action: t('Open'),
       done: !!tender.submission,
       urgent: false,
-      body: (
-        <span className="text-muted">
-          {tender.submission
-            ? t('Submitted at CHF {p} on {d}.', { p: fmt0(tender.submission.offer_price), d: fmtDateTime(tender.submission.at) })
-            : t('The filled tender: the original PDF with your prices written in. Also the offer workbook, SIA interface file and pricing report. Open points above do not block the export.')}{' '}
+      status: (
+        <>
+          {tender.submission && (
+            <span className="text-muted">
+              {t('Submitted at CHF {p} on {d}.', { p: fmt0(tender.submission.offer_price), d: fmtDateTime(tender.submission.at) })}
+            </span>
+          )}
           <button
             type="button"
             onClick={() => void api.download(id, 'lv-filled.pdf')}
@@ -129,8 +132,11 @@ export function Overview() {
           >
             {t('Download the filled tender (PDF)')}
           </button>
-        </span>
+        </>
       ),
+      details: tender.submission
+        ? null
+        : t('The filled tender: the original PDF with your prices written in. Also the offer workbook, SIA interface file and pricing report. Open points above do not block the export.'),
     },
     {
       n: 5,
@@ -139,13 +145,8 @@ export function Overview() {
       action: t('Open'),
       done: !!tender.outcome,
       urgent: false,
-      body: (
-        <span className="text-muted">
-          {tender.outcome
-            ? t('Outcome recorded.')
-            : t('Winning price and number of bidders from the award notice, so the next tender starts from real numbers.')}
-        </span>
-      ),
+      status: null,
+      details: tender.outcome ? null : t('Winning price and number of bidders from the award notice, so the next tender starts from real numbers.'),
     },
   ]
   const left = steps.slice(0, 3).filter((x) => !x.done).length
@@ -166,6 +167,12 @@ export function Overview() {
               : null
   const rule = tender.submission_rule
   const rt = tender.review_trail
+  const details = (st: Step, className = '') =>
+    st.details && (
+      <Source label={t('Details')} title={st.title} className={cx('text-[13px] text-muted', className)}>
+        <p className="m-0 leading-[1.55]">{st.details}</p>
+      </Source>
+    )
 
   return (
     <main className="flex-auto flex flex-wrap items-start">
@@ -178,40 +185,45 @@ export function Overview() {
             </span>
           </div>
         )}
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="m-0 text-[24px] leading-[1.25] font-semibold">
-              {left === 0 ? t('Ready to submit') : left === 1 ? t('1 step left before you can submit') : t('{n} steps left before you can submit', { n: left })}
-            </h1>
-            <span className="text-muted">
-              {left === 0
-                ? t('Every line is checked, the instructions are handled and the price is chosen.')
-                : t('The tender is read and priced where the catalogue allows. This is what still needs you.')}
-            </span>
-          </div>
-          {next && cta && (
-            <LinkButton to={next.to} variant="primary">
-              {cta}
-            </LinkButton>
-          )}
-        </div>
+        <h1 className="m-0 text-[24px] leading-[1.25] font-semibold">
+          {left === 0 ? t('Ready to submit') : left === 1 ? t('1 step left before you can submit') : t('{n} steps left before you can submit', { n: left })}
+        </h1>
 
         <ol className="m-0 p-0 list-none flex flex-col border-t border-ink">
-          {steps.map((st, i) => (
-            <li
-              key={st.n}
-              className={cx('grid grid-cols-[28px_minmax(0,1fr)_auto] gap-x-4 gap-y-1 items-center py-4', i < steps.length - 1 && 'border-b border-rowrule')}
-            >
-              <span className={cx('font-mono', st.done ? 'text-ink' : st.urgent ? 'text-attn' : 'text-muted')}>{st.n}</span>
-              <span className={cx('text-[16px] font-semibold', !st.urgent && !st.done && st.n === 5 && 'text-muted')}>
-                {st.title}
-                {st.done && <span className="ml-2.5 text-[13px] font-medium text-ink align-middle">· {t('Done')}</span>}
-              </span>
-              <LinkButton to={st.to}>{st.action}</LinkButton>
-              <span />
-              <span className="col-[2/-1]">{st.body}</span>
-            </li>
-          ))}
+          {steps.map((st, i) => {
+            const isNext = st.n === next?.n
+            return (
+              <li
+                key={st.n}
+                className={cx('grid grid-cols-[28px_minmax(0,1fr)_auto] gap-x-4 gap-y-1 items-center py-3.5', i < steps.length - 1 && 'border-b border-rowrule')}
+              >
+                <span className={cx('font-mono', st.done ? 'text-ink' : st.urgent ? 'text-attn' : 'text-muted')}>{st.n}</span>
+                <span className={cx('text-[16px] font-semibold', !st.urgent && !st.done && st.n === 5 && 'text-muted')}>
+                  {st.title}
+                  {st.done && <span className="ml-2.5 text-[13px] font-medium text-ink align-middle">· {t('Done')}</span>}
+                  {!st.status && details(st, 'ml-3 font-normal')}
+                </span>
+                {isNext ? (
+                  <LinkButton to={st.to} variant="primary" className="justify-self-end">
+                    {cta ?? st.action}
+                  </LinkButton>
+                ) : (
+                  <Link to={st.to} className="justify-self-end inline-flex items-center min-h-9 px-1">
+                    {st.action}
+                  </Link>
+                )}
+                {st.status && (
+                  <>
+                    <span />
+                    <span className="col-[2/-1] flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      {st.status}
+                      {details(st)}
+                    </span>
+                  </>
+                )}
+              </li>
+            )
+          })}
         </ol>
         {rt && (rt.changes > 0 || rt.ai_to_review > 0) && <ReviewTrailNote rt={rt} to={`${base}/changes`} />}
         {learnedN > 0 && (
@@ -223,17 +235,22 @@ export function Overview() {
       </section>
 
       <aside aria-label={t('Tender facts')} className="flex-[1_1_360px] max-w-[460px] min-w-0 px-6 pt-7 pb-10 border-l border-rule flex flex-col gap-6">
-        <section className="flex flex-col gap-1.5 p-4 border border-ink">
+        <section className="flex flex-col gap-1 p-4 border border-ink">
           <span className="text-[13px] text-muted">{t('Submission due')}</span>
           <span className="text-[26px] leading-[1.2] font-semibold">{fmtDaysLeft(tender.due_at, lang)}</span>
           <span className="font-mono">{fmtDateTime(tender.due_at)}</span>
           {rule && (
-            <span className="text-[13px] text-muted">
-              {rule.summary ? (lang === 'de' ? rule.summary.short_de : rule.summary.short_en) : `«${rule.text_de}»`} {t('Read from the tender, p. {page}.', { page: rule.page })}{' '}
-              <button type="button" onClick={() => setPageOpen(true)} className="border-0 bg-transparent p-0 min-h-0 text-accent underline underline-offset-2">
-                {t('Show on page')}
-              </button>
-            </span>
+            <Source label={t('How to submit')} title={t('How to submit')} className="self-start text-[13px] text-muted">
+              <p className="m-0 leading-[1.55]">
+                {rule.summary ? (lang === 'de' ? rule.summary.short_de : rule.summary.short_en) : `«${rule.text_de}»`}
+              </p>
+              <span className="text-muted">
+                {t('Read from the tender, p. {page}.', { page: rule.page })}{' '}
+                <button type="button" onClick={() => setPageOpen(true)} className="border-0 bg-transparent p-0 min-h-0 text-accent underline underline-offset-2">
+                  {t('Show on page')}
+                </button>
+              </span>
+            </Source>
           )}
         </section>
 
@@ -263,9 +280,9 @@ export function Overview() {
 
         {verif?.summary && verif.summary.found > 0 && <VerifiedPanel v={verif} tenderId={id} />}
 
-        <section className="flex flex-col gap-1.5">
-          <h2 className="m-0 text-[15px] font-semibold">{t('Tender')}</h2>
-          <div className="grid grid-cols-[96px_minmax(0,1fr)] gap-x-3 gap-y-1.5">
+        <section className="flex flex-col gap-1.5 text-[13px]">
+          <h2 className="m-0 text-[13px] font-semibold text-muted">{t('Tender')}</h2>
+          <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-x-3 gap-y-1">
             <span className="text-muted">{t('Client')}</span>
             <span>{tender.client}</span>
             <span className="text-muted">{t('Trade')}</span>
@@ -300,33 +317,44 @@ export function Overview() {
   )
 }
 
-/** "N changes waiting for senior review": what people and Assist changed, and low-confidence AI picks. */
+/** Put a styled count into a translated sentence: t() with a marker for {n}, then split on it. */
+function withCount(text: (n: string) => string, n: number, className: string): ReactNode {
+  const parts = text('\u0000').split('\u0000')
+  if (parts.length < 2) return text(String(n)).replace('\u0000', String(n))
+  const [pre, post] = parts
+  return (
+    <>
+      {pre}
+      <span className={className}>{n}</span>
+      {post}
+    </>
+  )
+}
+
+/** "37 low-confidence AI picks waiting for senior review": one quiet line, the count in attn, a link to Changes. */
 function ReviewTrailNote({ rt, to }: { rt: ReviewTrail; to: string }) {
   const t = useT()
-  const waiting = rt.to_review > 0 || rt.ai_to_review > 0
+  const attn = 'text-attn font-medium'
   return (
-    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-      <span className={cx('flex-none w-2 h-2 self-center', waiting ? 'bg-attn' : 'bg-ink')} aria-hidden="true" />
-      {waiting ? (
-        <span>
-          {rt.to_review > 0 ? (
-            <>
-              <span className="text-attn font-medium">
-                {rt.to_review === 1 ? t('1 change waiting for senior review') : t('{n} changes waiting for senior review', { n: rt.to_review })}
-              </span>
-              {rt.ai_to_review > 0 && ', ' + (rt.ai_to_review === 1 ? t('and 1 low-confidence AI pick') : t('and {n} low-confidence AI picks', { n: rt.ai_to_review }))}.
-            </>
-          ) : (
-            <span className="text-attn font-medium">
-              {rt.ai_to_review === 1 ? t('1 low-confidence AI pick waiting for senior review') : t('{n} low-confidence AI picks waiting for senior review', { n: rt.ai_to_review })}
-            </span>
-          )}
-        </span>
+    <p className="m-0 text-[13px] text-muted">
+      {rt.to_review > 0 ? (
+        <>
+          {rt.to_review === 1
+            ? withCount(() => t('1 change waiting for senior review').replace(/^1/, '\u0000'), 1, attn)
+            : withCount((n) => t('{n} changes waiting for senior review', { n }), rt.to_review, attn)}
+          {rt.ai_to_review > 0 && ', ' + (rt.ai_to_review === 1 ? t('and 1 low-confidence AI pick') : t('and {n} low-confidence AI picks', { n: rt.ai_to_review }))}
+        </>
+      ) : rt.ai_to_review > 0 ? (
+        rt.ai_to_review === 1 ? (
+          withCount(() => t('1 low-confidence AI pick waiting for senior review').replace(/^1/, '\u0000'), 1, attn)
+        ) : (
+          withCount((n) => t('{n} low-confidence AI picks waiting for senior review', { n }), rt.ai_to_review, attn)
+        )
       ) : (
-        <span className="text-muted">{t('All {n} changes reviewed by a senior.', { n: rt.changes })}</span>
-      )}
-      <Link to={to}>{t('See who did what')}</Link>
-    </div>
+        t('All {n} changes reviewed by a senior.', { n: rt.changes })
+      )}{' '}
+      · <Link to={to}>{t('See who did what')}</Link>
+    </p>
   )
 }
 
@@ -363,56 +391,57 @@ function DeleteTenderDialog({ id, name, onClose }: { id: string; name: string; o
   )
 }
 
+/** "✓ Verified against Equans examples: 22/22", one line; the counts and the example table sit in its popover. */
 function VerifiedPanel({ v, tenderId }: { v: NonNullable<ReturnType<typeof useVerification>['data']>; tenderId: string }) {
   const t = useT()
   const [open, setOpen] = useState(false)
   const s = v.summary!
   const all = s.found === s.total && s.direct_ok === s.total && s.product_ok === s.total
+  const label = t('Verified against Equans examples: {a}/{b}', { a: s.direct_ok, b: s.total })
   return (
-    <section className="flex flex-col gap-1.5">
-      <h2 className="m-0 text-[15px] font-semibold">
-        {all && (
-          <span className="inline-block mr-1.5 align-[-1px]">
-            <IconCheck size={13} />
-          </span>
-        )}
-        {t('Verified against Equans examples: {a}/{b}', { a: s.direct_ok, b: s.total })}
-      </h2>
-      <span className="text-[13px] text-muted">
-        {t('{f} of {n} example lines found in the PDF, {p} with the same product, {d} with the same line total to the centime.', {
-          f: s.found,
-          n: s.total,
-          p: s.product_ok,
-          d: s.direct_ok,
-        })}{' '}
-        {s.subset_direct_golden !== undefined &&
-          t('Subset direct cost CHF {a} (Equans: {b}).', { a: fmt2(s.subset_direct_ours), b: fmt2(s.subset_direct_golden) })}
-        {(s.price_list_rows ?? 0) > 0 && (
-          <> {t('{n} differ because an active price list replaces the catalogue prices the examples use.', { n: s.price_list_rows ?? 0 })}</>
-        )}
-      </span>
-      <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open} className="self-start p-0 min-h-0 border-0 bg-transparent text-accent underline underline-offset-2 text-[13px]">
-        {open ? t('Hide the examples') : t('Show the examples')}
-      </button>
-      {open && (
-        <div className="grid grid-cols-[52px_52px_minmax(0,1fr)_auto] gap-x-2 text-[12.5px]">
-          {v.rows.map((r) => (
-            <Fragment key={r.example_id}>
-              <span className="py-1 border-b border-rowrule font-mono text-muted">{r.example_id}</span>
-              <span className="py-1 border-b border-rowrule font-mono">
-                {r.our_lv_id ? <Link to={`/t/${tenderId}/lines/${r.our_lv_id}?f=all`}>{r.our_lv_id}</Link> : '–'}
-              </span>
-              <span className="py-1 border-b border-rowrule overflow-hidden text-ellipsis whitespace-nowrap" title={r.description}>
-                {r.description}
-              </span>
-              <span className={cx('py-1 border-b border-rowrule font-mono text-right inline-flex items-center justify-end gap-1', !r.direct_ok && 'text-attn')}>
-                {fmt2(r.golden_direct)}
-                {r.direct_ok ? <IconCheck size={11} /> : <span>≠</span>}
-              </span>
-            </Fragment>
-          ))}
-        </div>
+    <section className="flex items-baseline gap-1.5 text-[13px]">
+      {all && (
+        <span className="flex-none self-center">
+          <IconCheck size={12} />
+        </span>
       )}
+      <Source label={label} title={label} className="text-[13px] text-ink" width={520}>
+        <p className="m-0 leading-[1.55] text-muted">
+          {t('{f} of {n} example lines found in the PDF, {p} with the same product, {d} with the same line total to the centime.', {
+            f: s.found,
+            n: s.total,
+            p: s.product_ok,
+            d: s.direct_ok,
+          })}{' '}
+          {s.subset_direct_golden !== undefined &&
+            t('Subset direct cost CHF {a} (Equans: {b}).', { a: fmt2(s.subset_direct_ours), b: fmt2(s.subset_direct_golden) })}
+          {(s.price_list_rows ?? 0) > 0 && (
+            <> {t('{n} differ because an active price list replaces the catalogue prices the examples use.', { n: s.price_list_rows ?? 0 })}</>
+          )}
+        </p>
+        <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open} className="self-start p-0 min-h-0 border-0 bg-transparent text-accent underline underline-offset-2 text-[13px]">
+          {open ? t('Hide the examples') : t('Show the examples')}
+        </button>
+        {open && (
+          <div className="grid grid-cols-[52px_52px_minmax(0,1fr)_auto] gap-x-2 text-[12.5px]">
+            {v.rows.map((r) => (
+              <Fragment key={r.example_id}>
+                <span className="py-1 border-b border-rowrule font-mono text-muted">{r.example_id}</span>
+                <span className="py-1 border-b border-rowrule font-mono">
+                  {r.our_lv_id ? <Link to={`/t/${tenderId}/lines/${r.our_lv_id}?f=all`}>{r.our_lv_id}</Link> : '–'}
+                </span>
+                <span className="py-1 border-b border-rowrule overflow-hidden text-ellipsis whitespace-nowrap" title={r.description}>
+                  {r.description}
+                </span>
+                <span className={cx('py-1 border-b border-rowrule font-mono text-right inline-flex items-center justify-end gap-1', !r.direct_ok && 'text-attn')}>
+                  {fmt2(r.golden_direct)}
+                  {r.direct_ok ? <IconCheck size={11} /> : <span>≠</span>}
+                </span>
+              </Fragment>
+            ))}
+          </div>
+        )}
+      </Source>
     </section>
   )
 }

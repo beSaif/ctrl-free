@@ -32,8 +32,7 @@ export function OutcomePage() {
   const comp = sub?.settings?.competition ?? pr.settings.competition
   const compLabel = t(callLabel(COMPETITION, comp) ?? String(comp))
   const insights: string[] = []
-  if (!sub) insights.push(t('Mark the offer as submitted first, so there is a snapshot to compare with.'))
-  else {
+  if (sub) {
     if (!hasW && !hasB) insights.push(t('Fill in the winning price and number of bidders to compare.'))
     if (hasW && ours) {
       const d = (ours / w! - 1) * 100
@@ -108,10 +107,12 @@ export function OutcomePage() {
                     {t(callLabel(SENSITIVITY, calls.sensitivity) ?? '')} <span className="font-mono">{calls.sensitivity?.toFixed(2)}</span>
                   </span>
                 </div>
-                <span className="text-[13px] text-muted">
-                  {allDefault ? t('All three were project defaults.') : t('Some were your own calls.')}{' '}
-                  {notes.length ? t('Notes: {n}', { n: notes.join(' · ') }) : t('No notes were added.')}
-                </span>
+                {/* defaults and "no notes" are silent; only own calls and notes get a line */}
+                {(!allDefault || notes.length > 0) && (
+                  <span className="text-[13px] text-muted">
+                    {!allDefault && t('Some were your own calls.')} {notes.length > 0 && t('Notes: {n}', { n: notes.join(' · ') })}
+                  </span>
+                )}
               </>
             )}
           </>
@@ -128,7 +129,9 @@ export function OutcomePage() {
       <section aria-label={t('Record the award')} className="flex-[1_1_560px] min-w-0 p-6 flex flex-col gap-[18px]">
         <div className="flex flex-col gap-1">
           <h2 className="m-0 text-[20px] font-semibold">{t('Record the award')}</h2>
-          <p className="m-0 text-muted">{t('Copy the figures from the award notice on simap (Zuschlag). Nobody knows the competitors before; this is where you learn them.')}</p>
+          <p className="m-0 text-muted" title={t('Copy the figures from the award notice on simap (Zuschlag). Nobody knows the competitors before; this is where you learn them.')}>
+            {t('From the award notice on simap (Zuschlag).')}
+          </p>
         </div>
         <form
           className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-3"
@@ -166,12 +169,14 @@ export function OutcomePage() {
           </Field>
         </form>
 
-        <div className="flex flex-col gap-2 px-4 py-3.5 bg-panel" aria-live="polite">
-          <h3 className="m-0 text-[14px] font-semibold">{t('Compared with your offer')}</h3>
-          {insights.map((x) => (
-            <span key={x}>{x}</span>
-          ))}
-        </div>
+        {sub && (
+          <div className="flex flex-col gap-2 px-4 py-3.5 bg-panel" aria-live="polite">
+            <h3 className="m-0 text-[14px] font-semibold">{t('Compared with your offer')}</h3>
+            {insights.map((x) => (
+              <span key={x}>{x}</span>
+            ))}
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="primary" onClick={submitOutcome} disabled={save.isPending || !sub}>
@@ -179,10 +184,10 @@ export function OutcomePage() {
           </Button>
           <LinkButton to="/">{t('Back to tenders')}</LinkButton>
           {saved && <span className="text-[13px]">{t('Saved.')}</span>}
+          <Link to="/results" className="ml-auto text-[13px]" title={t('Saved outcomes are compared across all tenders in') + ' ' + t('Results history')}>
+            {t('Results history')}
+          </Link>
         </div>
-        <span className="text-[13px] text-muted">
-          {t('Saved outcomes are compared across all tenders in')} <Link to="/results">{t('Results history')}</Link>.
-        </span>
       </section>
     </main>
   )

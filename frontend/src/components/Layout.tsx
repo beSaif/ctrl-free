@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useParams, Link } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { setLang, useLang, useT } from '../i18n'
@@ -36,53 +37,109 @@ export function LangToggle() {
   )
 }
 
-/** Who is working (demo identity, no login): every change is stamped with this person's name. */
-export function PersonSwitcher() {
+/** Who is working (demo identity, no login): every change is stamped with this person's name.
+ *  One menu for the person, the language and (offline) the demo data, so the header stays one line. */
+export function PersonMenu() {
   const t = useT()
+  const lang = useLang()
+  const mode = useApiMode()
   const qc = useQueryClient()
   const actor = useActor()
   const { data: people } = usePeople()
-  if (!people?.length) return null
+  const [open, setOpen] = useState(false)
+  const wrap = useRef<HTMLDivElement>(null)
+  const btn = useRef<HTMLButtonElement>(null)
+  const pop = useRef<HTMLDivElement>(null)
+  const me = people?.find((p) => p.id === actor)
+
+  useEffect(() => {
+    if (!open) return
+    pop.current?.querySelector<HTMLElement>('input:checked, button')?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      e.stopPropagation()
+      setOpen(false)
+      btn.current?.focus()
+    }
+    const onDown = (e: MouseEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('keydown', onKey, true)
+    document.addEventListener('mousedown', onDown)
+    return () => {
+      document.removeEventListener('keydown', onKey, true)
+      document.removeEventListener('mousedown', onDown)
+    }
+  }, [open])
+
   const change = (id: string) => {
     setActor(id)
     void qc.invalidateQueries()
+    setOpen(false)
+    btn.current?.focus()
   }
-  return (
-    <label className="inline-flex items-center gap-2 text-[13px] text-muted">
-      <span>{t('Working as')}</span>
-      <select
-        value={people.some((p) => p.id === actor) ? actor : ''}
-        onChange={(e) => change(e.target.value)}
-        className="min-h-8 px-1.5 border border-rule rounded-[2px] bg-white text-ink text-[13px] hover:border-ink"
-      >
-        {!people.some((p) => p.id === actor) && <option value="">{t('Choose a person')}</option>}
-        {people.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.name} · {t(p.role_label)}
-          </option>
-        ))}
-      </select>
-    </label>
-  )
-}
-
-function DemoBadge() {
-  const mode = useApiMode()
-  const t = useT()
-  const qc = useQueryClient()
-  if (mode !== 'mock') return null
   const reset = async () => {
     const m = await import('../api/mock')
     m.resetMockData()
     await qc.invalidateQueries()
+    setOpen(false)
   }
+  const name = me?.name ?? (people?.length ? t('Choose a person') : t('Language'))
+
   return (
-    <span className="inline-flex items-center gap-2 text-[12.5px] text-faint" title={t('The backend is not reachable. The app runs on built-in demo data.')}>
-      <span>{t('Demo data')}</span>
-      <button type="button" onClick={reset} className="min-h-8 px-1 border-0 bg-transparent underline underline-offset-2 text-faint hover:text-ink">
-        {t('Reset')}
+    <div ref={wrap} className="relative">
+      <button
+        ref={btn}
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => setOpen((x) => !x)}
+        title={me ? t('Working as {name} · {role}', { name: me.name, role: t(me.role_label) }) : undefined}
+        className="inline-flex items-center gap-1.5 min-h-8 px-2 border border-transparent rounded-[2px] bg-transparent text-[13px] text-ink hover:border-rule"
+      >
+        <span className="font-medium">{name}</span>
+        <span className="text-faint">
+          {mode === 'mock' && t('Demo') + ' · '}
+          {lang.toUpperCase()}
+        </span>
+        <span aria-hidden="true" className="text-[10px] text-muted">
+          ▾
+        </span>
       </button>
-    </span>
+      {open && (
+        <div
+          ref={pop}
+          role="dialog"
+          aria-label={t('Person and language')}
+          className="absolute right-0 top-full mt-1 z-40 w-[300px] bg-white border border-ink flex flex-col text-[13px] text-ink"
+        >
+          {!!people?.length && (
+            <fieldset className="m-0 px-3.5 py-2.5 border-0 border-b border-rule flex flex-col gap-0.5">
+              <legend className="float-left mb-1 text-[12px] text-muted">{t('Working as')}</legend>
+              {people.map((p) => (
+                <label key={p.id} className="clear-left grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 items-center py-1 cursor-pointer hover:text-accent">
+                  <input type="radio" name="person" checked={p.id === actor} onChange={() => change(p.id)} className="accent-accent" />
+                  <span className={cx(p.id === actor && 'font-semibold')}>{p.name}</span>
+                  <span className="col-start-2 text-[12px] text-muted">{t(p.role_label)}</span>
+                </label>
+              ))}
+            </fieldset>
+          )}
+          <div className="flex items-center justify-between gap-3 px-3.5 py-1.5">
+            <span className="text-muted">{t('Language')}</span>
+            <LangToggle />
+          </div>
+          {mode === 'mock' && (
+            <div className="flex flex-col gap-1 px-3.5 py-2.5 border-t border-rule">
+              <span className="text-muted">{t('The backend is not reachable. The app runs on built-in demo data.')}</span>
+              <button type="button" onClick={reset} className="self-start min-h-8 p-0 border-0 bg-transparent text-accent underline underline-offset-2 hover:text-accent-hover">
+                {t('Reset the demo data')}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -119,9 +176,7 @@ export function AppLayout() {
             )
           })}
         </nav>
-        <DemoBadge />
-        <PersonSwitcher />
-        <LangToggle />
+        <PersonMenu />
       </header>
       <Outlet />
     </div>
@@ -151,35 +206,24 @@ function TenderShell({ id }: { id: string }) {
   const rt = tender?.review_trail
   const toApprove = rt ? rt.to_review + rt.ai_to_review : 0
   const base = `/t/${id}`
-  const tabs = [
+  // tab marks show only open work: a plain count in attn, nothing when done
+  const work = (n: number) => (ready && n > 0 ? { count: String(n), attn: true } : {})
+  const submitted = tender?.status === 'submitted' || tender?.status === 'awarded'
+  type Tab = { to: string; label: string; end?: boolean; count?: string; attn?: boolean; dot?: string }
+  const tabs: Tab[] = [
     { to: base, label: 'Overview', end: true },
-    {
-      to: `${base}/lines`,
-      label: 'Lines',
-      count: ready ? (toReview ? t('{n} to review', { n: toReview }) : t('done')) : null,
-      attn: toReview > 0,
-    },
-    { to: `${base}/pdf`, label: 'Tender PDF' },
-    {
-      to: `${base}/instructions`,
-      label: 'Instructions & norms',
-      count: ready ? (toConfirm ? t('{n} to confirm', { n: toConfirm }) : t('done')) : null,
-      attn: toConfirm > 0,
-    },
+    { to: `${base}/lines`, label: 'Lines', ...work(toReview) },
+    { to: `${base}/instructions`, label: 'Instructions & norms', ...work(toConfirm) },
     {
       to: `${base}/pricing`,
       label: 'Pricing',
-      count: ready ? (chosen ? 'CHF ' + fmt0(tender?.offer_price ?? null) : t('price not chosen')) : null,
-      attn: !chosen,
+      ...(!ready ? {} : chosen ? { count: 'CHF ' + fmt0(tender?.offer_price ?? null) } : { dot: t('price not chosen') }),
     },
-    {
-      to: `${base}/changes`,
-      label: 'Changes',
-      count: ready && rt ? (toApprove ? t('{n} to review', { n: toApprove }) : t('reviewed')) : null,
-      attn: toApprove > 0,
-    },
+    { to: `${base}/pdf`, label: 'Tender PDF' },
+    { to: `${base}/changes`, label: 'Changes', ...work(rt ? toApprove : 0) },
     { to: `${base}/export`, label: 'Export' },
-    { to: `${base}/outcome`, label: 'Outcome' },
+    // Outcome only once there is something to record; the route works before that too
+    ...(submitted || loc.pathname.startsWith(`${base}/outcome`) ? [{ to: `${base}/outcome`, label: 'Outcome' }] : []),
   ]
   const trade = shortTrade(tender?.trade ?? '')
   return (
@@ -203,14 +247,11 @@ function TenderShell({ id }: { id: string }) {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
             {ready && <AssistPill />}
             {tender?.due_at && (
-              <span className="text-[13px] text-muted">
-                {t('Due')} <span className="font-mono">{fmtDateTime(tender.due_at)}</span> ·{' '}
-                <span className="text-ink font-semibold">{fmtDaysLeft(tender.due_at, lang)}</span>
+              <span className="text-[13px] font-semibold" title={`${t('Due')} ${fmtDateTime(tender.due_at)}`}>
+                {fmtDaysLeft(tender.due_at, lang).replace(/^./, (c) => c.toUpperCase())}
               </span>
             )}
-            <DemoBadge />
-            <PersonSwitcher />
-            <LangToggle />
+            <PersonMenu />
           </div>
         </div>
         <nav aria-label={t('Tender')} className="flex flex-wrap gap-1 px-3 pt-1">
@@ -230,6 +271,9 @@ function TenderShell({ id }: { id: string }) {
                 {t(tab.label)}
                 {tab.count && (
                   <span className={cx('font-mono text-[12.5px] font-normal', tab.attn ? 'text-attn' : 'text-muted')}>{tab.count}</span>
+                )}
+                {tab.dot && (
+                  <span role="img" aria-label={tab.dot} title={tab.dot} className="w-1.5 h-1.5 rounded-full bg-attn" />
                 )}
               </NavLink>
             )
