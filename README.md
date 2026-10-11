@@ -1,43 +1,89 @@
-# ctrl-free
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/sprintd-on-dark.svg" />
+    <img src="docs/brand/sprintd.svg" height="44" alt="sprintd" />
+  </picture>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="frontend/public/brand/equans-logo-on-dark.png" />
+    <img src="docs/brand/equans-switzerland.svg" height="44" alt="Equans Switzerland" />
+  </picture>
+</p>
 
-sprintd Hackathon, 9–11 Oct 2026, Zurich. Equans case: **From tender to first price.**
+<h1 align="center">ctrl-free</h1>
 
-ctrl-free reads a 202-page Swiss German ventilation tender (BKP 244 LV) and finds every priced position. It matches each position to Equans' catalogue and install rules and computes a first price where every number links back to the tender page or a reference row. The estimator reviews what needs them, asks suppliers for missing prices, chooses an offer price from scenarios with win chances, and exports the offer.
+<p align="center">From a 200-page tender to a first price, every number traced to its source.</p>
 
-> **LLM picks, code computes, estimator decides.**
+<p align="center"><b>Runner-up</b> at sprintd Zurich 2026 (9–11 Oct), Equans Switzerland case <i>From tender to first price</i>.</p>
 
-## Run it
+An Equans estimator gets a 202-page ventilation tender in Swiss German and prices it by hand:
+Ctrl+F through the PDF, copy positions into Excel, look up products and install hours in
+handbooks. We had a weekend to cut that down.
 
-```bash
-cp .env.example .env        # add OPENAI_API_KEY (or Azure OpenAI vars); optional, it runs rules-only without
-./dev.sh                    # backend on :8000, frontend on :5173
-open http://localhost:5173
-```
+ctrl-free reads the tender, finds every priced position, matches each one to Equans' catalogue
+and install rules, and computes a first price. The estimator only looks at what needs them, gets
+missing prices from suppliers, picks the offer price and exports the filled tender. The rule we
+built it around: **the LLM picks, code computes, the estimator decides.**
 
-Requirements: `uv` (Python 3.12) and `pnpm` (Node 20+). Click **New tender** and then either upload the PDF or press **Use the Oberglatt demo tender**.
+<p align="center">
+  <img src="docs/screenshots/line.png" width="900" alt="One tender line: the PDF crop it was read from, the supplier's reply, and the price with a source next to every number" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/overview.png" width="445" alt="Tender overview: steps left before submitting, and the price so far" />
+  <img src="docs/screenshots/strategy.png" width="445" alt="Pricing strategy: win chance and expected profit by offer price" />
+</p>
 
-The frontend falls back to built-in demo data when the backend is not reachable. Set `VITE_USE_MOCK=1` to force this. `frontend/.env.development` pins "today" to 10 Sep 2026 so the Oberglatt deadline shows as "12 days left". Remove that file to use the real date.
-
-Two looks: the ctrl-free style (default) and the Equans brand style (Roboto, Dark blue, Turquoise and Dark green, Equans logo). Switch under the person menu → Style, or open any page with `?theme=equans` / `?theme=ctrlfree`. Colours are CSS variables in `frontend/src/index.css`.
+**Demo video:** [youtu.be/sg1u-QXRCGk](https://youtu.be/sg1u-QXRCGk)
 
 ## What it does
 
-1. **Read** the tender. The parser detects systems (LA01–LA05, Montagesystem), sections and positions from the PDF's own layout, with page and bounding box for every line. A block that lists several sizes becomes several lines. Engineer lists and totals are excluded.
-2. **Match.** Each line gets a shortlist of 5 catalogue products, scored in code by type, size and unit. The LLM picks one or "none", and can't invent an ID. Without an LLM the rules pick. A make named in the tender is treated as an example unless the tender says only that make is accepted. Every line shows "Tender asks · We offer", attribute by attribute (type, size, fire class, length, unit, make).
-3. **Learn.** When the estimator corrects a match, ctrl-free keeps it as a rule: this tender wording → this product, who taught it and on which line. "Apply to N similar lines" uses it in the same tender, and new tenders use it first, marked "Learned from Oberglatt LV0021". Reference → Learned matches lists every rule with how often it was applied, confirmed or overridden.
-4. **Compute.** `backend/app/pricing.py` computes every line: material, hours with site factors, labour, direct cost. It reproduces all of Equans' golden numbers: 22/22 lines, the CHF 414'489.12 baseline and the 3 bid scenarios. The net price follows a fixed order: price typed on the line > supplier quote > Equans' negotiated price lists > supplier price lists > standard catalogue. Price lists, the catalogue and the install rules import from Excel (.xlsx, .xls), ODS, CSV/TSV, JSON or a PDF with a table, with German or English column names.
-5. **Review, with every number traceable.** A "needs you" queue sorted by money at risk, with the PDF crop beside each line. The note beside each number (quantity, unit price, hours, rate, waste) opens its source: the quoted tender line, the catalogue or price-list row, or the install rule with each site factor and its parameter key. A link opens that row in Reference data. Each line has its full history, from "read from p. 78" and the AI's pick to every later change, with who and the value before. The list can be grouped by type or in the tender's printed order.
-6. **AI → junior → senior.** Every change is stamped with the person who made it (person switcher in the top bar). The Changes screen shows what the AI, Assist and each person did, before → after, with the CHF effect. The senior approves, reverts or comments.
-7. **Instructions & norms.** Tender rules (pp. 36–41) quoted verbatim with page, sorted into adds cost / risk / scope / covered. A line picker selects the lines a rule applies to by system, section or product type.
-8. **Supplier quotes.** Lines not in the catalogue, or on budget prices, are grouped by product type into drafted German request emails. Assist reads the suppliers' replies (several PDFs or e-mails at once, the supplier taken from the letterhead or sender) and proposes the prices; nothing changes until the estimator says OK. When several suppliers quote the same line, the line compares their offers (lowest marked, delivery and validity on demand) and the estimator uses one, one supplier for the whole request, or the cheapest per line, undoable.
-9. **Pricing in two steps.** *Costs*: project costs, overhead, transport and site factors, each with its live CHF effect, its default and who changed it. *Strategy*: the estimator's read of competition, appetite and price sensitivity, a win-chance and expected-profit chart over the offer price, four options with their margins set right next to their prices, and a recommendation in plain words.
-10. **Export.** The original tender PDF filled in, with selling prices on the dotted lines, totals per section and system, and a cover page. Also an offer workbook (.xlsx with live formulas and source comments), a pricing report PDF and a simplified SIA file. After the award, record the outcome to build up a results history.
-11. **Verified.** `GET /api/tenders/{id}/verification` checks our output against Equans' 22 verified examples: 22/22 found, matched and priced to the cent.
+- **Reads the tender.** Systems, sections and positions come from the PDF's own layout, with the
+  page and position of every line. All 202 pages take about 4 seconds.
+- **Matches products.** Code scores a shortlist of 5 catalogue products per line (type, size,
+  unit); the LLM picks one or "none" and can't invent an ID. Without an LLM, the rules pick. A
+  make named "z.B." in the tender counts as an example, so equivalent products are allowed.
+- **Computes the price.** Material, hours with site factors, labour, direct cost. It reproduces
+  all of Equans' reference numbers: 22/22 lines, the CHF 414'489.12 baseline and the 3 bid
+  scenarios.
+- **Shows where every number comes from.** Quantity, unit price, hours, rate and waste each open
+  their source: the tender line, the catalogue or price-list row, or the install rule.
+- **Learns from corrections.** When the estimator fixes a match, it becomes a rule for similar
+  lines and for the next tender.
+- **Handles supplier quotes.** Lines without a catalogue price are grouped into drafted request
+  emails. Drop the suppliers' PDF replies in and it proposes the prices; nothing changes until
+  the estimator says OK.
+- **Helps pick the offer price.** Costs and overhead with their CHF effect, then a win-chance and
+  expected-profit chart over four price options.
+- **Keeps a history.** Every change is stamped with who made it (AI, junior, senior) and its CHF
+  effect. The senior approves or reverts.
+- **Exports the offer.** The original tender PDF with prices filled in on the dotted lines, an
+  Excel workbook with live formulas, a pricing report and a SIA file.
 
-## Repo
+## Run it locally
 
-- `backend/`: FastAPI with the parser, matcher, pricing, exports, Assist and pipeline. Tests: `cd backend && uv run pytest -q`.
-- `frontend/`: React, Vite and Tailwind; the v4 design (`research/design_v4`).
-- `docs/SPEC.md`: data model and API contract. `docs/PRODUCTION.md`: path to production. `docs/DEMO.md`: 5-minute demo script.
-- `problem_statement/`: case description, data package and the tender.
-- `research/`: case research, the original pricing engine, and the design canvases.
+```bash
+cp .env.example .env        # OPENAI_API_KEY or the Azure OpenAI vars; optional, it runs rules-only without
+./dev.sh                    # backend on :8000, frontend on :5173
+```
+
+You need `uv` (Python 3.12) and `pnpm` (Node 20+). Open http://localhost:5173, click **New
+tender**, then upload the PDF or press **Use the Oberglatt demo tender**.
+
+No backend? The frontend falls back to built-in demo data (force it with `VITE_USE_MOCK=1`).
+`frontend/.env.development` pins "today" to 10 Sep 2026 so the demo deadline reads "12 days
+left"; delete it to use the real date.
+
+There are two looks: ctrl-free (default) and the Equans brand style. Switch under the person menu
+→ Style, or add `?theme=equans` to any URL.
+
+## Under the hood
+
+- `backend/`: FastAPI. Parser, matcher, pricing (`app/pricing.py`), exports and Assist. Tests:
+  `cd backend && uv run pytest -q`.
+- `frontend/`: React, Vite and Tailwind.
+- `GET /api/tenders/{id}/verification` checks the output against Equans' 22 verified examples.
+- [docs/DEMO.md](docs/DEMO.md): the 5-minute demo script.
+- [docs/SPEC.md](docs/SPEC.md): data model and API. [docs/PRODUCTION.md](docs/PRODUCTION.md):
+  what it would take to run this for real.
+- `problem_statement/`: the case, the data package and the tender. `research/`: case notes, the
+  original pricing engine and design canvases.
