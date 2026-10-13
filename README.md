@@ -14,7 +14,7 @@
 
 <p align="center">From a 200-page tender to a first price, every number traced to its source.</p>
 
-<p align="center"><b>Runner-up</b> at sprintd Zurich 2026 (9–11 Oct), Equans Switzerland case <i>From tender to first price</i>.</p>
+<p align="center"><b>3rd place</b> on the Equans Switzerland case <i>From tender to first price</i> at sprintd Zurich 2026 (9–11 Oct).</p>
 
 An Equans estimator gets a 202-page ventilation tender in Swiss German and prices it by hand:
 Ctrl+F through the PDF, copy positions into Excel, look up products and install hours in
